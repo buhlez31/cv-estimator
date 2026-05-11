@@ -18,10 +18,16 @@ def generate(
     gaps: list[str],
     seniority_score: int,
     cz_isco: str,
+    analysis_role: str | None = None,
 ) -> list[Recommendation]:
+    """Generate 3 gap-driven recommendations targeted at the analysis role.
+
+    `analysis_role` is the role to grow into (target role when user supplied
+    one, otherwise the detected role). Falls back to `explicit.role`.
+    """
     prompt = llm.render_prompt(
         "roadmap",
-        role=explicit.role,
+        role=analysis_role or explicit.role,
         cz_isco=cz_isco,
         seniority_score=seniority_score,
         gaps=json.dumps(gaps, ensure_ascii=False),

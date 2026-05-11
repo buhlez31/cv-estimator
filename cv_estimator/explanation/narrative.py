@@ -20,14 +20,21 @@ def analyze(
     inferred: InferredData,
     breakdown: ScoreBreakdown,
     seniority_score: int,
+    analysis_role: str | None = None,
 ) -> StrengthsGaps:
+    """Generate strengths + gaps narrative.
+
+    `analysis_role` is the role to evaluate the candidate against (target
+    role if user supplied one, otherwise the detected role). When omitted,
+    falls back to `explicit.role` for backward compatibility.
+    """
     inferred_brief = [
         {"skill": c.skill, "confidence": round(c.confidence, 2)}
         for c in inferred.inferred_capabilities
     ]
     prompt = llm.render_prompt(
         "strengths_gaps",
-        role=explicit.role,
+        role=analysis_role or explicit.role,
         seniority_score=seniority_score,
         years_score=int(breakdown.years_experience),
         skills_score=int(breakdown.skills_depth),

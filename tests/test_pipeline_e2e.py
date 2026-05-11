@@ -173,3 +173,31 @@ def test_pipeline_with_target_role_drives_everything():
     # far above the 2519 P50 (~83k).
     assert result.track_with_inferred.salary_estimate.median > 120_000
     assert result.track_explicit.salary_estimate.market_p50 > 120_000
+
+
+def test_target_role_threaded_into_narrative_and_roadmap_prompts():
+    """When target_role is set, the strengths/gaps and roadmap prompts
+    must render with the TARGET role, not the detected one. Otherwise
+    the narrative cites the wrong role in its output."""
+    captured_prompts: list[str] = []
+
+    def _capture_mock(prompt: str) -> dict:
+        captured_prompts.append(prompt)
+        return _mock_call_json(prompt)
+
+    with patch("cv_estimator.llm.call_json", side_effect=_capture_mock):
+        pipeline.analyze_cv(SAMPLE_TXT, "sample.txt", target_role="ML Engineer")
+
+    narrative_prompt = next(p for p in captured_prompts if "Strengths & gaps analysis" in p)
+    roadmap_prompt = next(p for p in captured_prompts if "Salary growth roadmap" in p)
+
+    # Target role string must appear in both prompts; detected role
+    # ("Senior Data Engineer") must NOT be the value substituted into the
+    # `{role}` placeholder of either template.
+    assert "ML Engineer" in narrative_prompt
+    assert "ML Engineer" in roadmap_prompt
+    # Detected role's full string should NOT appear as the rendered Role
+    # line (it would imply the wrong substitution). It may still appear
+    # in JSON skill payloads.
+    assert "**Role:** Senior Data Engineer" not in narrative_prompt
+    assert "**Role:** Senior Data Engineer" not in roadmap_prompt

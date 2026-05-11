@@ -70,8 +70,11 @@ def analyze_cv(
 
     # Narrative + recommendations consume the fuller picture so roadmap advice
     # covers the hidden-asset trajectory, not just the conservative baseline.
-    sg = narrative.analyze(explicit_data, inferred_data, breakdown_full, score_full)
-    recs = roadmap.generate(explicit_data, sg.gaps, score_full, cz_isco)
+    # Both use `analysis_role` (target if supplied, else detected) so strengths,
+    # gaps and recommendations align with the role driving the rest of the
+    # pipeline — not the auto-detected role from the CV.
+    sg = narrative.analyze(explicit_data, inferred_data, breakdown_full, score_full, analysis_role)
+    recs = roadmap.generate(explicit_data, sg.gaps, score_full, cz_isco, analysis_role)
 
     # LLM #5: only when the user supplied a target role.
     target: TargetRoleMatch | None = None
