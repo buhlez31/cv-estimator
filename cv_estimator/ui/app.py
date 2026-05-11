@@ -19,12 +19,23 @@ from cv_estimator.salary.role_mapping import UnmappedRoleError
 
 load_dotenv()
 
+# Streamlit Community Cloud delivers secrets via st.secrets; bridge to env
+# so `cv_estimator.llm` (which reads os.environ) works in both deploy modes.
+if not os.environ.get("ANTHROPIC_API_KEY"):
+    try:
+        os.environ["ANTHROPIC_API_KEY"] = st.secrets["ANTHROPIC_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        pass
+
 st.set_page_config(page_title="CV Estimator", page_icon="📄", layout="wide")
 st.title("📄 CV Estimator")
 st.caption("AI odhad seniority skóre, tržní mzdy a roadmapy růstu z CV.")
 
 if not os.environ.get("ANTHROPIC_API_KEY"):
-    st.error("Chybí `ANTHROPIC_API_KEY`. Vytvoř `.env` ze `.env.example` a doplň klíč.")
+    st.error(
+        "Chybí `ANTHROPIC_API_KEY`. Lokálně: `.env` ze `.env.example`. "
+        "Cloud: Secrets v Streamlit Cloud."
+    )
     st.stop()
 
 

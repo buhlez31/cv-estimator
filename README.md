@@ -33,6 +33,30 @@ CZ-ISCO lookup, salary band, hidden-asset scoping, plus a 5th LLM call that
 scores how well the CV fits the target. When empty, the auto-detected role
 from the CV drives everything.
 
+## Deploy (Streamlit Community Cloud)
+
+1. Push repo to GitHub (already at `buhlez31/cv-estimator`).
+2. [share.streamlit.io](https://share.streamlit.io) → sign in with GitHub →
+   **New app** → pick repo, branch `main`, main file `cv_estimator/ui/app.py`.
+3. **Advanced settings → Secrets**:
+   ```toml
+   ANTHROPIC_API_KEY = "sk-ant-..."
+   ```
+4. Deploy. Build ~3-5 min. URL: `https://<app-name>.streamlit.app`.
+
+Python pinned via [`runtime.txt`](runtime.txt). Runtime deps in
+[`requirements.txt`](requirements.txt); dev tooling in
+[`requirements-dev.txt`](requirements-dev.txt).
+
+**Data flow on deploy.** Uploaded CV stays in Streamlit server RAM
+(BytesIO buffer) — never written to disk. Extracted text is sent to the
+Anthropic API per call. Anthropic logs API calls per their commercial
+data policy (30-day retention by default, no training on API content).
+The deployed app uses the owner's `ANTHROPIC_API_KEY`: every visitor's
+analysis bills the owner's account. Set a monthly budget cap in the
+Anthropic console; gate access via Streamlit Cloud's "Viewer auth" if
+you want only invited testers.
+
 ## Pipeline
 
 ```
