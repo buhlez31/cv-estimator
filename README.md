@@ -65,13 +65,11 @@ the target field set, once empty.
         │
         ├── scoring/components.py             → ScoreBreakdown (4 axes, 0-100)
         │   ▶ years_experience: years / 15 × 100
-        │   ▶ skills_depth (track A — baseline):
-        │       tech    → TECH_STACK_CATEGORIES coverage (9 cats × 11.1%)
-        │       non-tech → LLM scoring (skills_coverage_nontech prompt)
-        │   ▶ skills_depth (track B — with hidden assets):
-        │       tech    → coverage + inferred caps unlock categories
-        │                 ± overclaim penalty (caveats / low confidence)
-        │       non-tech → LLM scoring with inferred caps included
+        │   ▶ skills_depth (both tracks): LLM-driven coverage scoring
+        │       (`skills_coverage` prompt — single mechanism, all role
+        │        families; skepticism / overclaim handling lives in the
+        │        prompt, not Python). Confident inferred caps (≥0.6) feed
+        │        the model as supporting evidence on track B.
         │   ▶ role_progression: title keywords + years
         │   ▶ education: degree base + prestige + role-aware field modifier
         │
@@ -79,8 +77,8 @@ the target field set, once empty.
         ├── salary/lookup.py                  → SalaryEstimate per track
         │                                       (bucketed: junior/mid/senior/principal)
         │
-        ├── coverage_attribution_for(...)     → CoverageAttribution | None
-        │                                       (non-tech only — surfaces LLM's
+        ├── coverage_attribution_for(...)     → CoverageAttribution
+        │                                       (always populated — surfaces LLM's
         │                                        value_adding + concerns lists)
         │
         ├── LLM #3  explanation/narrative.py  → strengths + gaps for analysis_role
@@ -95,11 +93,9 @@ the target field set, once empty.
                        CVAnalysis (Pydantic)
 ```
 
-**LLM call count per analysis:**
-- Tech role, no target → **4 calls** (~$0.035)
-- Tech role + target → **5 calls** (~$0.045)
-- Non-tech role, no target → **4 + 2** (coverage scoring × 2 tracks) (~$0.045)
-- Non-tech role + target → **5 + 2** (~$0.055)
+**LLM call count per analysis (Phase 11 — single all-LLM coverage):**
+- No target role → **4 + 2** = 6 calls (4 pipeline + 2 coverage tracks) (~$0.045)
+- With target role → **5 + 2** = 7 calls (~$0.055)
 - Plus 1 conditional LLM fallback for `role_mapping` on unknown titles (~$0.003)
 
 Four LLM calls, each driven by a prompt loaded from
@@ -202,33 +198,30 @@ The pipeline emits **two independent scoring tracks** so the reader sees
 buzzword vs hidden-assets analyses side-by-side instead of a single blended
 number:
 
-- **`track_explicit`** — buzzword baseline. Objective view from the
-  literal CV content. For tech roles, `skills_depth` is a **category
-  coverage** score: `covered_categories / 8 × 100` over the
-  `TECH_STACK_CATEGORIES` checklist (language, database, cloud,
-  container/orchestration, messaging, web framework, observability,
-  CI/devops). 100 literally means "every expected stack category is
-  represented in the CV's skill listing".
-- **`track_with_inferred`** — same coverage check, but inferred
-  capabilities with `confidence ≥ 0.6` also count as signals. The gap
-  between the two tracks measures *which categories the candidate
-  covers via project-narrative evidence rather than the explicit skill
-  listing*. If inferred doesn't unlock any new category, the gap is
-  zero — methodologically honest. No artificial asymmetric cap.
+- **`track_explicit`** — buzzword baseline. The LLM (`skills_coverage`
+  prompt) returns `coverage_percent` for the role given only the
+  literal CV content. 100 means "every core competency a hiring
+  manager would check for this role is demonstrated by the CV's
+  listed skills".
+- **`track_with_inferred`** — same coverage prompt, but inferred
+  capabilities with `confidence ≥ 0.6` are also handed to the model as
+  supporting evidence. The model decides how much (if at all) they
+  lift the score, capped at ~15 points per its rubric.
 
-For **non-tech roles** (business management, marketing, legal, etc.)
-the framework falls back to the legacy tier-weighted scoring with the
-explicit-only cap at 75 and a confidence-weighted inferred bonus — we
-don't have calibrated category lists for non-tech families yet, and
-the case study scope is IT.
+The split applies to **every role family** — tech, business, marketing,
+legal, healthcare, design, etc. — through a single LLM-driven
+mechanism. Skepticism / overclaim handling (caveat-heavy or
+low-confidence inferred passes) lives in the prompt itself: see
+`cv_estimator/prompts/skills_coverage.md` for the rubric and rules.
 
-Worked examples (tech role):
+Worked examples:
 - Backend Engineer CV listing python, postgres, kafka, k8s, terraform
-  → covers `language`, `database`, `messaging`, `container/orchestration`
-  = 4/8 = **50 %**.
-- Same CV + inferred capability "aws" (confidence 0.8) → unlocks
-  `cloud_platform` → 5/8 = **62.5 %**, gap 12.5.
-- CV listing all 8 categories → **100 %** (the methodological max).
+  → LLM returns ~70 %, flags observability + CI/CD as missing core.
+- Marketing Manager CV listing google analytics, seo, hubspot, content
+  strategy, email automation → LLM returns ~70 %, flags paid
+  acquisition + brand strategy as missing core.
+- Lawyer CV listing contract drafting, litigation, compliance → LLM
+  returns ~60 %, flags GDPR + M&A + court representation as missing core.
 
 Each track ships its own `seniority_score` and `salary_estimate`. The UI
 renders them in side-by-side cards and a market-range chart shows both
@@ -261,8 +254,9 @@ now:
   confidence (0.3–0.5).
 - **Classifies each capability** as either `must_have` (direct core
   competency of the role) or `nice_to_have` (adjacent skill, soft signal).
-  Scoring contribution: `must_have` gets the full `8 × confidence` bonus;
-  `nice_to_have` gets half.
+  Both are fed to the LLM coverage scorer as supporting evidence —
+  the coverage prompt decides how much each lifts (or fails to lift)
+  the score.
 - **Enforces an explicit skepticism protocol** on top:
 
 1. Anchor confidence at 0.5 by default — move to 0.8+ only with concrete
