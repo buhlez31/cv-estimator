@@ -201,7 +201,13 @@ def _radar(track: TrackResult, name: str) -> go.Figure:
                 b.education,
                 b.years_experience,
             ],
-            theta=["Years exp", "Skills depth", "Role progression", "Education", "Years exp"],
+            theta=[
+                "Years exp",
+                "Skills coverage",
+                "Role progression",
+                "Education",
+                "Years exp",
+            ],
             fill="toself",
             name=name,
         )

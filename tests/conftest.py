@@ -32,6 +32,15 @@ def inferred_senior_dev() -> InferredData:
                 relevance="must_have",
             ),
             SkillEvidence(
+                # Matches TECH_STACK_CATEGORIES['cloud_platform'] — used by
+                # tests that exercise the "inferred unlocks a new category"
+                # branch of _skills_coverage_score.
+                skill="aws",
+                evidence_quote="migrated infrastructure to AWS",
+                confidence=0.8,
+                relevance="must_have",
+            ),
+            SkillEvidence(
                 skill="stakeholder management",
                 evidence_quote="reported weekly to 200 stakeholders",
                 confidence=0.75,

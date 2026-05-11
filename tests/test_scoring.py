@@ -21,18 +21,43 @@ def test_seniority_clamped_to_range():
     assert score == 74
 
 
-def test_components_explicit_only_capped_at_75(explicit_senior_dev):
-    """Buzzword baseline is capped at 75 even when raw skill-tier sum exceeds it."""
+def test_skills_coverage_tech_baseline(explicit_senior_dev):
+    """senior_dev explicit_skills cover 4 of 8 tech categories:
+    language (python), container_orchestration (k8s + terraform),
+    database (postgres), messaging_streaming (kafka). → 50.0%."""
     b_explicit = components.compute_explicit_only(explicit_senior_dev, "Senior Software Engineer")
-    assert b_explicit.skills_depth == 75.0
+    assert b_explicit.skills_depth == 50.0
 
 
-def test_components_with_inferred_exceeds_baseline(explicit_senior_dev, inferred_senior_dev):
-    """With-inferred track must score strictly higher when inferred caps exist."""
+def test_skills_coverage_inferred_unlocks_new_category(explicit_senior_dev, inferred_senior_dev):
+    """inferred_senior_dev fixture includes 'aws' capability (confidence
+    0.8, above threshold) — unlocks cloud_platform category. Baseline
+    4/8 = 50%, with-inferred 5/8 = 62.5%."""
     role = "Senior Software Engineer"
     b_explicit = components.compute_explicit_only(explicit_senior_dev, role)
     b_full = components.compute_with_inferred(explicit_senior_dev, inferred_senior_dev, role)
-    assert b_full.skills_depth > b_explicit.skills_depth
+    assert b_explicit.skills_depth == 50.0
+    assert b_full.skills_depth == 62.5
+
+
+def test_skills_coverage_low_confidence_inferred_does_not_unlock(explicit_senior_dev):
+    """Inferred capability below confidence threshold (0.6) does NOT count
+    toward coverage even if its skill string matches a category keyword."""
+    weak_inferred = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(
+                skill="aws",
+                evidence_quote="mentioned cloud experience",
+                confidence=0.4,  # below threshold
+                relevance="nice_to_have",
+            ),
+        ]
+    )
+    b = components.compute_with_inferred(
+        explicit_senior_dev, weak_inferred, "Senior Software Engineer"
+    )
+    # Same 4/8 as baseline — low-confidence inferred didn't unlock cloud.
+    assert b.skills_depth == 50.0
 
 
 def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
@@ -72,25 +97,26 @@ def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
-    """senior_dev fixture: explicit @ cap-100 = 95, inferred bonus
-    (0.85+0.75/2)*8 = 9.8 → 104.8 clamped to 100.
-
-    Education (NEW lowered base map): master 50 + ČVUT prestige 5 +
-    CS field matches Senior Software Engineer (tech-tech direct match)
-    → +5 = 60.
+    """senior_dev fixture under category-coverage methodology:
+    - Years: 8/15*100 ≈ 53
+    - Skills coverage: 4 explicit categories + 1 inferred (aws → cloud_platform)
+      = 5/8 = 62.5%
+    - Role: senior signal + 8 years (no +5 since <10) = 80
+    - Education: master 50 + ČVUT prestige 5 + CS match +5 = 60
     """
     b = components.compute_with_inferred(
         explicit_senior_dev, inferred_senior_dev, "Senior Software Engineer"
     )
     assert 50 <= b.years_experience <= 55
-    assert b.skills_depth == 100.0
+    assert b.skills_depth == 62.5
     assert b.role_progression == 80.0
     assert b.education == 60.0
 
 
 def test_components_junior_support(explicit_junior_support, inferred_empty):
-    """Education: bachelor 30 + VŠE prestige 5 + 'Information Systems'
-    field family unknown → 0 modifier → 35."""
+    """IT Support Specialist role family → unknown → falls back to legacy
+    tier-weighted scoring. excel+outlook+jira = 15 (3 × LOW=5).
+    Education: bachelor 30 + VŠE prestige 5 + unknown field family → 35."""
     b = components.compute_with_inferred(
         explicit_junior_support, inferred_empty, "IT Support Specialist"
     )
@@ -100,12 +126,43 @@ def test_components_junior_support(explicit_junior_support, inferred_empty):
     assert b.education == 35.0
 
 
-def test_components_unknown_skill_partial_credit(explicit_senior_dev, inferred_empty):
+def test_skills_coverage_unknown_skill_tech_role_no_credit(explicit_senior_dev, inferred_empty):
+    """For tech roles, skills outside TECH_STACK_CATEGORIES don't count.
+    "some-niche-tool" matches no category → 0% coverage."""
     explicit_senior_dev.explicit_skills = ["some-niche-tool"]
     b = components.compute_with_inferred(
         explicit_senior_dev, inferred_empty, "Senior Software Engineer"
     )
-    assert b.skills_depth == 8.0
+    assert b.skills_depth == 0.0
+
+
+def test_skills_coverage_full_stack_saturates(explicit_senior_dev, inferred_empty):
+    """CV listing skills covering all 8 categories saturates at 100%."""
+    explicit_senior_dev.explicit_skills = [
+        "python",  # language
+        "postgres",  # database
+        "aws",  # cloud_platform
+        "kubernetes",  # container_orchestration
+        "kafka",  # messaging_streaming
+        "fastapi",  # framework_web
+        "prometheus",  # observability
+        "git",  # ci_devops
+    ]
+    b = components.compute_with_inferred(
+        explicit_senior_dev, inferred_empty, "Senior Software Engineer"
+    )
+    assert b.skills_depth == 100.0
+
+
+def test_skills_coverage_non_tech_falls_back_to_tier_weights(explicit_senior_dev, inferred_empty):
+    """Marketing Manager role → non-tech (well, business_mgmt) → falls
+    back to legacy tier-weighted scoring."""
+    # senior_dev skills are mostly tech, but scored via legacy weights for non-tech roles.
+    # Note: "Marketing Manager" maps to business_mgmt family.
+    b = components.compute_with_inferred(explicit_senior_dev, inferred_empty, "Marketing Manager")
+    # Legacy: kubernetes(25 HIGH) + terraform(25 HIGH) + python(15 MID) +
+    # postgres(15 MID) + kafka(15 MID) = 95 (with-inferred cap 100).
+    assert b.skills_depth == 95.0
 
 
 # ----- Education field-relevance modifier ------------------------------------

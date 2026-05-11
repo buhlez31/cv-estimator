@@ -24,13 +24,95 @@ SKILL_TIER_HIGH = 1.0  # senior-signal tech (k8s, system design, ML infra, ...)
 SKILL_TIER_MID = 0.6  # mainstream production tools (Docker, AWS, Kafka, ...)
 SKILL_TIER_LOW = 0.3  # generic / commodity (Excel, basic Office, ...)
 
-# --- Two-track skills_depth ceilings (see scoring/components.py) ---
-# Buzzword-only baseline cannot reach 100 — a bare skill list without
-# project-narrative evidence is inherently incomplete signal.
+# --- Skills coverage methodology (tech roles) ---
+# 100 = candidate's CV demonstrates coverage of every expected stack
+# category for the role family. 8 categories → each covered category
+# contributes 12.5 percentage points. Anchored definition matches the
+# years_experience pattern (max=15 yrs, score=years/15×100).
+TECH_STACK_CATEGORIES: dict[str, set[str]] = {
+    "language": {
+        "python",
+        "java",
+        "go",
+        "rust",
+        "typescript",
+        "javascript",
+        "c++",
+        "c#",
+        "ruby",
+        "php",
+        "kotlin",
+        "swift",
+        "scala",
+        "sql",
+    },
+    "database": {
+        "postgres",
+        "postgresql",
+        "mysql",
+        "mongodb",
+        "redis",
+        "dynamodb",
+        "snowflake",
+        "bigquery",
+        "elasticsearch",
+        "cassandra",
+    },
+    "cloud_platform": {
+        "aws",
+        "gcp",
+        "azure",
+    },
+    "container_orchestration": {
+        "docker",
+        "kubernetes",
+        "k8s",
+        "terraform",
+    },
+    "messaging_streaming": {
+        "kafka",
+        "rabbitmq",
+        "sqs",
+        "kafka streams",
+        "pubsub",
+    },
+    "framework_web": {
+        "fastapi",
+        "django",
+        "flask",
+        "express",
+        "react",
+        "vue",
+        "angular",
+        "node",
+        "node.js",
+        "spring",
+    },
+    "observability": {
+        "prometheus",
+        "grafana",
+        "datadog",
+        "splunk",
+        "elk",
+    },
+    "ci_devops": {
+        "git",
+        "github actions",
+        "jenkins",
+        "gitlab ci",
+        "ci/cd",
+    },
+}
+# Confidence threshold for an inferred capability to "unlock" a category
+# on the with-inferred track. Lower confidence inferences don't count
+# toward coverage.
+INFERRED_COVERAGE_CONFIDENCE_THRESHOLD = 0.6
+
+# --- Two-track skills_depth fallback (non-tech roles) ---
+# Used only when analysis_role's family isn't "tech" — kept so the
+# pipeline still produces a meaningful score for roles outside the IT
+# CZ-ISCO families.
 EXPLICIT_ONLY_SKILLS_CAP = 75.0
-# Inferred capabilities are confidence-weighted and capped on their
-# aggregate contribution. Tuned so a typical 3-capability senior CV
-# lifts ~17 points of skills_depth (= ~6 points of seniority_score).
 INFERRED_BONUS_PER_CAPABILITY = 8.0
 INFERRED_BONUS_CAP = 25.0
 

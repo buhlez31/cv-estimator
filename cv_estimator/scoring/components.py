@@ -21,6 +21,7 @@ from cv_estimator.config import (
     FIELD_FAMILY_KEYWORDS,
     INFERRED_BONUS_CAP,
     INFERRED_BONUS_PER_CAPABILITY,
+    INFERRED_COVERAGE_CONFIDENCE_THRESHOLD,
     JUNIOR_TITLE_KEYWORDS,
     PRESTIGE_INSTITUTION_KEYWORDS,
     ROLE_FAMILY_KEYWORDS,
@@ -29,6 +30,7 @@ from cv_estimator.config import (
     SKILL_TIERS_HIGH,
     SKILL_TIERS_LOW,
     SKILL_TIERS_MID,
+    TECH_STACK_CATEGORIES,
     YEARS_CAP,
 )
 from cv_estimator.extractors.explicit import ExplicitData
@@ -39,17 +41,18 @@ from cv_estimator.models import ScoreBreakdown
 def compute_explicit_only(explicit: ExplicitData, analysis_role: str) -> ScoreBreakdown:
     """Buzzword baseline — uses only what is literally in the CV.
 
-    Skills capped at EXPLICIT_ONLY_SKILLS_CAP (75) to encode the rule
-    that a bare skill list, without project-narrative evidence, is
-    inherently incomplete signal. The remaining 25 points of headroom
-    are only reachable on the with-inferred track when hidden assets
-    surface genuine project depth.
+    For technical roles, skills_depth is a **category coverage** score
+    (covered TECH_STACK_CATEGORIES / total). For non-tech roles, falls
+    back to the legacy tier-weighted scoring with the asymmetric cap.
 
-    `analysis_role` drives the education field-relevance modifier.
+    `analysis_role` drives both the skills category check and the
+    education field-relevance modifier.
     """
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
-        skills_depth=_explicit_skills_score(explicit.explicit_skills, cap=EXPLICIT_ONLY_SKILLS_CAP),
+        skills_depth=_skills_coverage_score(
+            explicit.explicit_skills, [], analysis_role, include_inferred=False
+        ),
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
@@ -67,14 +70,17 @@ def compute_with_inferred(
     inferred: InferredData,
     analysis_role: str,
 ) -> ScoreBreakdown:
-    """Optimistic ceiling — explicit skills (cap 100) plus confidence-weighted
-    inferred bonus on top, also capped so a single noisy LLM pass cannot
-    inflate skills_depth past saturation."""
-    explicit_skills = _explicit_skills_score(explicit.explicit_skills, cap=100.0)
-    bonus = _inferred_bonus(inferred)
+    """Hidden-assets-included view — for tech roles, inferred capabilities
+    with confidence ≥ threshold can unlock additional stack categories.
+    For non-tech roles, applies the legacy confidence-weighted bonus."""
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
-        skills_depth=min(100.0, explicit_skills + bonus),
+        skills_depth=_skills_coverage_score(
+            explicit.explicit_skills,
+            inferred.inferred_capabilities,
+            analysis_role,
+            include_inferred=True,
+        ),
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
@@ -105,6 +111,50 @@ def _years_score(years: int) -> float:
     return float(min(years, YEARS_CAP) / YEARS_CAP * 100)
 
 
+def _skills_coverage_score(
+    explicit_skills: list[str],
+    inferred_capabilities: list,
+    analysis_role: str,
+    *,
+    include_inferred: bool,
+) -> float:
+    """Category-coverage score for technical roles, tier-weighted fallback
+    otherwise.
+
+    Tech path: build a set of signal strings (explicit skills + optionally
+    inferred capabilities meeting the confidence threshold), then count
+    how many TECH_STACK_CATEGORIES are "covered" — i.e. at least one
+    signal in the candidate's list matches at least one keyword in the
+    category's set. Score = covered / total × 100.
+
+    Non-tech path: fall back to the legacy tier-weighted sum, with the
+    explicit-only cap if include_inferred=False, or +inferred bonus
+    otherwise. We don't have calibrated category lists for non-tech
+    role families.
+    """
+    role_family = _classify_role_family(analysis_role)
+
+    if role_family == "tech":
+        signals = {s.strip().lower() for s in explicit_skills if s.strip()}
+        if include_inferred:
+            for cap in inferred_capabilities:
+                if cap.confidence >= INFERRED_COVERAGE_CONFIDENCE_THRESHOLD:
+                    signals.add(cap.skill.strip().lower())
+
+        covered = 0
+        for keywords in TECH_STACK_CATEGORIES.values():
+            if any(any(kw in s for kw in keywords) for s in signals):
+                covered += 1
+        return (covered / len(TECH_STACK_CATEGORIES)) * 100.0
+
+    # Non-tech fallback: legacy tier-weighted sum.
+    if include_inferred:
+        explicit_score = _explicit_skills_score(explicit_skills, cap=100.0)
+        bonus = _inferred_bonus(inferred_capabilities)
+        return min(100.0, explicit_score + bonus)
+    return _explicit_skills_score(explicit_skills, cap=EXPLICIT_ONLY_SKILLS_CAP)
+
+
 def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
     """Tier-weighted score for skills that literally appear in the CV,
     clamped to the caller-supplied cap. The explicit-only track passes
@@ -127,16 +177,17 @@ def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
     return float(min(cap, base))
 
 
-def _inferred_bonus(inferred: InferredData) -> float:
+def _inferred_bonus(inferred_capabilities: list) -> float:
     """Confidence-weighted bonus from inferred capabilities, capped at
-    INFERRED_BONUS_CAP.
+    INFERRED_BONUS_CAP. Used as the non-tech-role fallback in
+    `_skills_coverage_score`.
 
     must_have capabilities contribute the full multiplier; nice_to_have
     capabilities contribute half, so role-critical signal dominates
     soft / adjacent signal in the score.
     """
     raw = 0.0
-    for cap in inferred.inferred_capabilities:
+    for cap in inferred_capabilities:
         weight = INFERRED_BONUS_PER_CAPABILITY * cap.confidence
         if cap.relevance == "nice_to_have":
             weight *= 0.5

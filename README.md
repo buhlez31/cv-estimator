@@ -172,19 +172,32 @@ buzzword vs hidden-assets analyses side-by-side instead of a single blended
 number:
 
 - **`track_explicit`** — buzzword baseline. Objective view from the
-  literal CV content. `skills_depth` is **capped at 75**, encoding the
-  rule that a bare skill list without project-narrative evidence is
-  inherently incomplete signal. Inferred capabilities are computed for
-  visibility but excluded from this track's score. No skepticism is
-  applied here — this is the straight reading of what the CV claims.
-- **`track_with_inferred`** — optimistic ceiling. Explicit skills can
-  reach 100, and a confidence-weighted bonus from the inferred pass
-  (`bonus = 8 × confidence` per capability, aggregate cap +25) is added
-  on top. The cap asymmetry between the two tracks is what makes the
-  methodology visible in the UI: even a buzzword-saturating CV (which
-  pegs explicit skills at 75 / baseline) leaves room for hidden-asset
-  evidence to lift the with-inferred track by ~10–17 points and shift
-  the salary marker visibly within the ISPV range.
+  literal CV content. For tech roles, `skills_depth` is a **category
+  coverage** score: `covered_categories / 8 × 100` over the
+  `TECH_STACK_CATEGORIES` checklist (language, database, cloud,
+  container/orchestration, messaging, web framework, observability,
+  CI/devops). 100 literally means "every expected stack category is
+  represented in the CV's skill listing".
+- **`track_with_inferred`** — same coverage check, but inferred
+  capabilities with `confidence ≥ 0.6` also count as signals. The gap
+  between the two tracks measures *which categories the candidate
+  covers via project-narrative evidence rather than the explicit skill
+  listing*. If inferred doesn't unlock any new category, the gap is
+  zero — methodologically honest. No artificial asymmetric cap.
+
+For **non-tech roles** (business management, marketing, legal, etc.)
+the framework falls back to the legacy tier-weighted scoring with the
+explicit-only cap at 75 and a confidence-weighted inferred bonus — we
+don't have calibrated category lists for non-tech families yet, and
+the case study scope is IT.
+
+Worked examples (tech role):
+- Backend Engineer CV listing python, postgres, kafka, k8s, terraform
+  → covers `language`, `database`, `messaging`, `container/orchestration`
+  = 4/8 = **50 %**.
+- Same CV + inferred capability "aws" (confidence 0.8) → unlocks
+  `cloud_platform` → 5/8 = **62.5 %**, gap 12.5.
+- CV listing all 8 categories → **100 %** (the methodological max).
 
 Each track ships its own `seniority_score` and `salary_estimate`. The UI
 renders them in side-by-side cards and a market-range chart shows both
