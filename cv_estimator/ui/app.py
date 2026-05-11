@@ -372,6 +372,8 @@ if result.inferred_capabilities:
     # scored coverage and identified which inputs lifted or undermined it.
     attr = result.track_with_inferred.coverage_attribution
     if attr is not None and (attr.value_adding or attr.concerns):
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.divider()
         st.markdown("#### 📊 Vliv hidden assets na skóre")
         st.caption(
             f"LLM coverage hodnotitel ({result.analysis_role}) označil tyto inputy "
