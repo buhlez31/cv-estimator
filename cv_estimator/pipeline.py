@@ -62,11 +62,20 @@ def analyze_cv(
     breakdown_explicit = components.compute_explicit_only(explicit_data, analysis_role)
     score_explicit = seniority.compute(breakdown_explicit)
     salary_explicit = lookup.estimate_salary(cz_isco, score_explicit)
+    attr_explicit = components.coverage_attribution_for(
+        analysis_role, explicit_data.explicit_skills, [], include_inferred=False
+    )
 
     # Track B: optimistic ceiling (adds confidence-weighted inferred bonus).
     breakdown_full = components.compute_with_inferred(explicit_data, inferred_data, analysis_role)
     score_full = seniority.compute(breakdown_full)
     salary_full = lookup.estimate_salary(cz_isco, score_full)
+    attr_full = components.coverage_attribution_for(
+        analysis_role,
+        explicit_data.explicit_skills,
+        inferred_data.inferred_capabilities,
+        include_inferred=True,
+    )
 
     # Narrative + recommendations consume the fuller picture so roadmap advice
     # covers the hidden-asset trajectory, not just the conservative baseline.
@@ -100,11 +109,13 @@ def analyze_cv(
             seniority_score=score_explicit,
             breakdown=breakdown_explicit,
             salary_estimate=salary_explicit,
+            coverage_attribution=attr_explicit,
         ),
         track_with_inferred=TrackResult(
             seniority_score=score_full,
             breakdown=breakdown_full,
             salary_estimate=salary_full,
+            coverage_attribution=attr_full,
         ),
         target=target,
         strengths=sg.strengths,

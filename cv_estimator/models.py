@@ -48,6 +48,17 @@ class Recommendation(BaseModel):
     target_skill: str
 
 
+class CoverageAttribution(BaseModel):
+    """Per-track explanation of which inputs moved the skills coverage
+    score. Populated only for non-tech roles where the coverage score
+    comes from an LLM call that can list contributing / problematic
+    capabilities. Tech roles get None (attribution is implicit from the
+    deterministic category-match check)."""
+
+    value_adding: list[str]
+    concerns: list[str]
+
+
 class TrackResult(BaseModel):
     """One scoring view — either the buzzword-only baseline (objective,
     derived from literal CV content) or the hidden-assets-included
@@ -56,6 +67,7 @@ class TrackResult(BaseModel):
     seniority_score: int = Field(ge=0, le=100)
     breakdown: ScoreBreakdown
     salary_estimate: SalaryEstimate
+    coverage_attribution: CoverageAttribution | None = None
 
 
 class TargetRoleMatch(BaseModel):

@@ -17,17 +17,22 @@ def _stub_llm_calls():
     test can focus on whichever component it's actually asserting.
     Tests that want a specific LLM response override with their own patch.
     """
-    components._llm_coverage_nontech.cache_clear()
+    components._llm_coverage_nontech_raw.cache_clear()
 
     def _stub(prompt: str) -> dict:
         if "Skills coverage scoring for non-tech role" in prompt:
-            return {"coverage_percent": 50, "missing_core": []}
+            return {
+                "coverage_percent": 50,
+                "missing_core": [],
+                "value_adding_capabilities": [],
+                "concerns": [],
+            }
         # Any other LLM hit during a test means a missing mock — fail loud.
         raise AssertionError(f"Unexpected LLM call in test_scoring: {prompt[:100]}")
 
     with patch("cv_estimator.llm.call_json", side_effect=_stub):
         yield
-    components._llm_coverage_nontech.cache_clear()
+    components._llm_coverage_nontech_raw.cache_clear()
 
 
 def test_seniority_is_weighted_average():
@@ -218,11 +223,57 @@ def test_skills_coverage_non_tech_uses_llm():
     )
     with patch(
         "cv_estimator.llm.call_json",
-        return_value={"coverage_percent": 72, "missing_core": ["paid acquisition"]},
+        return_value={
+            "coverage_percent": 72,
+            "missing_core": ["paid acquisition"],
+            "value_adding_capabilities": ["google analytics"],
+            "concerns": [],
+        },
     ) as mock_call:
         b = components.compute_explicit_only(marketing_cv, "Marketing Manager")
     assert b.skills_depth == 72.0
     assert mock_call.call_count == 1
+
+
+def test_coverage_attribution_for_non_tech():
+    """For a non-tech role, `coverage_attribution_for` returns the LLM's
+    value_adding / concerns lists. For tech roles, it returns None."""
+    from cv_estimator.extractors.inferred import InferredData
+
+    inferred = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(
+                skill="seo",
+                evidence_quote="ev",
+                confidence=0.8,
+                relevance="must_have",
+            ),
+        ]
+    )
+    with patch(
+        "cv_estimator.llm.call_json",
+        return_value={
+            "coverage_percent": 75,
+            "missing_core": [],
+            "value_adding_capabilities": ["seo"],
+            "concerns": ["hubspot"],
+        },
+    ):
+        attr = components.coverage_attribution_for(
+            "Marketing Manager",
+            ["seo", "hubspot"],
+            inferred.inferred_capabilities,
+            include_inferred=True,
+        )
+    assert attr is not None
+    assert attr.value_adding == ["seo"]
+    assert attr.concerns == ["hubspot"]
+
+    # Tech role → no attribution
+    attr_tech = components.coverage_attribution_for(
+        "Senior Backend Engineer", ["python"], [], include_inferred=False
+    )
+    assert attr_tech is None
 
 
 # ----- Education field-relevance modifier ------------------------------------

@@ -322,6 +322,32 @@ if result.inferred_capabilities:
         else:
             st.caption("_Žádné nice-to-have hidden assets detekovány._")
 
+    # Coverage attribution — only populated for non-tech roles where LLM
+    # scored coverage and identified which inputs lifted or undermined it.
+    attr = result.track_with_inferred.coverage_attribution
+    if attr is not None and (attr.value_adding or attr.concerns):
+        st.markdown("#### 📊 Vliv hidden assets na skóre")
+        st.caption(
+            f"LLM coverage hodnotitel ({result.analysis_role}) označil tyto inputy "
+            "jako rozhodující pro pohyb skills_coverage skóre mezi `baseline` a "
+            "`s hidden assets`."
+        )
+        attr_a, attr_b = st.columns(2)
+        with attr_a:
+            st.markdown("**✅ Capabilities zvedly skóre**")
+            if attr.value_adding:
+                for name in attr.value_adding:
+                    st.markdown(f"- {name}")
+            else:
+                st.caption("_Žádný value-adding signál._")
+        with attr_b:
+            st.markdown("**⚠️ Capabilities snížily / nepomohly**")
+            if attr.concerns:
+                for name in attr.concerns:
+                    st.markdown(f"- {name}")
+            else:
+                st.caption("_Žádné concerns._")
+
     st.divider()
 
 

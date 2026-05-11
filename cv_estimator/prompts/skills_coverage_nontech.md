@@ -22,9 +22,21 @@ Single JSON object. No prose, no markdown fences.
 ```json
 {
   "coverage_percent": <int 0-100>,
-  "missing_core": ["<short skill name>", "..."]
+  "missing_core": ["<short skill name>", "..."],
+  "value_adding_capabilities": ["<skill name from inputs that lifted the score>"],
+  "concerns": ["<skill name from inputs that pulled the score down or didn't help>"]
 }
 ```
+
+### Attribution fields
+
+- `value_adding_capabilities`: names of **inferred capabilities or
+  explicit skills from the inputs** that genuinely advanced the
+  candidate's fit for `{role}`. Pick names from the lists provided —
+  don't invent. Empty list if nothing materially contributed.
+- `concerns`: names of inputs that *should have helped* but had caveats,
+  low confidence, or weren't actually role-relevant. Empty list if no
+  notable concerns. Use this to flag overclaim signals.
 
 ## Scoring rubric
 

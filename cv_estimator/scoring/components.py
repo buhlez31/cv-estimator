@@ -189,22 +189,22 @@ def _skills_coverage_score(
 
 
 @lru_cache(maxsize=128)
-def _llm_coverage_nontech(
+def _llm_coverage_nontech_raw(
     role: str,
     explicit_skills_tuple: tuple[str, ...],
     inferred_caps_tuple: tuple[tuple[str, float], ...],
     *,
     include_inferred: bool,
-) -> float:
+) -> tuple[float, tuple[str, ...], tuple[str, ...]]:
     """LLM-based skills coverage scoring for non-tech roles.
 
-    Asks the model to estimate what percent of the role's expected core
-    competencies the candidate's CV demonstrates. Cached per
-    (role, skills, inferred, include_inferred) so the same analysis
-    doesn't re-query.
+    Returns (coverage_percent, value_adding tuple, concerns tuple). The
+    LLM call is made ONCE per (role, skills, inferred, include_inferred)
+    via lru_cache; subsequent calls (e.g. for attribution) reuse the
+    cached response — no double-billing.
 
-    Lazy import of `llm` to keep test fixtures that exercise only tech
-    paths from needing Anthropic client setup.
+    Lazy import of `llm` so test fixtures that don't exercise this path
+    don't need an Anthropic client.
     """
     import json as _json
 
@@ -218,8 +218,69 @@ def _llm_coverage_nontech(
         inferred_capabilities=_json.dumps(inferred_payload, ensure_ascii=False),
     )
     payload = llm.call_json(prompt)
-    score = float(payload.get("coverage_percent", 0) or 0)
-    return max(0.0, min(100.0, score))
+    score = max(0.0, min(100.0, float(payload.get("coverage_percent", 0) or 0)))
+    value_adding = tuple(str(x) for x in (payload.get("value_adding_capabilities") or []))
+    concerns = tuple(str(x) for x in (payload.get("concerns") or []))
+    return score, value_adding, concerns
+
+
+def _llm_coverage_nontech(
+    role: str,
+    explicit_skills_tuple: tuple[str, ...],
+    inferred_caps_tuple: tuple[tuple[str, float], ...],
+    *,
+    include_inferred: bool,
+) -> float:
+    """Thin wrapper that returns just the float score (drops attribution).
+    Used by `_skills_coverage_score` which only needs the number."""
+    score, _, _ = _llm_coverage_nontech_raw(
+        role,
+        explicit_skills_tuple,
+        inferred_caps_tuple,
+        include_inferred=include_inferred,
+    )
+    return score
+
+
+def coverage_attribution_for(
+    role: str,
+    explicit_skills: list[str],
+    inferred_capabilities: list,
+    *,
+    include_inferred: bool,
+):
+    """Return a `CoverageAttribution` for non-tech roles, None for tech.
+
+    Pipeline calls this after compute_*; the underlying LLM response is
+    already cached from the skills-coverage scoring call, so this is
+    free.
+    """
+    from cv_estimator.models import CoverageAttribution
+
+    role_family = _classify_role_family(role)
+    if role_family == "tech":
+        return None
+
+    skills_tuple = tuple(s.strip().lower() for s in explicit_skills if s.strip())
+    inferred_tuple = (
+        tuple(
+            (c.skill.strip().lower(), round(c.confidence, 2))
+            for c in inferred_capabilities
+            if c.confidence >= INFERRED_COVERAGE_CONFIDENCE_THRESHOLD
+        )
+        if include_inferred
+        else ()
+    )
+    _, value_adding, concerns = _llm_coverage_nontech_raw(
+        role,
+        skills_tuple,
+        inferred_tuple,
+        include_inferred=include_inferred,
+    )
+    return CoverageAttribution(
+        value_adding=list(value_adding),
+        concerns=list(concerns),
+    )
 
 
 def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
