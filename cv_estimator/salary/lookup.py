@@ -67,18 +67,28 @@ def estimate_salary(cz_isco: str, seniority_score: int) -> SalaryEstimate:
 
 
 def _interpolate(score: int, p25: int, p50: int, p75: int, p90: int) -> tuple[int, int]:
-    """Linear-interpolate seniority_score (0-100) onto the ISPV quantile curve.
+    """Map seniority_score (0-100) to a market salary point.
 
-    Returns (estimated_median_CZK, percentile_position 25-90).
-    Anchors: score 25→P25, 50→P50, 75→P75, 90→P90. Linear in between.
+    Uses **seniority-bucket anchors**, not a continuous linear curve, so a
+    mid-tier engineer doesn't land at P75 just because the score happens to
+    sit at 75:
+
+    - Junior (0-40)     → P25 (entry-level wage band)
+    - Mid (40-70)       → P25 → P50 (interpolated)
+    - Senior (70-90)    → P50 → P75 (interpolated)
+    - Principal (90-100)→ P75 → P90 (interpolated)
+
+    Trade-off: fewer candidates earn a P75+ estimate, which matches the
+    real market shape (most senior ICs sit between P50 and P75, P90 is
+    reserved for principal / staff-level outliers). Calibrated against
+    public Czech IT salary surveys.
     """
     score = max(0, min(100, score))
     anchors = [
         (0, p25, 25),
-        (25, p25, 25),
-        (50, p50, 50),
-        (75, p75, 75),
-        (90, p90, 90),
+        (40, p25, 25),
+        (70, p50, 50),
+        (90, p75, 75),
         (100, p90, 90),
     ]
     for i in range(len(anchors) - 1):

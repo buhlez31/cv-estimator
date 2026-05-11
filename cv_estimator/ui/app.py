@@ -88,60 +88,72 @@ if result.target:
 
 
 def _range_chart(result: CVAnalysis) -> go.Figure:
-    """Horizontal market range with markers for both tracks."""
+    """Horizontal market range with markers for both tracks.
+
+    Two stacked rows so the baseline and with-inferred markers never
+    overlap and each gets a clean value annotation.
+    """
     s = result.track_explicit.salary_estimate  # market band identical for both tracks
     explicit_pt = result.track_explicit.salary_estimate.median
     inferred_pt = result.track_with_inferred.salary_estimate.median
 
+    # Two rows: y=1 for baseline, y=-1 for with-inferred. Market band drawn
+    # at both rows for visual reference.
     fig = go.Figure()
-    fig.add_shape(
-        type="line",
-        x0=s.market_p25,
-        x1=s.market_p90,
-        y0=0,
-        y1=0,
-        line=dict(color="#d0d0d0", width=18),
-    )
-    fig.add_shape(
-        type="line",
-        x0=s.market_p50,
-        x1=s.market_p50,
-        y0=-0.4,
-        y1=0.4,
-        line=dict(color="#888", width=2, dash="dot"),
-    )
-    fig.add_shape(
-        type="line",
-        x0=s.market_p75,
-        x1=s.market_p75,
-        y0=-0.4,
-        y1=0.4,
-        line=dict(color="#888", width=2, dash="dot"),
-    )
+    for y in (1, -1):
+        fig.add_shape(
+            type="line",
+            x0=s.market_p25,
+            x1=s.market_p90,
+            y0=y,
+            y1=y,
+            line=dict(color="#d0d0d0", width=22),
+            layer="below",
+        )
+
+    # Quartile reference ticks across both rows
+    for x_val in (s.market_p50, s.market_p75):
+        fig.add_shape(
+            type="line",
+            x0=x_val,
+            x1=x_val,
+            y0=-1.8,
+            y1=1.8,
+            line=dict(color="#aaa", width=1, dash="dot"),
+            layer="below",
+        )
+
+    # Baseline marker (top row)
     fig.add_trace(
         go.Scatter(
             x=[explicit_pt],
-            y=[0],
+            y=[1],
             mode="markers+text",
-            marker=dict(symbol="diamond", size=18, color="#1f77b4"),
-            text=["baseline"],
-            textposition="top center",
-            name="Buzzword baseline",
+            marker=dict(
+                symbol="diamond", size=28, color="#1f77b4", line=dict(color="white", width=2)
+            ),
+            text=[f"{explicit_pt:,} CZK".replace(",", " ")],
+            textposition="middle right",
+            textfont=dict(size=14, color="#1f77b4"),
+            name="🪧 Buzzword baseline",
             hovertemplate="Baseline: %{x:,.0f} CZK<extra></extra>",
         )
     )
+    # With-inferred marker (bottom row)
     fig.add_trace(
         go.Scatter(
             x=[inferred_pt],
-            y=[0],
+            y=[-1],
             mode="markers+text",
-            marker=dict(symbol="star", size=22, color="#d62728"),
-            text=["s hidden assets"],
-            textposition="bottom center",
-            name="S hidden assets",
+            marker=dict(symbol="star", size=30, color="#d62728", line=dict(color="white", width=2)),
+            text=[f"{inferred_pt:,} CZK".replace(",", " ")],
+            textposition="middle right",
+            textfont=dict(size=14, color="#d62728"),
+            name="🔍 S hidden assets",
             hovertemplate="S hidden assets: %{x:,.0f} CZK<extra></extra>",
         )
     )
+
     fig.update_layout(
         xaxis=dict(
             title="Hrubá měsíční mzda (CZK)",
@@ -149,17 +161,24 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
             tickmode="array",
             tickvals=[s.market_p25, s.market_p50, s.market_p75, s.market_p90],
             ticktext=[
-                f"P25<br>{s.market_p25:,}",
-                f"P50<br>{s.market_p50:,}",
-                f"P75<br>{s.market_p75:,}",
-                f"P90<br>{s.market_p90:,}",
+                f"P25<br>{s.market_p25:,}".replace(",", " "),
+                f"P50<br>{s.market_p50:,}".replace(",", " "),
+                f"P75<br>{s.market_p75:,}".replace(",", " "),
+                f"P90<br>{s.market_p90:,}".replace(",", " "),
             ],
+            range=[s.market_p25 * 0.92, s.market_p90 * 1.15],
         ),
-        yaxis=dict(visible=False, range=[-1, 1]),
-        height=220,
+        yaxis=dict(
+            visible=True,
+            tickmode="array",
+            tickvals=[1, -1],
+            ticktext=["🪧 baseline", "🔍 hidden assets"],
+            range=[-2.2, 2.2],
+            showgrid=False,
+        ),
+        height=260,
         margin=dict(l=10, r=10, t=30, b=10),
-        showlegend=True,
-        legend=dict(orientation="h", y=-0.3),
+        showlegend=False,
     )
     return fig
 

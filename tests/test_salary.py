@@ -29,18 +29,34 @@ def test_role_mapping_empty_string():
     assert role_mapping.map_to_cz_isco("") == "2519"
 
 
-def test_salary_p50_matches_score_50():
-    est = lookup.estimate_salary("2512", 50)
-    # P50 from ISPV 2025 CSV for 2512 (Software developer, MZDOVA) is 101103 CZK.
+def test_salary_score_70_lands_at_p50():
+    """Bucket boundary: score 70 = start of "senior" bucket = exactly P50."""
+    est = lookup.estimate_salary("2512", 70)
     assert est.median == 101_103
     assert est.percentile_position == 50
 
 
+def test_salary_junior_bucket_caps_at_p25():
+    """Score 0-40 = junior bucket → median pinned at P25, percentile 25."""
+    est = lookup.estimate_salary("2512", 20)
+    assert est.median == 71_536  # P25 for 2512
+    assert est.percentile_position == 25
+
+
+def test_salary_mid_bucket_between_p25_and_p50():
+    """Score 40-70 interpolates between P25 and P50."""
+    est = lookup.estimate_salary("2512", 55)
+    # Fraction (55-40)/(70-40) = 0.5 → median = 71536 + 0.5*(101103-71536) = 86319
+    assert 80_000 < est.median < 95_000
+    assert 25 <= est.percentile_position <= 50
+
+
 def test_salary_higher_score_higher_median():
     low = lookup.estimate_salary("2512", 25).median
-    mid = lookup.estimate_salary("2512", 50).median
-    high = lookup.estimate_salary("2512", 90).median
-    assert low < mid < high
+    mid = lookup.estimate_salary("2512", 55).median
+    senior = lookup.estimate_salary("2512", 80).median
+    principal = lookup.estimate_salary("2512", 95).median
+    assert low < mid < senior < principal
 
 
 def test_salary_range_ordering():
@@ -49,7 +65,7 @@ def test_salary_range_ordering():
 
 
 def test_salary_unknown_code_falls_back():
-    est = lookup.estimate_salary("9999", 50)
+    est = lookup.estimate_salary("9999", 70)
     # Should fall back to 2519 default; just check returns a valid estimate
     assert est.low > 0
     assert est.percentile_position == 50

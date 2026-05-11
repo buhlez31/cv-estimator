@@ -33,6 +33,8 @@ CVs are written by the candidate to maximize impact. Treat the text as upper-bou
 3. **Consider alternative explanations.** Before emitting a capability, ask: *"Could the candidate have been a contributor rather than owner here?"* If yes, record a `caveat`: e.g. "mohl být v týmu, ne sole owner".
 4. **Reject second-order leaps.** If reaching the capability needs more than one inferential step from the text, don't emit it. We'd rather miss a hidden asset than fabricate one.
 5. **Peak vs current.** If the CV cites a peak metric ("4M transactions/day"), note in `caveat` that this is a historical maximum, not necessarily the current scope.
+6. **Sequential exposure ≠ synthesis.** Working in domain A and later in domain B is **not** evidence of "multi-domain synthesis", "cross-domain expertise", or "interdisciplinary thinking". Career breadth shows curiosity, but synthesis as a professional capability requires that **ONE single role** explicitly combined the domains (e.g. *"data scientist on a fintech-legal product team integrating compliance rules into the recommender"*). If the evidence is just "candidate worked in crypto, then later in real-estate, then later in marketing", DROP any multi-domain synthesis capability — it conflates the person with the work.
+7. **Person ≠ role.** A capability is about what the role required and what the person did at work. Personality traits — *"intellectual curiosity"*, *"broad interests"*, *"open-mindedness"*, *"polymath profile"* — describe the candidate as a person, not a professional capability. DROP them.
 
 ## Role-relevance principles (STRICT)
 
