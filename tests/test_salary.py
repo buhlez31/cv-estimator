@@ -43,16 +43,23 @@ from cv_estimator.salary import lookup, role_mapping
         ("UX Designer", "2166"),
         ("Customer Success Manager", "4222"),
         ("Paralegal", "3411"),
-        # Fallback
-        ("Random Title", "2519"),
     ],
 )
 def test_role_mapping(role, expected_code):
     assert role_mapping.map_to_cz_isco(role) == expected_code
 
 
-def test_role_mapping_empty_string():
-    assert role_mapping.map_to_cz_isco("") == "2519"
+def test_role_mapping_unknown_raises():
+    """No silent default — unmapped role raises UnmappedRoleError so the
+    UI can surface a 'role not found in ISPV database' message."""
+    with pytest.raises(role_mapping.UnmappedRoleError) as exc_info:
+        role_mapping.map_to_cz_isco("Quantum Computing Researcher")
+    assert exc_info.value.role == "Quantum Computing Researcher"
+
+
+def test_role_mapping_empty_string_raises():
+    with pytest.raises(role_mapping.UnmappedRoleError):
+        role_mapping.map_to_cz_isco("")
 
 
 def test_salary_score_70_lands_at_p50():

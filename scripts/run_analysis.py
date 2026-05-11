@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from cv_estimator.models import CVAnalysis, TrackResult
 from cv_estimator.pipeline import analyze_cv
+from cv_estimator.salary.role_mapping import UnmappedRoleError
 
 
 def main() -> int:
@@ -38,7 +39,16 @@ def main() -> int:
         return 2
 
     file_bytes = args.cv_path.read_bytes()
-    result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
+    try:
+        result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
+    except UnmappedRoleError as e:
+        print(
+            f"Role {e.role!r} did not match any CZ-ISCO entry in the ISPV "
+            "database. Use a more standard job title (e.g. 'Senior Backend "
+            "Engineer', 'Marketing Manager', 'Lawyer') or omit --target-role.",
+            file=sys.stderr,
+        )
+        return 3
 
     if args.json:
         print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))

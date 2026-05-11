@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 
 from cv_estimator.models import CVAnalysis, TrackResult
 from cv_estimator.pipeline import analyze_cv
+from cv_estimator.salary.role_mapping import UnmappedRoleError
 
 load_dotenv()
 
@@ -50,7 +51,15 @@ spinner_label = "Analyzuji CV (5 LLM volání)…" if target_role else "Analyzuj
 with st.spinner(spinner_label):
     try:
         result: CVAnalysis = analyze_cv(uploaded.getvalue(), uploaded.name, target_role=target_role)
-    except Exception as e:  # noqa: BLE001 — surface anything to user
+    except UnmappedRoleError as e:
+        st.warning(
+            f"⚠️ Role **{e.role}** se nepodařilo zmapovat na CZ-ISCO v ISPV databázi. "
+            "Použij běžnější název pozice — např. *Senior Backend Engineer*, "
+            "*Marketing Manager*, *Lawyer*, *Doctor* — nebo nech pole `Pozice` "
+            "prázdné a analýza použije roli auto-detekovanou z CV."
+        )
+        st.stop()
+    except Exception as e:  # noqa: BLE001 — surface anything else to user
         st.error(f"Pipeline error: {e}")
         st.stop()
 

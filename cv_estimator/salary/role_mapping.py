@@ -101,7 +101,25 @@ _RULES: list[tuple[int, tuple[str, ...], str]] = [
     # --- Generic engineer catch-all (lowest, only fires for unspecific titles) ---
     (30, ("engineer",), "2512"),
 ]
-_DEFAULT_ISCO = "2519"
+
+
+class UnmappedRoleError(ValueError):
+    """Raised when a role string matches no keyword rule.
+
+    Per user direction: no silent fallback to a default CZ-ISCO. The
+    caller (UI / CLI) must surface a clear "role not found in ISPV
+    database — please specify a more common job title" message.
+    """
+
+    def __init__(self, role: str) -> None:
+        self.role = role
+        super().__init__(
+            f"Role {role!r} did not match any CZ-ISCO keyword rule. "
+            "Specify a more standard job title (e.g. 'Senior Backend "
+            "Engineer', 'Marketing Manager', 'Lawyer') or leave the "
+            "target-role field empty to use the auto-detected role from "
+            "the CV."
+        )
 
 
 @lru_cache(maxsize=256)
@@ -110,13 +128,19 @@ def _kw_pattern(keyword: str) -> re.Pattern[str]:
 
 
 def map_to_cz_isco(role: str) -> str:
-    """Return best-match CZ-ISCO 4-digit code for a role title."""
+    """Return best-match CZ-ISCO 4-digit code for a role title.
+
+    Raises `UnmappedRoleError` when no keyword rule matches — no silent
+    default. Callers must catch and surface the error to the user.
+    """
     if not role:
-        return _DEFAULT_ISCO
+        raise UnmappedRoleError(role)
     low = role.lower()
     best: tuple[int, str] | None = None
     for priority, keywords, code in _RULES:
         if any(_kw_pattern(kw).search(low) for kw in keywords):
             if best is None or priority > best[0]:
                 best = (priority, code)
-    return best[1] if best else _DEFAULT_ISCO
+    if best is None:
+        raise UnmappedRoleError(role)
+    return best[1]
