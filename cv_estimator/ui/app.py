@@ -47,21 +47,46 @@ if uploaded is None:
     st.info("👈 Vyber soubor pro analýzu.")
     st.stop()
 
-spinner_label = "Analyzuji CV (5 LLM volání)…" if target_role else "Analyzuji CV (4 LLM volání)…"
-with st.spinner(spinner_label):
-    try:
-        result: CVAnalysis = analyze_cv(uploaded.getvalue(), uploaded.name, target_role=target_role)
-    except UnmappedRoleError as e:
-        st.warning(
-            f"⚠️ Role **{e.role}** se nepodařilo zmapovat na CZ-ISCO v ISPV databázi. "
-            "Použij běžnější název pozice — např. *Senior Backend Engineer*, "
-            "*Marketing Manager*, *Lawyer*, *Doctor* — nebo nech pole `Pozice` "
-            "prázdné a analýza použije roli auto-detekovanou z CV."
-        )
-        st.stop()
-    except Exception as e:  # noqa: BLE001 — surface anything else to user
-        st.error(f"Pipeline error: {e}")
-        st.stop()
+# Clear any cached result when a new file is uploaded — file_id changes
+# per upload, so this triggers automatically.
+if st.session_state.get("upload_id") != uploaded.file_id:
+    st.session_state.pop("result", None)
+    st.session_state["upload_id"] = uploaded.file_id
+
+run_button = st.button(
+    "🚀 Spustit analýzu",
+    type="primary",
+    help="Po nahrání souboru a (volitelně) vyplnění pozice klikni pro spuštění.",
+)
+
+if run_button:
+    spinner_label = (
+        "Analyzuji CV (5 LLM volání)…" if target_role else "Analyzuji CV (4 LLM volání)…"
+    )
+    with st.spinner(spinner_label):
+        try:
+            st.session_state["result"] = analyze_cv(
+                uploaded.getvalue(), uploaded.name, target_role=target_role
+            )
+        except UnmappedRoleError as e:
+            st.warning(
+                f"⚠️ Role **{e.role}** se nepodařilo zmapovat na CZ-ISCO v ISPV databázi. "
+                "Použij běžnější název pozice — např. *Senior Backend Engineer*, "
+                "*Marketing Manager*, *Lawyer*, *Doctor* — nebo nech pole `Pozice` "
+                "prázdné a analýza použije roli auto-detekovanou z CV."
+            )
+            st.stop()
+        except Exception as e:  # noqa: BLE001 — surface anything else to user
+            st.error(f"Pipeline error: {e}")
+            st.stop()
+
+result: CVAnalysis | None = st.session_state.get("result")
+if result is None:
+    st.info(
+        "📝 Soubor připraven. Pokud chceš, vyplň pole `Pozice` výše a klikni "
+        "**Spustit analýzu**."
+    )
+    st.stop()
 
 
 # -------------------------- Header label ---------------------------------
