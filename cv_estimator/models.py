@@ -1,6 +1,5 @@
 """Pydantic schemas — single source of truth for pipeline output contract."""
 
-from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -62,23 +61,6 @@ class SalaryEstimate(BaseModel):
     # can attribute the adjustment.
     region: str | None = None
     region_multiplier: float = 1.0
-
-
-class MarketPostings(BaseModel):
-    """Live posting signal pulled from jobs.cz via the Apify
-    `abaddion/jobscz-scraper` actor. Optional — None when APIFY_TOKEN
-    is unset or the actor errored. ISPV stays the authoritative source;
-    this is a recency cross-check."""
-
-    sample_size: int  # postings with a parseable salary
-    total_postings: int  # all postings returned by the actor
-    median: int | None = None
-    p25: int | None = None
-    p75: int | None = None
-    currency: Literal["CZK"] = "CZK"
-    source: Literal["jobs.cz via Apify"] = "jobs.cz via Apify"
-    fetched_at: datetime
-    sample_url: str | None = None
 
 
 class Recommendation(BaseModel):
@@ -152,9 +134,5 @@ class CVAnalysis(BaseModel):
     strengths: list[str]
     gaps: list[str]
     recommendations: list[Recommendation] = Field(min_length=3, max_length=3)
-
-    # Live market signal — None when APIFY_TOKEN is unset or the actor failed.
-    # ISPV stays the source of truth for the seniority-anchored point estimate.
-    market_postings: MarketPostings | None = None
 
     processing_metadata: dict

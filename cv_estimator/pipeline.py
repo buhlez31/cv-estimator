@@ -19,7 +19,7 @@ import time
 from cv_estimator.explanation import match_assess, narrative, roadmap
 from cv_estimator.extractors import document, explicit, inferred
 from cv_estimator.models import CVAnalysis, TargetRoleMatch, TrackResult
-from cv_estimator.salary import lookup, market_postings, role_mapping
+from cv_estimator.salary import lookup, role_mapping
 from cv_estimator.scoring import components, seniority
 from cv_estimator.validation import sanity
 
@@ -99,15 +99,6 @@ def analyze_cv(
             rationale=match.rationale,
         )
 
-    # Layer C — optional live posting cross-check. Skips silently when
-    # APIFY_TOKEN is unset; failure here never breaks the pipeline. When
-    # data is available we nudge both track medians toward the live signal
-    # (30 % weight) so the displayed salary reflects present-day jobs.cz
-    # without bloating the UI with an extra panel.
-    postings = market_postings.fetch_market_postings(analysis_role, region)
-    salary_explicit = lookup.blend_with_postings(salary_explicit, postings)
-    salary_full = lookup.blend_with_postings(salary_full, postings)
-
     result = CVAnalysis(
         analysis_role=analysis_role,
         cz_isco_code=cz_isco,
@@ -133,7 +124,6 @@ def analyze_cv(
         strengths=sg.strengths,
         gaps=sg.gaps,
         recommendations=recs,
-        market_postings=postings,
         processing_metadata={
             "filename": filename,
             "elapsed_seconds": round(time.time() - started, 2),
@@ -142,7 +132,6 @@ def analyze_cv(
             "ispv_sphere": lookup.ISPV_SPHERE,
             "target_role_provided": target_role is not None,
             "region": region,
-            "live_postings_available": postings is not None,
         },
     )
     sanity.validate(result)

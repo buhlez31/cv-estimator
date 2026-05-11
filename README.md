@@ -64,7 +64,7 @@ as reviewer-visible artefacts. Output contract:
 
 ## Data approach
 
-The salary estimate is built from **three additive layers** so each
+The salary estimate is built from **two additive layers** so each
 number is traceable to a published source.
 
 ### Layer A — ISPV official statistics
@@ -107,20 +107,6 @@ curve.
 
 Exposed via the CLI flag `--region CZ010`. The web UI keeps a national
 default; region precision lives on the CLI / library API today.
-
-### Layer C — live jobs.cz blend (optional, silent)
-
-When `APIFY_TOKEN` is set, the pipeline runs the
-[`abaddion/jobscz-scraper`](https://apify.com/abaddion/jobscz-scraper)
-Apify actor for the resolved role + region, parses posted salaries
-(range / single value / hourly), and nudges the ISPV-anchored median
-toward the live signal at a 30 % weight. ISPV stays the dominant
-anchor (70 %); the live layer just keeps the number from drifting
-behind present-day jobs.cz. Cached 24 h per (role, region), so repeat
-analyses cost ~zero.
-
-Without the token, the pipeline runs Layer A + B only — same UI, same
-output schema, the displayed CZK is the pure ISPV figure.
 
 ## Design choices
 
