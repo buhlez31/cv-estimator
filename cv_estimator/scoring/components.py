@@ -10,7 +10,10 @@ The weighted aggregate is in `seniority.py`.
 """
 
 from cv_estimator.config import (
+    EXPLICIT_ONLY_SKILLS_CAP,
     HIGHER_ED_KEYWORDS,
+    INFERRED_BONUS_CAP,
+    INFERRED_BONUS_PER_CAPABILITY,
     JUNIOR_TITLE_KEYWORDS,
     PRESTIGE_INSTITUTION_KEYWORDS,
     SENIOR_TITLE_KEYWORDS,
@@ -23,18 +26,19 @@ from cv_estimator.extractors.explicit import ExplicitData
 from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown
 
-# Cap on the inferred-capabilities bonus applied to skills_depth.
-# Inferred contribution is confidence-weighted (5 * confidence per capability)
-# and then summed, capped at this value before being added to the explicit
-# skills score.
-INFERRED_BONUS_CAP = 15.0
-
 
 def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
-    """Skeptical baseline — uses only what is literally in the CV."""
+    """Skeptical baseline — uses only what is literally in the CV.
+
+    Skills capped at EXPLICIT_ONLY_SKILLS_CAP (75) to encode the rule
+    that a bare skill list, without project-narrative evidence, is
+    inherently incomplete signal. The remaining 25 points of headroom
+    are only reachable on the with-inferred track when hidden assets
+    surface genuine project depth.
+    """
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
-        skills_depth=_explicit_skills_score(explicit.explicit_skills),
+        skills_depth=_explicit_skills_score(explicit.explicit_skills, cap=EXPLICIT_ONLY_SKILLS_CAP),
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
@@ -43,8 +47,10 @@ def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
 
 
 def compute_with_inferred(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
-    """Optimistic ceiling — adds confidence-weighted inferred bonus to skills."""
-    explicit_skills = _explicit_skills_score(explicit.explicit_skills)
+    """Optimistic ceiling — explicit skills (cap 100) plus confidence-weighted
+    inferred bonus on top, also capped so a single noisy LLM pass cannot
+    inflate skills_depth past saturation."""
+    explicit_skills = _explicit_skills_score(explicit.explicit_skills, cap=100.0)
     bonus = _inferred_bonus(inferred)
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
@@ -70,8 +76,10 @@ def _years_score(years: int) -> float:
     return float(min(years, YEARS_CAP) / YEARS_CAP * 100)
 
 
-def _explicit_skills_score(skills: list[str]) -> float:
-    """Tier-weighted score for skills that literally appear in the CV."""
+def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
+    """Tier-weighted score for skills that literally appear in the CV,
+    clamped to the caller-supplied cap. The explicit-only track passes
+    EXPLICIT_ONLY_SKILLS_CAP (75); the with-inferred track passes 100."""
     base = 0.0
     seen: set[str] = set()
     for raw in skills:
@@ -87,15 +95,18 @@ def _explicit_skills_score(skills: list[str]) -> float:
             base += 5
         else:
             base += 8  # unknown skill — partial credit, don't ignore
-    return float(min(100, base))
+    return float(min(cap, base))
 
 
 def _inferred_bonus(inferred: InferredData) -> float:
     """Confidence-weighted bonus from inferred capabilities, capped at
-    INFERRED_BONUS_CAP. A 0.4-confidence capability contributes 40% of what
-    a 1.0-confidence one would. No floor — even weak signals add a sliver.
+    INFERRED_BONUS_CAP. A 0.4-confidence capability contributes 40 % of
+    what a 1.0-confidence one would. No floor — even weak signals add a
+    sliver.
     """
-    raw = sum(5.0 * cap.confidence for cap in inferred.inferred_capabilities)
+    raw = sum(
+        INFERRED_BONUS_PER_CAPABILITY * cap.confidence for cap in inferred.inferred_capabilities
+    )
     return min(INFERRED_BONUS_CAP, raw)
 
 

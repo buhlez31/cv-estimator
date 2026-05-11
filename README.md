@@ -116,11 +116,18 @@ buzzword vs hidden-assets analyses side-by-side instead of a single blended
 number:
 
 - **`track_explicit`** — skeptical baseline. Only literal CV content
-  feeds the score. Inferred capabilities are computed but excluded from
-  this track's `skills_depth`.
-- **`track_with_inferred`** — optimistic ceiling. Adds a confidence-weighted
-  bonus from the inferred-capabilities pass (`bonus = 5 × confidence` per
-  capability, capped at +15 to `skills_depth`).
+  feeds the score. `skills_depth` is **capped at 75**, encoding the
+  rule that a bare skill list without project-narrative evidence is
+  inherently incomplete signal. Inferred capabilities are computed for
+  visibility but excluded from this track's score.
+- **`track_with_inferred`** — optimistic ceiling. Explicit skills can
+  reach 100, and a confidence-weighted bonus from the inferred pass
+  (`bonus = 8 × confidence` per capability, aggregate cap +25) is added
+  on top. The cap asymmetry between the two tracks is what makes the
+  methodology visible in the UI: even a buzzword-saturating CV (which
+  pegs explicit skills at 75 / baseline) leaves room for hidden-asset
+  evidence to lift the with-inferred track by ~10–17 points and shift
+  the salary marker visibly within the ISPV range.
 
 Each track ships its own `seniority_score` and `salary_estimate`. The UI
 renders them in side-by-side cards and a market-range chart shows both
