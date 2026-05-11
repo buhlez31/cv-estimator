@@ -100,8 +100,13 @@ def analyze_cv(
         )
 
     # Layer C — optional live posting cross-check. Skips silently when
-    # APIFY_TOKEN is unset; failure here never breaks the pipeline.
+    # APIFY_TOKEN is unset; failure here never breaks the pipeline. When
+    # data is available we nudge both track medians toward the live signal
+    # (30 % weight) so the displayed salary reflects present-day jobs.cz
+    # without bloating the UI with an extra panel.
     postings = market_postings.fetch_market_postings(analysis_role, region)
+    salary_explicit = lookup.blend_with_postings(salary_explicit, postings)
+    salary_full = lookup.blend_with_postings(salary_full, postings)
 
     result = CVAnalysis(
         analysis_role=analysis_role,

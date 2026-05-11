@@ -277,6 +277,34 @@ def test_fetch_market_postings_returns_none_without_token(monkeypatch):
     assert market_postings.fetch_market_postings("Backend Engineer") is None
 
 
+def test_blend_with_postings_shifts_median_toward_live_signal():
+    """Blend nudges ISPV median 30 % toward Apify median. ISPV stays
+    authoritative (70 % weight)."""
+    from datetime import UTC, datetime
+
+    from cv_estimator.models import MarketPostings
+
+    base = lookup.estimate_salary("2512", 70)
+    postings = MarketPostings(
+        sample_size=20,
+        total_postings=30,
+        median=base.median + 30_000,  # live market 30k above ISPV
+        p25=base.median - 5_000,
+        p75=base.median + 50_000,
+        fetched_at=datetime.now(UTC),
+    )
+    blended = lookup.blend_with_postings(base, postings)
+    # 70 % × base + 30 % × (base + 30000) = base + 9000
+    expected = base.median + 9_000
+    assert abs(blended.median - expected) <= 1
+    assert blended.low <= blended.median <= blended.high
+
+
+def test_blend_with_postings_noop_when_no_signal():
+    base = lookup.estimate_salary("2512", 70)
+    assert lookup.blend_with_postings(base, None).median == base.median
+
+
 def test_fetch_market_postings_parses_actor_response(monkeypatch, tmp_path):
     """With APIFY_TOKEN set + actor returning items with salary strings,
     fetch_market_postings should aggregate into a MarketPostings."""

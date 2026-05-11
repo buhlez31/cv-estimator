@@ -105,22 +105,22 @@ the bucket interpolation so the candidate's national percentile stays
 unchanged — region adjusts the absolute CZK, not the standing in the
 curve.
 
-UI exposes a *Region (volitelné)* dropdown; CLI accepts `--region CZ010`.
+Exposed via the CLI flag `--region CZ010`. The web UI keeps a national
+default; region precision lives on the CLI / library API today.
 
-### Layer C — live jobs.cz cross-check (optional)
+### Layer C — live jobs.cz blend (optional, silent)
 
 When `APIFY_TOKEN` is set, the pipeline runs the
 [`abaddion/jobscz-scraper`](https://apify.com/abaddion/jobscz-scraper)
-Apify actor for the resolved role + region and aggregates parseable
-salaries from the postings into P25 / median / P75. Cached for 24 h per
-(role, region) so repeated analyses cost ~zero. ISPV stays authoritative
-for the point estimate; this layer is a recency cross-check ("does
-2025-mid market match what jobs.cz is currently listing?"). When the
-live median sits > 10 % outside the ISPV pásmo, the UI raises an
-*"ověř ručně"* warning.
+Apify actor for the resolved role + region, parses posted salaries
+(range / single value / hourly), and nudges the ISPV-anchored median
+toward the live signal at a 30 % weight. ISPV stays the dominant
+anchor (70 %); the live layer just keeps the number from drifting
+behind present-day jobs.cz. Cached 24 h per (role, region), so repeat
+analyses cost ~zero.
 
-Without the token, the pipeline runs Layer A + B only — the UI shows a
-hint instead of the live panel.
+Without the token, the pipeline runs Layer A + B only — same UI, same
+output schema, the displayed CZK is the pure ISPV figure.
 
 ## Design choices
 

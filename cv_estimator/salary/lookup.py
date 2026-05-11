@@ -11,6 +11,7 @@ from functools import lru_cache
 import pandas as pd
 
 from cv_estimator.config import (
+    APIFY_BLEND_WEIGHT,
     DATA_DIR,
     HIGH_SAMPLE_THRESHOLD,
     LOW_SAMPLE_THRESHOLD,
@@ -19,7 +20,7 @@ from cv_estimator.config import (
     SALARY_CEILING,
     SALARY_FLOOR,
 )
-from cv_estimator.models import SalaryEstimate
+from cv_estimator.models import MarketPostings, SalaryEstimate
 from cv_estimator.salary.region import resolve_region_multiplier
 
 ISPV_CSV = DATA_DIR / "ispv_2025.csv"
@@ -141,6 +142,47 @@ def estimate_salary(
         confidence=confidence,
         region=region_code,
         region_multiplier=mult,
+    )
+
+
+def blend_with_postings(
+    est: SalaryEstimate,
+    postings: MarketPostings | None,
+    *,
+    weight: float = APIFY_BLEND_WEIGHT,
+) -> SalaryEstimate:
+    """Return a SalaryEstimate whose `median` (and low/high band, plus
+    total_comp_*) has been nudged toward the live Apify median.
+
+    ISPV stays the anchor (weight 1 - weight); the live signal nudges the
+    point estimate toward present-day postings. No-op when postings is
+    None or has no usable median.
+    """
+    if postings is None or postings.median is None:
+        return est
+    blended = int(est.median * (1 - weight) + postings.median * weight)
+    # Recompute band around the new median, preserving the band-pct that
+    # was already applied (low/high are still ±SALARY_BAND_PCT_* of est.median).
+    if est.median > 0:
+        ratio = blended / est.median
+        new_low = max(SALARY_FLOOR, int(est.low * ratio))
+        new_high = min(SALARY_CEILING, int(est.high * ratio))
+    else:
+        new_low, new_high = est.low, est.high
+    new_low = min(new_low, blended)
+    new_high = max(new_high, blended)
+
+    # Total-comp scales with the same ratio so the relative bonus share holds.
+    comp_mult = 1.0 + (est.bonus_pct + est.supplement_pct) / 100.0
+    return est.model_copy(
+        update={
+            "low": new_low,
+            "median": blended,
+            "high": new_high,
+            "total_comp_low": int(new_low * comp_mult),
+            "total_comp_median": int(blended * comp_mult),
+            "total_comp_high": int(new_high * comp_mult),
+        }
     )
 
 

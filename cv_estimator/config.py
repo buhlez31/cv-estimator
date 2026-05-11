@@ -306,3 +306,8 @@ REGIONAL_MULTIPLIERS_PATH = PACKAGE_ROOT / "data" / "regional_multipliers_2025.c
 APIFY_ACTOR_ID = "abaddion/jobscz-scraper"
 APIFY_CACHE_TTL_HOURS = 24
 APIFY_MAX_RESULTS = 50
+# Weight given to the Apify live median when blending with the ISPV-anchored
+# point estimate. ISPV is authoritative (national-scale official sample) so
+# it keeps the dominant weight; live postings nudge the number toward
+# present-day market.
+APIFY_BLEND_WEIGHT = 0.30  # 30 % Apify, 70 % ISPV
