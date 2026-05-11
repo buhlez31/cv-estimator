@@ -59,3 +59,14 @@ def test_salary_prefix_fallback():
     # 2515 doesn't exist in CSV but 251x prefix has 2511, 2512, 2513, 2514
     est = lookup.estimate_salary("2515", 50)
     assert est.median > 0
+
+
+def test_salary_exposes_market_band():
+    """Salary estimate must include the full ISPV P25-P90 band so the UI
+    can render the candidate's position within the market range."""
+    est = lookup.estimate_salary("2512", 50)
+    assert est.market_p25 == 71_536
+    assert est.market_p50 == 101_103
+    assert est.market_p75 == 141_956
+    assert est.market_p90 == 184_858
+    assert est.market_p25 < est.market_p50 < est.market_p75 < est.market_p90

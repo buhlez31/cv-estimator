@@ -20,12 +20,52 @@ def test_seniority_clamped_to_range():
     assert score == 74
 
 
-def test_components_senior_dev(explicit_senior_dev, inferred_senior_dev):
-    b = components.compute(explicit_senior_dev, inferred_senior_dev)
+def test_components_explicit_only_excludes_inferred_bonus(explicit_senior_dev, inferred_senior_dev):
+    """Skeptical baseline must NOT include the inferred capabilities bonus."""
+    b_explicit = components.compute_explicit_only(explicit_senior_dev)
+    b_full = components.compute_with_inferred(explicit_senior_dev, inferred_senior_dev)
+    assert b_full.skills_depth >= b_explicit.skills_depth
+    # The senior dev fixture's explicit skills (kubernetes+terraform high,
+    # python+postgres+kafka mid) already saturate 100 — bonus invisible.
+    # Sanity: at least confirm explicit-only never exceeds 100.
+    assert b_explicit.skills_depth <= 100
+
+
+def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
+    """A 0.4-confidence capability contributes 40% of what 1.0 does."""
+    from cv_estimator.extractors.inferred import InferredData
+    from cv_estimator.models import SkillEvidence
+
+    weak = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(skill="x", evidence_quote="ev1", confidence=0.4),
+        ]
+    )
+    strong = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(skill="y", evidence_quote="ev2", confidence=1.0),
+        ]
+    )
+    b_weak = components.compute_with_inferred(explicit_junior_support, weak)
+    b_strong = components.compute_with_inferred(explicit_junior_support, strong)
+    delta_weak = (
+        b_weak.skills_depth - components.compute_explicit_only(explicit_junior_support).skills_depth
+    )
+    delta_strong = (
+        b_strong.skills_depth
+        - components.compute_explicit_only(explicit_junior_support).skills_depth
+    )
+    # 0.4 cap contributes 5 * 0.4 = 2.0
+    assert abs(delta_weak - 2.0) < 0.01
+    # 1.0 cap contributes 5 * 1.0 = 5.0
+    assert abs(delta_strong - 5.0) < 0.01
+
+
+def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
+    b = components.compute_with_inferred(explicit_senior_dev, inferred_senior_dev)
     # 8/15*100 ≈ 53
     assert 50 <= b.years_experience <= 55
-    # high-tier skills (kubernetes, terraform) + mid (python, postgres, kafka)
-    # = 25+25 + 15+15+15 = 95, +10 inferred bonus → capped 100
+    # explicit skills saturate 100 already
     assert b.skills_depth == 100
     # senior signal + 8 years (no +5 since <10)
     assert b.role_progression == 80.0
@@ -34,7 +74,7 @@ def test_components_senior_dev(explicit_senior_dev, inferred_senior_dev):
 
 
 def test_components_junior_support(explicit_junior_support, inferred_empty):
-    b = components.compute(explicit_junior_support, inferred_empty)
+    b = components.compute_with_inferred(explicit_junior_support, inferred_empty)
     # 1/15*100 ≈ 6.67
     assert 5 <= b.years_experience <= 8
     # excel(5) + outlook(5) + jira(5) = 15, no inferred bonus
@@ -47,5 +87,5 @@ def test_components_junior_support(explicit_junior_support, inferred_empty):
 
 def test_components_unknown_skill_partial_credit(explicit_senior_dev, inferred_empty):
     explicit_senior_dev.explicit_skills = ["some-niche-tool"]
-    b = components.compute(explicit_senior_dev, inferred_empty)
+    b = components.compute_with_inferred(explicit_senior_dev, inferred_empty)
     assert b.skills_depth == 8.0  # unknown → 8 pt fallback

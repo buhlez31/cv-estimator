@@ -109,6 +109,48 @@ a second LLM pass that finds skills *implied* by project descriptions
 `stakeholder management`) instead of the buzzword list at the bottom of the
 CV.
 
+### Two parallel analysis tracks
+
+The pipeline emits **two independent scoring tracks** so the reader sees
+buzzword vs hidden-assets analyses side-by-side instead of a single blended
+number:
+
+- **`track_explicit`** — skeptical baseline. Only literal CV content
+  feeds the score. Inferred capabilities are computed but excluded from
+  this track's `skills_depth`.
+- **`track_with_inferred`** — optimistic ceiling. Adds a confidence-weighted
+  bonus from the inferred-capabilities pass (`bonus = 5 × confidence` per
+  capability, capped at +15 to `skills_depth`).
+
+Each track ships its own `seniority_score` and `salary_estimate`. The UI
+renders them in side-by-side cards and a market-range chart shows both
+points within the ISPV P25-P90 band for the role.
+
+When the two tracks coincide (e.g. CV already lists every skill explicitly),
+that is itself a signal: there is nothing for the inferred pass to surface.
+When they diverge, the gap measures *how much the candidate's description
+style under-represents them* — which is the case the standard buzzword
+filters fail at.
+
+### Skepticism by default
+
+Looking at real-CV output, the inferred pass had a tendency to over-attribute
+(e.g. inferring "community manager" from being the analyst on a community
+project). The [`extract_inferred.md`](cv_estimator/prompts/extract_inferred.md)
+prompt now enforces an explicit skepticism protocol:
+
+1. Anchor confidence at 0.5 by default — move to 0.8+ only with concrete
+   numeric or role-scoped evidence.
+2. Title-only inferences are capped at confidence 0.4.
+3. The model emits an optional `caveat` field beside each capability when
+   the inference rests on team-scope ambiguity, peak metrics, or
+   short-tenure roles ("mohl být v týmu, ne sole owner").
+4. Second-order inferential leaps are rejected — "miss a hidden asset"
+   beats "fabricate one".
+
+The UI renders each `caveat` in italics under the evidence quote so the
+reader sees the model's self-doubt and can discount accordingly.
+
 **A/B buzzword test** ([`scripts/generate_synthetic_cvs.py`](scripts/generate_synthetic_cvs.py))
 produces two CVs for the same fictional candidate:
 
@@ -116,10 +158,9 @@ produces two CVs for the same fictional candidate:
 - **Variant B** — outcome-driven: same person, same skills, but described
   as *what they did* and *what they delivered* (with metrics).
 
-Expected: A and B land within roughly the same band. If A scores
-significantly higher, the inferred pass is failing and the prompt needs
-work. This is the kind of test the standard buzzword-matching CV screeners
-fail by design — and the reason the second LLM pass is worth its latency.
+Expected: A and B land within roughly the same band on `track_with_inferred`.
+If A scores significantly higher even on the inferred track, the inferred
+pass is failing and the prompt needs work.
 
 ## Architecture invariants
 

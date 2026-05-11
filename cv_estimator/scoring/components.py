@@ -1,7 +1,12 @@
 """Compute the 4 ScoreBreakdown components from extractor outputs.
 
-Each component is normalized to 0-100. The weighted aggregate happens in
-`seniority.py` using the fixed weights from `config.py`.
+Two entry points produce two ScoreBreakdowns:
+
+- `compute_explicit_only` — skeptical baseline using only literal CV content
+- `compute_with_inferred` — adds a confidence-weighted bonus from the
+  hidden-assets pass
+
+The weighted aggregate is in `seniority.py`.
 """
 
 from cv_estimator.config import (
@@ -18,11 +23,18 @@ from cv_estimator.extractors.explicit import ExplicitData
 from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown
 
+# Cap on the inferred-capabilities bonus applied to skills_depth.
+# Inferred contribution is confidence-weighted (5 * confidence per capability)
+# and then summed, capped at this value before being added to the explicit
+# skills score.
+INFERRED_BONUS_CAP = 15.0
 
-def compute(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
+
+def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
+    """Skeptical baseline — uses only what is literally in the CV."""
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
-        skills_depth=_skills_score(explicit.explicit_skills, inferred),
+        skills_depth=_explicit_skills_score(explicit.explicit_skills),
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
@@ -30,13 +42,36 @@ def compute(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
     )
 
 
+def compute_with_inferred(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
+    """Optimistic ceiling — adds confidence-weighted inferred bonus to skills."""
+    explicit_skills = _explicit_skills_score(explicit.explicit_skills)
+    bonus = _inferred_bonus(inferred)
+    return ScoreBreakdown(
+        years_experience=_years_score(explicit.years_experience),
+        skills_depth=min(100.0, explicit_skills + bonus),
+        role_progression=_role_progression_score(
+            explicit.role, explicit.role_seniority_signal, explicit.years_experience
+        ),
+        education=_education_score(explicit.highest_education, explicit.institution),
+    )
+
+
+# Backwards-compatible alias for any external caller — internal pipeline
+# uses the two explicit entry points above.
+def compute(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
+    return compute_with_inferred(explicit, inferred)
+
+
+# ----- Internals ---------------------------------------------------------
+
+
 def _years_score(years: int) -> float:
     """Continuous, capped at YEARS_CAP (15)."""
     return float(min(years, YEARS_CAP) / YEARS_CAP * 100)
 
 
-def _skills_score(skills: list[str], inferred: InferredData) -> float:
-    """Tier-weighted explicit skills + bonus for high-confidence inferred capabilities."""
+def _explicit_skills_score(skills: list[str]) -> float:
+    """Tier-weighted score for skills that literally appear in the CV."""
     base = 0.0
     seen: set[str] = set()
     for raw in skills:
@@ -51,10 +86,17 @@ def _skills_score(skills: list[str], inferred: InferredData) -> float:
         elif s in SKILL_TIERS_LOW:
             base += 5
         else:
-            base += 8  # unknown skill — give partial credit, don't ignore
-    # Inferred bonus: up to +15 pts for hidden assets with confidence ≥ 0.6
-    bonus = sum(5 for c in inferred.inferred_capabilities if c.confidence >= 0.6)
-    return float(min(100, base + min(15, bonus)))
+            base += 8  # unknown skill — partial credit, don't ignore
+    return float(min(100, base))
+
+
+def _inferred_bonus(inferred: InferredData) -> float:
+    """Confidence-weighted bonus from inferred capabilities, capped at
+    INFERRED_BONUS_CAP. A 0.4-confidence capability contributes 40% of what
+    a 1.0-confidence one would. No floor — even weak signals add a sliver.
+    """
+    raw = sum(5.0 * cap.confidence for cap in inferred.inferred_capabilities)
+    return min(INFERRED_BONUS_CAP, raw)
 
 
 def _role_progression_score(role: str, signal: str, years: int) -> float:
@@ -84,7 +126,6 @@ def _education_score(highest: str, institution: str) -> float:
     inst_low = (institution or "").lower()
     if any(kw in inst_low for kw in PRESTIGE_INSTITUTION_KEYWORDS):
         base = min(100.0, base + 5.0)
-    # Sanity guard: institution-only signal (no degree label) for users who write only "MIT, 2018"
     if highest == "none" and any(kw in inst_low for kw in HIGHER_ED_KEYWORDS):
         base = max(base, 60.0)
     return base

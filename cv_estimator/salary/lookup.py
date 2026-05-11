@@ -59,6 +59,10 @@ def estimate_salary(cz_isco: str, seniority_score: int) -> SalaryEstimate:
         high=high,
         currency="CZK",
         percentile_position=percentile,
+        market_p25=p25,
+        market_p50=p50,
+        market_p75=p75,
+        market_p90=p90,
     )
 
 

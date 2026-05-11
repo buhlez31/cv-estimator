@@ -1,7 +1,8 @@
 """End-to-end pipeline test with mocked LLM calls.
 
 Skips the real Anthropic API; verifies that the orchestrator wires the
-domain modules together correctly and produces a valid CVAnalysis.
+domain modules together correctly and produces a valid CVAnalysis with
+both parallel tracks populated.
 """
 
 from unittest.mock import patch
@@ -42,17 +43,20 @@ def _mock_call_json(prompt: str) -> dict:
                 {
                     "skill": "data engineering",
                     "evidence_quote": "Built and maintained ETL pipelines processing 500M events/day",
-                    "confidence": 0.95,
+                    "confidence": 0.7,
+                    "caveat": None,
                 },
                 {
                     "skill": "technical leadership",
                     "evidence_quote": "Led migration of legacy reporting system to Snowflake",
-                    "confidence": 0.85,
+                    "confidence": 0.55,
+                    "caveat": "led ≠ sole architect",
                 },
                 {
                     "skill": "mentoring",
                     "evidence_quote": "Mentored 3 junior engineers",
-                    "confidence": 0.8,
+                    "confidence": 0.75,
+                    "caveat": None,
                 },
             ]
         }
@@ -101,14 +105,26 @@ def test_pipeline_end_to_end():
 
     assert isinstance(result, CVAnalysis)
     assert result.detected_role == "Senior Data Engineer"
-    assert result.cz_isco_code == "2519"  # "Data Engineer" → 2519 per rules
+    assert result.cz_isco_code == "2519"
     assert result.language == "en"
-    assert 0 <= result.seniority_score <= 100
+
+    # Both parallel tracks must be populated.
+    assert 0 <= result.track_explicit.seniority_score <= 100
+    assert 0 <= result.track_with_inferred.seniority_score <= 100
+
+    # Inferred bonus is additive — ceiling >= baseline.
+    assert result.track_with_inferred.seniority_score >= result.track_explicit.seniority_score
+
+    # Salary estimates exposed for both tracks and include the market band.
+    for track in (result.track_explicit, result.track_with_inferred):
+        s = track.salary_estimate
+        assert s.low <= s.median <= s.high
+        assert s.market_p25 < s.market_p50 < s.market_p75 < s.market_p90
+
     assert len(result.recommendations) == 3
     assert 3 <= len(result.strengths) <= 5
     assert 3 <= len(result.gaps) <= 5
-    assert (
-        result.salary_estimate.low <= result.salary_estimate.median <= result.salary_estimate.high
-    )
-    # Senior with strong skills should land at a respectable score
-    assert result.seniority_score >= 60
+
+    # Hidden assets carry caveat strings or None.
+    caveats = [c.caveat for c in result.inferred_capabilities]
+    assert any(c is not None for c in caveats)
