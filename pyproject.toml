@@ -1,0 +1,24 @@
+[project]
+name = "cv-estimator"
+version = "0.1.0"
+description = "AI-powered CV fit & salary estimator"
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Martin" }]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["cv_estimator*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "UP", "B"]

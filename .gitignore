@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+.venv/
+venv/
+.DS_Store
+.streamlit/secrets.toml
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Real PII anchor CVs - DO NOT COMMIT
+tests/fixtures/anchor_cvs/*.pdf
+tests/fixtures/anchor_cvs/*.docx
+
+# Raw ISPV download (preprocessed file ispv_2024.csv is committed)
+data/raw/
