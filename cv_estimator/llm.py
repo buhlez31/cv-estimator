@@ -19,9 +19,7 @@ from cv_estimator.config import LLM_MAX_TOKENS, LLM_MODEL, LLM_TEMPERATURE, PROM
 def _client() -> Anthropic:
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
-        raise RuntimeError(
-            "ANTHROPIC_API_KEY not set. Copy .env.example to .env and add your key."
-        )
+        raise RuntimeError("ANTHROPIC_API_KEY not set. Copy .env.example to .env and add your key.")
     return Anthropic(api_key=key)
 
 
@@ -33,9 +31,15 @@ def load_prompt(name: str) -> str:
 
 
 def render_prompt(name: str, **kwargs: Any) -> str:
-    """Load and fill a prompt template using str.format on `{var}` placeholders."""
-    template = load_prompt(name)
-    return template.format(**kwargs)
+    """Load and fill a prompt template by replacing `{var}` placeholders.
+
+    Uses plain str.replace (NOT str.format) so JSON braces in the prompt body
+    don't need to be escaped as `{{` / `}}`.
+    """
+    out = load_prompt(name)
+    for key, value in kwargs.items():
+        out = out.replace("{" + key + "}", str(value))
+    return out
 
 
 _JSON_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)\s*```", re.MULTILINE)
@@ -60,6 +64,4 @@ def call_json(prompt: str, *, max_tokens: int = LLM_MAX_TOKENS) -> dict:
     try:
         return json.loads(payload)
     except json.JSONDecodeError as e:
-        raise ValueError(
-            f"LLM did not return valid JSON. First 500 chars:\n{payload[:500]}"
-        ) from e
+        raise ValueError(f"LLM did not return valid JSON. First 500 chars:\n{payload[:500]}") from e

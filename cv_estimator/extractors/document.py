@@ -16,7 +16,7 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
     if suffix in (".docx", ".doc"):
         return _extract_docx(file_bytes)
     if suffix == ".txt":
-        return file_bytes.decode("utf-8", errors="replace")
+        return _normalize(file_bytes.decode("utf-8", errors="replace"))
     raise ValueError(f"Unsupported file extension: {suffix!r}. Use PDF, DOCX, or TXT.")
 
 
@@ -50,12 +50,43 @@ def _normalize(text: str) -> str:
 # --- Language detection (cs / en heuristic) ---
 _CZ_CHARS = set("áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ")
 _CZ_STOPWORDS = {
-    "a", "v", "se", "na", "je", "to", "že", "s", "z", "o", "do", "od",
-    "pro", "nebo", "ale", "jako", "při", "byl", "byla", "bylo",
+    "a",
+    "v",
+    "se",
+    "na",
+    "je",
+    "to",
+    "že",
+    "s",
+    "z",
+    "o",
+    "do",
+    "od",
+    "pro",
+    "nebo",
+    "ale",
+    "jako",
+    "při",
+    "byl",
+    "byla",
+    "bylo",
 }
 _EN_STOPWORDS = {
-    "the", "of", "and", "to", "in", "is", "with", "for", "on", "as",
-    "by", "an", "at", "from", "or",
+    "the",
+    "of",
+    "and",
+    "to",
+    "in",
+    "is",
+    "with",
+    "for",
+    "on",
+    "as",
+    "by",
+    "an",
+    "at",
+    "from",
+    "or",
 }
 
 

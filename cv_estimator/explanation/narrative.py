@@ -4,9 +4,9 @@ import json
 
 from pydantic import BaseModel
 
+from cv_estimator import llm
 from cv_estimator.extractors.explicit import ExplicitData
 from cv_estimator.extractors.inferred import InferredData
-from cv_estimator.llm import call_json, render_prompt
 from cv_estimator.models import ScoreBreakdown
 
 
@@ -25,7 +25,7 @@ def analyze(
         {"skill": c.skill, "confidence": round(c.confidence, 2)}
         for c in inferred.inferred_capabilities
     ]
-    prompt = render_prompt(
+    prompt = llm.render_prompt(
         "strengths_gaps",
         role=explicit.role,
         seniority_score=seniority_score,
@@ -37,5 +37,5 @@ def analyze(
         inferred_capabilities=json.dumps(inferred_brief, ensure_ascii=False),
         language=explicit.language,
     )
-    payload = call_json(prompt)
+    payload = llm.call_json(prompt)
     return StrengthsGaps.model_validate(payload)

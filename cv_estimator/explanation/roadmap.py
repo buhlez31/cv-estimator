@@ -4,8 +4,8 @@ import json
 
 from pydantic import BaseModel, Field
 
+from cv_estimator import llm
 from cv_estimator.extractors.explicit import ExplicitData
-from cv_estimator.llm import call_json, render_prompt
 from cv_estimator.models import Recommendation
 
 
@@ -19,7 +19,7 @@ def generate(
     seniority_score: int,
     cz_isco: str,
 ) -> list[Recommendation]:
-    prompt = render_prompt(
+    prompt = llm.render_prompt(
         "roadmap",
         role=explicit.role,
         cz_isco=cz_isco,
@@ -28,5 +28,5 @@ def generate(
         explicit_skills=json.dumps(explicit.explicit_skills, ensure_ascii=False),
         language=explicit.language,
     )
-    payload = call_json(prompt)
+    payload = llm.call_json(prompt)
     return RoadmapData.model_validate(payload).recommendations

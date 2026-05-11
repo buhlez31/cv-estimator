@@ -20,10 +20,10 @@ You produce a balanced strengths/gaps narrative for a CV based on extracted data
 Return a single JSON object. Output the JSON object only — no prose, no markdown fences.
 
 ```json
-{{
+{
   "strengths": ["<3-5 short bullets, each 1 sentence>"],
   "gaps": ["<3-5 short bullets, each 1 sentence>"]
-}}
+}
 ```
 
 ## Rules

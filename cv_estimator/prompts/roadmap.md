@@ -16,16 +16,16 @@ Generate exactly 3 concrete, gap-driven recommendations that, together, would pl
 Return a single JSON object. Output the JSON object only — no prose, no markdown fences.
 
 ```json
-{{
+{
   "recommendations": [
-    {{
+    {
       "action": "<concrete, verb-first step the candidate can take; 1 sentence>",
       "time_investment": "<e.g. '3-6 months', '6-12 months'>",
       "expected_impact": "<which scoring component improves and how this maps to salary; 1 sentence>",
       "target_skill": "<canonical skill name being acquired or deepened>"
-    }}
+    }
   ]
-}}
+}
 ```
 
 ## Rules

@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from cv_estimator.llm import call_json, render_prompt
+from cv_estimator import llm
 
 
 class ExplicitData(BaseModel):
@@ -19,6 +19,6 @@ class ExplicitData(BaseModel):
 
 def extract(cv_text: str, language: str | None = None) -> ExplicitData:
     """Call LLM #1 and validate the response. `language` arg is informational only."""
-    prompt = render_prompt("extract_explicit", cv_text=cv_text)
-    payload = call_json(prompt)
+    prompt = llm.render_prompt("extract_explicit", cv_text=cv_text)
+    payload = llm.call_json(prompt)
     return ExplicitData.model_validate(payload)
