@@ -121,19 +121,41 @@ the interpolated median, clamped to (P25, P90).
 by LLM #1) against the analysis role's family. Heuristic role-family +
 field-family classifiers (`ROLE_FAMILY_KEYWORDS`, `FIELD_FAMILY_KEYWORDS`
 in [`config.py`](cv_estimator/config.py)) bucket each side into one of
-~8 families; the modifier is then:
+~8 families.
 
-| Relationship | Modifier |
+**Lowered base map** so the typical case isn't already saturated before
+the relevance modifier applies:
+
+| Degree | Base |
 |---|---|
-| Same family (e.g. CS field + Software Engineer role) | **+5** |
-| Adjacent pair (e.g. Geoinformatika + Research Analyst, CS + CTO) | 0 |
-| Different families (e.g. History + Backend Engineer) | **-10** |
-| Field empty / either side unclassified | 0 (no signal, no penalty) |
+| none | 0 |
+| high_school | 10 |
+| bachelor | 30 |
+| master | 50 |
+| phd | 70 |
 
-This means a Master's degree in History applying to a tech role scores
-`85 − 10 = 75` on education (vs `85` for a CS degree), giving the
-seniority weighted aggregate a defensible nudge based on field-role
-relevance rather than treating all degrees of the same level equally.
+**+5** prestige bonus on top if the institution is in
+`PRESTIGE_INSTITUTION_KEYWORDS`.
+
+**Field-relevance modifier:**
+
+| Relationship | Effect on score |
+|---|---|
+| Same family (e.g. CS field + Software Engineer role) | **+5** match bonus |
+| Adjacent pair (e.g. Geoinformatika + Research Analyst, CS + CTO) | 0 |
+| Different families (e.g. History + Backend Engineer) | **-25** hard penalty |
+| Field empty (LLM couldn't find one) | base × **0.5** half-credit |
+| Either side unclassified | 0 (no signal, no penalty) |
+| `highest_education = "none"` | **0** regardless of anything else |
+
+Worked examples (assuming ČVUT, which has the +5 prestige bonus):
+
+- Master CS + Senior Backend Engineer (match) → 50 + 5 + 5 = **60**
+- Master Geoinformatika + Research Analyst (adjacent) → 50 + 5 = **55**
+- Master History + Senior Backend Engineer (mismatch) → 50 + 5 − 25 = **30**
+- PhD History + Senior Backend Engineer (mismatch, no prestige) → 70 − 25 = **45**
+- Master CS, no field listed + Backend Engineer (half credit) → (50 + 5) × 0.5 = **27.5**
+- No degree listed → **0** regardless of role / institution
 
 ## The hidden-assets thesis
 

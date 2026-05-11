@@ -74,8 +74,10 @@ def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
     """senior_dev fixture: explicit @ cap-100 = 95, inferred bonus
     (0.85+0.75/2)*8 = 9.8 → 104.8 clamped to 100.
-    Education: master 85 + ČVUT prestige +5 + CS field matches Senior Software
-    Engineer (tech) → +5 = 95.
+
+    Education (NEW lowered base map): master 50 + ČVUT prestige 5 +
+    CS field matches Senior Software Engineer (tech-tech direct match)
+    → +5 = 60.
     """
     b = components.compute_with_inferred(
         explicit_senior_dev, inferred_senior_dev, "Senior Software Engineer"
@@ -83,19 +85,19 @@ def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
     assert 50 <= b.years_experience <= 55
     assert b.skills_depth == 100.0
     assert b.role_progression == 80.0
-    assert b.education == 95.0
+    assert b.education == 60.0
 
 
 def test_components_junior_support(explicit_junior_support, inferred_empty):
-    """Education: bachelor 60 + VŠE prestige +5 + Information Systems field
-    family unknown → 0 → 65 (unchanged vs pre-field-relevance)."""
+    """Education: bachelor 30 + VŠE prestige 5 + 'Information Systems'
+    field family unknown → 0 modifier → 35."""
     b = components.compute_with_inferred(
         explicit_junior_support, inferred_empty, "IT Support Specialist"
     )
     assert 5 <= b.years_experience <= 8
     assert b.skills_depth == 15.0
     assert b.role_progression == 25.0
-    assert b.education == 65.0
+    assert b.education == 35.0
 
 
 def test_components_unknown_skill_partial_credit(explicit_senior_dev, inferred_empty):
@@ -110,49 +112,68 @@ def test_components_unknown_skill_partial_credit(explicit_senior_dev, inferred_e
 
 
 def test_education_tech_field_tech_role_gets_bonus(explicit_senior_dev):
-    """CS degree + Backend Engineer (tech role) → +5 match bonus on edu."""
+    """CS degree + Backend Engineer (tech role) → +5 match bonus."""
     b = components.compute_explicit_only(explicit_senior_dev, "Senior Backend Engineer")
-    # master 85 + ČVUT prestige 5 + match bonus 5 = 95
-    assert b.education == 95.0
+    # master 50 + ČVUT prestige 5 + match bonus 5 = 60
+    assert b.education == 60.0
 
 
-def test_education_non_tech_field_tech_role_gets_penalty(explicit_senior_dev):
-    """History degree + Backend Engineer (tech role) → -10 mismatch penalty."""
+def test_education_non_tech_field_tech_role_gets_hard_penalty(explicit_senior_dev):
+    """History degree + Backend Engineer (tech) → -25 hard penalty."""
     explicit_senior_dev.field_of_study = "History"
     b = components.compute_explicit_only(explicit_senior_dev, "Senior Backend Engineer")
-    # master 85 + ČVUT prestige 5 - 10 = 80
-    assert b.education == 80.0
+    # master 50 + ČVUT prestige 5 - 25 = 30
+    assert b.education == 30.0
 
 
 def test_education_adjacent_field_tech_role_neutral(explicit_senior_dev):
     """Geoinformatika (tech_adjacent) + Research Analyst (tech) → 0 modifier."""
     explicit_senior_dev.field_of_study = "Geoinformatika"
     b = components.compute_explicit_only(explicit_senior_dev, "Research Analyst")
-    # master 85 + ČVUT prestige 5 + 0 = 90
-    assert b.education == 90.0
+    # master 50 + ČVUT prestige 5 + 0 = 55
+    assert b.education == 55.0
 
 
-def test_education_empty_field_no_modifier(explicit_senior_dev):
-    """Empty field_of_study → no modifier (no signal, no penalty)."""
+def test_education_empty_field_half_credit(explicit_senior_dev):
+    """Empty field_of_study → half credit on base + prestige."""
     explicit_senior_dev.field_of_study = ""
     b = components.compute_explicit_only(explicit_senior_dev, "Senior Backend Engineer")
-    # master 85 + ČVUT prestige 5 + 0 = 90
-    assert b.education == 90.0
+    # (master 50 + ČVUT prestige 5) × 0.5 = 27.5
+    assert b.education == 27.5
 
 
-def test_education_tech_field_non_tech_role_gets_penalty(explicit_senior_dev):
-    """CS degree + Marketing Manager (marketing) → -10 penalty (mismatch)."""
+def test_education_marketing_role_with_cs_field_adjacent(explicit_senior_dev):
+    """CS + Marketing Manager — 'manager' wins business_mgmt first; pair
+    (business_mgmt, tech) is in ROLE_FIELD_ADJACENT_PAIRS → 0 modifier."""
     b = components.compute_explicit_only(explicit_senior_dev, "Marketing Manager")
-    # NOTE: "Marketing Manager" contains "manager" → business_mgmt family wins via dict ordering.
-    # business_mgmt + tech is in adjacent pairs → 0 modifier. master 85 + prestige 5 = 90.
-    assert b.education == 90.0
+    # master 50 + ČVUT prestige 5 + 0 = 55
+    assert b.education == 55.0
 
 
-def test_education_business_mgmt_role_with_tech_field_adjacent(explicit_senior_dev):
-    """CTO (business_mgmt by 'chief' keyword) + CS degree → 0 (adjacent pair)."""
+def test_education_cto_with_cs_field_adjacent(explicit_senior_dev):
+    """CTO (business_mgmt) + CS (tech) → adjacent → 0 modifier."""
     b = components.compute_explicit_only(explicit_senior_dev, "CTO")
-    # Same as above logic — business_mgmt + tech in adjacency.
-    assert b.education == 90.0
+    # master 50 + ČVUT prestige 5 + 0 = 55
+    assert b.education == 55.0
+
+
+def test_education_none_returns_zero(explicit_senior_dev):
+    """No degree → 0 regardless of prestige, field, or role match.
+    User direction: 'kdo nema education uvedeny tak 0 za education navic'."""
+    explicit_senior_dev.highest_education = "none"
+    explicit_senior_dev.field_of_study = "Computer Science"
+    b = components.compute_explicit_only(explicit_senior_dev, "Senior Backend Engineer")
+    assert b.education == 0.0
+
+
+def test_education_phd_humanities_for_tech_role_dropped(explicit_senior_dev):
+    """PhD History + Backend Engineer → 70 + 0 prestige - 25 penalty = 45.
+    Even at PhD level, irrelevant field carries a real cost."""
+    explicit_senior_dev.highest_education = "phd"
+    explicit_senior_dev.institution = "Random University"  # not in prestige list
+    explicit_senior_dev.field_of_study = "History"
+    b = components.compute_explicit_only(explicit_senior_dev, "Senior Backend Engineer")
+    assert b.education == 45.0
 
 
 def test_classify_role_family_directly():

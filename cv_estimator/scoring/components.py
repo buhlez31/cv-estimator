@@ -12,11 +12,13 @@ The weighted aggregate is in `seniority.py`.
 """
 
 from cv_estimator.config import (
+    EDUCATION_BASE_MAP,
+    EDUCATION_EMPTY_FIELD_MULTIPLIER,
     EDUCATION_FIELD_MATCH_BONUS,
     EDUCATION_FIELD_MISMATCH_PENALTY,
+    EDUCATION_PRESTIGE_BONUS,
     EXPLICIT_ONLY_SKILLS_CAP,
     FIELD_FAMILY_KEYWORDS,
-    HIGHER_ED_KEYWORDS,
     INFERRED_BONUS_CAP,
     INFERRED_BONUS_PER_CAPABILITY,
     JUNIOR_TITLE_KEYWORDS,
@@ -169,16 +171,48 @@ def _education_score(
     field_of_study: str,
     analysis_role: str,
 ) -> float:
-    base_map = {"none": 0.0, "high_school": 15.0, "bachelor": 60.0, "master": 85.0, "phd": 95.0}
-    base = base_map.get(highest, 30.0)
+    """Education score = base degree value + prestige + field-relevance modifier.
+
+    - Lowered base map (master = 50, not 85) so prestige + field bonus
+      lands the typical case around 55-65, not 90.
+    - Empty field_of_study → half credit (we know the degree level but
+      can't judge relevance for the role).
+    - Match (same family or role-family unknown / field-family unknown)
+      → +5 only for direct match.
+    - Adjacent (e.g. tech_adjacent + tech) → 0 modifier.
+    - Mismatch (clearly wrong field for role) → -25 hard penalty,
+      "irrelevant education shouldn't carry weight".
+    - "none" → 0, never lifted by prestige / field bonus (safety floor
+      stays at 60 only when institution looks academic but degree label
+      missing — narrow safety net for sparse CVs).
+    """
+    if highest == "none":
+        # No degree → 0. Per user direction: "kdo nema education uvedeny
+        # tak 0 za education navic". No institution-only safety net.
+        return 0.0
+
+    base = EDUCATION_BASE_MAP.get(highest, 0.0)
     inst_low = (institution or "").lower()
     if any(kw in inst_low for kw in PRESTIGE_INSTITUTION_KEYWORDS):
-        base += 5.0
-    if highest == "none" and any(kw in inst_low for kw in HIGHER_ED_KEYWORDS):
-        base = max(base, 60.0)
+        base += EDUCATION_PRESTIGE_BONUS
 
-    base += _field_relevance_modifier(analysis_role, field_of_study)
-    return max(0.0, min(100.0, base))
+    if not (field_of_study or "").strip():
+        # No field info — half credit. Known degree level alone is half signal.
+        return max(0.0, min(100.0, base * EDUCATION_EMPTY_FIELD_MULTIPLIER))
+
+    role_family = _classify_role_family(analysis_role)
+    field_family = _classify_field_family(field_of_study)
+
+    if role_family == "unknown" or field_family == "unknown":
+        modifier = 0.0
+    elif role_family == field_family:
+        modifier = EDUCATION_FIELD_MATCH_BONUS
+    elif (role_family, field_family) in ROLE_FIELD_ADJACENT_PAIRS:
+        modifier = 0.0
+    else:
+        modifier = -EDUCATION_FIELD_MISMATCH_PENALTY
+
+    return max(0.0, min(100.0, base + modifier))
 
 
 def _classify_role_family(role: str) -> str:
@@ -199,23 +233,3 @@ def _classify_field_family(field: str) -> str:
         if any(kw in low for kw in keywords):
             return family
     return "unknown"
-
-
-def _field_relevance_modifier(role: str, field: str) -> int:
-    """Apply a bounded role-family ↔ field-family modifier on education.
-
-    Returns:
-        +EDUCATION_FIELD_MATCH_BONUS  when families match directly
-        0                              when adjacent or either side unknown
-        -EDUCATION_FIELD_MISMATCH_PENALTY  when families clearly differ
-    """
-    role_family = _classify_role_family(role)
-    field_family = _classify_field_family(field)
-
-    if role_family == "unknown" or field_family == "unknown":
-        return 0
-    if role_family == field_family:
-        return EDUCATION_FIELD_MATCH_BONUS
-    if (role_family, field_family) in ROLE_FIELD_ADJACENT_PAIRS:
-        return 0
-    return -EDUCATION_FIELD_MISMATCH_PENALTY

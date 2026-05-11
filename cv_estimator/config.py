@@ -313,8 +313,23 @@ ROLE_FIELD_ADJACENT_PAIRS: set[tuple[str, str]] = {
     ("ops_admin", "business"),
 }
 
-EDUCATION_FIELD_MATCH_BONUS = 5
-EDUCATION_FIELD_MISMATCH_PENALTY = 10
+# Education degree base map. Lowered from the previous 0/15/60/85/95
+# baseline so the typical master-with-prestige case is ~55, not ~90 —
+# field-relevance modifiers swing the final score around this base
+# instead of sitting on top of a saturated number.
+EDUCATION_BASE_MAP: dict[str, float] = {
+    "none": 0.0,
+    "high_school": 10.0,
+    "bachelor": 30.0,
+    "master": 50.0,
+    "phd": 70.0,
+}
+EDUCATION_PRESTIGE_BONUS = 5.0
+EDUCATION_FIELD_MATCH_BONUS = 5.0
+EDUCATION_FIELD_MISMATCH_PENALTY = 25.0
+# When field_of_study is missing entirely (LLM couldn't find one), apply
+# half credit to the base + prestige — degree level alone is half signal.
+EDUCATION_EMPTY_FIELD_MULTIPLIER = 0.5
 
 # --- CZ-ISCO IT-relevant code prefixes ---
 IT_ISCO_PREFIXES = ("251", "252", "1330", "351")
