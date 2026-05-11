@@ -113,10 +113,9 @@ def _skills_coverage_score(
 ) -> float:
     """LLM-driven skills coverage scoring (single mechanism, all role families).
 
-    Per the all-LLM unify (Phase 11): there's no longer a tech vs non-tech
-    branch. Every role routes through `_llm_coverage_raw`, which queries
-    the model with the role + signals and returns the coverage percent
-    plus attribution (value-adding capabilities + concerns). Overclaim
+    Every role routes through `_llm_coverage_raw`, which queries the model
+    with the role + signals and returns the coverage percent plus
+    attribution (value-adding capabilities + concerns). Overclaim
     skepticism lives in the prompt, not in Python.
     """
     score, _, _ = _llm_coverage_raw(

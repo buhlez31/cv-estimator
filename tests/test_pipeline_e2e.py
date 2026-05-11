@@ -109,7 +109,7 @@ def _mock_call_json(prompt: str) -> dict:
             ),
         }
     if "Skills coverage scoring" in prompt:
-        # Phase 11: all roles route through the LLM coverage scoring path.
+        # All roles route through the LLM coverage scoring path.
         return {
             "coverage_percent": 55,
             "missing_core": ["budget management"],

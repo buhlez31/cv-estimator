@@ -11,10 +11,10 @@ from cv_estimator.scoring import components, seniority
 
 @pytest.fixture(autouse=True)
 def _stub_llm_calls():
-    """All skills_coverage scoring now routes through the LLM (Phase 11
-    all-LLM unify). Stub call_json with a stable 50 % default so tests
-    can focus on whichever component they're actually asserting.
-    Tests that want a specific LLM response override with their own patch.
+    """All skills_coverage scoring routes through the LLM. Stub call_json
+    with a stable 50 % default so tests can focus on whichever component
+    they're actually asserting. Tests that want a specific LLM response
+    override with their own patch.
     """
     components._llm_coverage_raw.cache_clear()
 
@@ -51,9 +51,9 @@ def test_seniority_clamped_to_range():
 
 
 def test_skills_coverage_uses_llm_for_any_role(explicit_senior_dev):
-    """Phase 11: all roles (tech AND non-tech) route through the LLM-based
-    coverage scorer. Autouse stub returns 50 % default; verify the helper
-    is called and its output reaches `skills_depth`."""
+    """All roles route through the LLM-based coverage scorer. Autouse stub
+    returns 50 % default; verify the helper is called and its output
+    reaches `skills_depth`."""
     b = components.compute_explicit_only(explicit_senior_dev, "Senior Software Engineer")
     assert b.skills_depth == 50.0
 
@@ -93,7 +93,7 @@ def test_skills_coverage_inferred_changes_score(explicit_senior_dev, inferred_se
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
-    """senior_dev fixture under all-LLM coverage (Phase 11):
+    """senior_dev fixture under all-LLM coverage:
     - Years: 8/15*100 ≈ 53
     - Skills coverage: autouse stub returns 50 %
     - Role: senior signal + 8 years (no +5 since <10) = 80
@@ -121,8 +121,8 @@ def test_components_junior_support(explicit_junior_support, inferred_empty):
 
 
 def test_coverage_attribution_universal():
-    """Phase 11: `coverage_attribution_for` returns a CoverageAttribution
-    for every role family (no more tech→None branch)."""
+    """`coverage_attribution_for` returns a CoverageAttribution for every
+    role family (no tech→None branch)."""
     inferred = InferredData(
         inferred_capabilities=[
             SkillEvidence(
