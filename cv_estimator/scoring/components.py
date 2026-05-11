@@ -26,14 +26,16 @@ from cv_estimator.config import (
     ROLE_FAMILY_KEYWORDS,
     ROLE_FIELD_ADJACENT_PAIRS,
     SENIOR_TITLE_KEYWORDS,
-    YEARS_CAP,
     YEARS_CAP_BY_LEVEL,
 )
-
-_PRINCIPAL_TITLE_KEYWORDS = {"principal", "staff", "chief", "vp", "head of"}
 from cv_estimator.extractors.explicit import ExplicitData
 from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown
+
+# Title keywords used by `_role_progression_score` and `_expected_years_cap`
+# to bucket the analyzed role. `SENIOR_TITLE_KEYWORDS` lives in config.py;
+# this set covers the principal / staff / VP tier above it.
+_PRINCIPAL_TITLE_KEYWORDS = {"principal", "staff", "chief", "vp", "head of"}
 
 
 def compute_explicit_only(explicit: ExplicitData, analysis_role: str) -> ScoreBreakdown:
