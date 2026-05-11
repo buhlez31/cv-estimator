@@ -294,9 +294,39 @@ _render_track(
 _render_track(
     result.track_with_inferred,
     title="🔍 S hidden assets (potenciál)",
-    caption="Skóre a plat včetně confidence-vážených inferred capabilities. Strop, ne pravda.",
+    caption=(
+        "Skóre a plat včetně confidence-vážených inferred capabilities. "
+        "Scoring rozepsán níže v [Hidden assets](#hidden-assets)."
+    ),
     container=col_b,
 )
+
+st.divider()
+
+
+# -------------------------- Strengths & gaps -----------------------------
+
+c1, c2 = st.columns(2)
+with c1:
+    st.subheader("✅ Silné stránky")
+    for s in result.strengths:
+        st.markdown(f"- {s}")
+with c2:
+    st.subheader("⚠️ Mezery")
+    for g in result.gaps:
+        st.markdown(f"- {g}")
+
+st.divider()
+
+
+# -------------------------- Recommendations ------------------------------
+
+st.subheader("🎯 3 doporučení pro růst mzdy (+30 %)")
+for i, rec in enumerate(result.recommendations, start=1):
+    with st.expander(f"#{i}: {rec.action}"):
+        st.markdown(f"**Cílová dovednost:** {rec.target_skill}")
+        st.markdown(f"**Časová investice:** {rec.time_investment}")
+        st.markdown(f"**Očekávaný dopad:** {rec.expected_impact}")
 
 st.divider()
 
@@ -304,7 +334,10 @@ st.divider()
 # -------------------------- Hidden assets list ---------------------------
 
 if result.inferred_capabilities:
-    st.subheader(f"🧠 Hidden assets pro roli: {result.analysis_role}")
+    st.subheader(
+        f"🧠 Hidden assets pro roli: {result.analysis_role}",
+        anchor="hidden-assets",
+    )
     st.caption(
         "Schopnosti odvozené z celého CV (work, education, hobbies) a relevantní "
         "pro analyzovanou roli. Model je instruován ke skepticismu."
@@ -362,29 +395,6 @@ if result.inferred_capabilities:
                 st.caption("_Žádné concerns._")
 
     st.divider()
-
-
-# -------------------------- Strengths & gaps -----------------------------
-
-c1, c2 = st.columns(2)
-with c1:
-    st.subheader("✅ Silné stránky")
-    for s in result.strengths:
-        st.markdown(f"- {s}")
-with c2:
-    st.subheader("⚠️ Mezery")
-    for g in result.gaps:
-        st.markdown(f"- {g}")
-
-
-# -------------------------- Recommendations ------------------------------
-
-st.subheader("🎯 3 doporučení pro růst mzdy (+30 %)")
-for i, rec in enumerate(result.recommendations, start=1):
-    with st.expander(f"#{i}: {rec.action}"):
-        st.markdown(f"**Cílová dovednost:** {rec.target_skill}")
-        st.markdown(f"**Časová investice:** {rec.time_investment}")
-        st.markdown(f"**Očekávaný dopad:** {rec.expected_impact}")
 
 
 # -------------------------- Raw JSON -------------------------------------
