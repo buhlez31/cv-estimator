@@ -21,7 +21,18 @@ WEIGHT_ROLE = 0.20
 WEIGHT_EDUCATION = 0.15
 
 # --- Years experience normalization ---
-YEARS_CAP = 15  # 15+ years saturates at 100
+# Default cap when the analyzed role gives no level cue.
+YEARS_CAP = 15
+
+# Role-level → years cap mapping. A junior position saturates much sooner
+# than a principal-level one, so the same candidate's 8-year CV scores
+# 100 against a junior target but only 53 against a senior target.
+YEARS_CAP_BY_LEVEL: dict[str, int] = {
+    "principal": 20,
+    "senior": 15,
+    "mid": 10,
+    "junior": 3,
+}
 
 # --- Skills coverage (LLM-driven for all roles) ---
 # Inferred capability confidence threshold for inclusion in the LLM's

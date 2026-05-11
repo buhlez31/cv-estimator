@@ -27,7 +27,10 @@ from cv_estimator.config import (
     ROLE_FIELD_ADJACENT_PAIRS,
     SENIOR_TITLE_KEYWORDS,
     YEARS_CAP,
+    YEARS_CAP_BY_LEVEL,
 )
+
+_PRINCIPAL_TITLE_KEYWORDS = {"principal", "staff", "chief", "vp", "head of"}
 from cv_estimator.extractors.explicit import ExplicitData
 from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown
@@ -41,13 +44,11 @@ def compute_explicit_only(explicit: ExplicitData, analysis_role: str) -> ScoreBr
     plus the education field-relevance modifier.
     """
     return ScoreBreakdown(
-        years_experience=_years_score(explicit.years_experience),
+        years_experience=_years_score(explicit.years_experience, analysis_role),
         skills_depth=_skills_coverage_score(
             explicit.explicit_skills, [], analysis_role, include_inferred=False
         ),
-        role_progression=_role_progression_score(
-            explicit.role, explicit.role_seniority_signal, explicit.years_experience
-        ),
+        role_progression=_role_progression_score(analysis_role, explicit.years_experience),
         education=_education_score(
             explicit.highest_education,
             explicit.institution,
@@ -67,16 +68,14 @@ def compute_with_inferred(
     prompt as supporting evidence, and the model decides how much they
     lift the score."""
     return ScoreBreakdown(
-        years_experience=_years_score(explicit.years_experience),
+        years_experience=_years_score(explicit.years_experience, analysis_role),
         skills_depth=_skills_coverage_score(
             explicit.explicit_skills,
             inferred.inferred_capabilities,
             analysis_role,
             include_inferred=True,
         ),
-        role_progression=_role_progression_score(
-            explicit.role, explicit.role_seniority_signal, explicit.years_experience
-        ),
+        role_progression=_role_progression_score(analysis_role, explicit.years_experience),
         education=_education_score(
             explicit.highest_education,
             explicit.institution,
@@ -99,9 +98,26 @@ def compute(
 # ----- Internals ---------------------------------------------------------
 
 
-def _years_score(years: int) -> float:
-    """Continuous, capped at YEARS_CAP (15)."""
-    return float(min(years, YEARS_CAP) / YEARS_CAP * 100)
+def _years_score(years: int, analysis_role: str) -> float:
+    """Continuous, capped by what the analyzed role expects.
+
+    Junior roles saturate at 3 yrs, senior at 15, principal at 20.
+    Same CV → different score for the same candidate depending on the
+    target / detected role.
+    """
+    cap = _expected_years_cap(analysis_role)
+    return float(min(years, cap) / cap * 100)
+
+
+def _expected_years_cap(analysis_role: str) -> int:
+    low = (analysis_role or "").lower()
+    if any(kw in low for kw in _PRINCIPAL_TITLE_KEYWORDS):
+        return YEARS_CAP_BY_LEVEL["principal"]
+    if any(kw in low for kw in SENIOR_TITLE_KEYWORDS):
+        return YEARS_CAP_BY_LEVEL["senior"]
+    if any(kw in low for kw in JUNIOR_TITLE_KEYWORDS):
+        return YEARS_CAP_BY_LEVEL["junior"]
+    return YEARS_CAP_BY_LEVEL["mid"]
 
 
 def _skills_coverage_score(
@@ -208,18 +224,23 @@ def coverage_attribution_for(
     )
 
 
-def _role_progression_score(role: str, signal: str, years: int) -> float:
-    """Junior→Mid→Senior signal, anchored on title keywords + years."""
-    low = role.lower()
-    if signal == "principal":
+def _role_progression_score(analysis_role: str, years: int) -> float:
+    """Junior→Mid→Senior signal driven by the analyzed role's level + years.
+
+    The metric reflects the seniority of the role being analyzed (target
+    when supplied, otherwise the auto-detected one). A candidate's CV
+    seniority signal does NOT short-circuit this — the answer to "what
+    level does this analysis target?" comes from the analysis role
+    itself.
+    """
+    low = (analysis_role or "").lower()
+    if any(kw in low for kw in _PRINCIPAL_TITLE_KEYWORDS):
         return 95.0
-    if signal == "senior" or any(kw in low for kw in SENIOR_TITLE_KEYWORDS):
+    if any(kw in low for kw in SENIOR_TITLE_KEYWORDS):
         return 80.0 + (5.0 if years >= 10 else 0.0)
-    if signal == "junior" or any(kw in low for kw in JUNIOR_TITLE_KEYWORDS):
+    if any(kw in low for kw in JUNIOR_TITLE_KEYWORDS):
         return 25.0
-    if signal == "mid":
-        return 55.0
-    # unknown — infer from years alone
+    # No explicit level keyword in the role → fall back to years.
     if years >= 10:
         return 75.0
     if years >= 5:
