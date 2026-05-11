@@ -99,26 +99,37 @@ def _mock_call_json(prompt: str) -> dict:
                 },
             ]
         }
+    if "Target role match assessment" in prompt:
+        return {
+            "match_score": 72,
+            "rationale": (
+                "Strong data engineering and migration scope are a clear strength; "
+                "gap is people-management experience for a manager track."
+            ),
+        }
     raise AssertionError(f"Unexpected prompt: {prompt[:100]}")
 
 
 def test_pipeline_end_to_end():
+    """No target_role → analysis anchored on detected role, no match panel."""
     with patch("cv_estimator.llm.call_json", side_effect=_mock_call_json):
         result = pipeline.analyze_cv(SAMPLE_TXT, "sample.txt")
 
     assert isinstance(result, CVAnalysis)
     assert result.detected_role == "Senior Data Engineer"
+    assert result.analysis_role == "Senior Data Engineer"
+    assert result.role_source == "detected"
     assert result.cz_isco_code == "2519"
     assert result.language == "en"
+    # No target supplied → no LLM #5
+    assert result.target is None
+    assert result.processing_metadata["target_role_provided"] is False
 
-    # Both parallel tracks must be populated.
+    # Both parallel tracks populated.
     assert 0 <= result.track_explicit.seniority_score <= 100
     assert 0 <= result.track_with_inferred.seniority_score <= 100
-
-    # Inferred bonus is additive — ceiling >= baseline.
     assert result.track_with_inferred.seniority_score >= result.track_explicit.seniority_score
 
-    # Salary estimates exposed for both tracks and include the market band.
     for track in (result.track_explicit, result.track_with_inferred):
         s = track.salary_estimate
         assert s.low <= s.median <= s.high
@@ -131,3 +142,30 @@ def test_pipeline_end_to_end():
     # Hidden assets carry caveat strings or None.
     caveats = [c.caveat for c in result.inferred_capabilities]
     assert any(c is not None for c in caveats)
+
+
+def test_pipeline_with_target_role_drives_everything():
+    """target_role supplied → analysis anchored on target, match panel populated,
+    salary uses target's CZ-ISCO band, NOT detected."""
+    with patch("cv_estimator.llm.call_json", side_effect=_mock_call_json):
+        result = pipeline.analyze_cv(SAMPLE_TXT, "sample.txt", target_role="CTO")
+
+    # detected_role unchanged for traceability — but analysis is anchored on
+    # the target.
+    assert result.detected_role == "Senior Data Engineer"
+    assert result.analysis_role == "CTO"
+    assert result.role_source == "target"
+    # "CTO" maps to CZ-ISCO 1330; detected "Data Engineer" would map to 2519.
+    assert result.cz_isco_code == "1330"
+
+    # LLM #5 ran.
+    assert result.target is not None
+    assert result.target.target_role == "CTO"
+    assert result.target.target_cz_isco == "1330"
+    assert result.target.match_score == 72
+    assert result.processing_metadata["target_role_provided"] is True
+
+    # Salary anchored on CTO (1330) band — median for 1330 P50 ≈ 148k CZK,
+    # far above the 2519 P50 (~83k).
+    assert result.track_with_inferred.salary_estimate.median > 120_000
+    assert result.track_explicit.salary_estimate.market_p50 > 120_000

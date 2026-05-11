@@ -22,6 +22,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze a CV file (PDF/DOCX).")
     parser.add_argument("cv_path", type=Path, help="Path to CV file")
     parser.add_argument("--json", action="store_true", help="Emit raw JSON only")
+    parser.add_argument(
+        "--target-role",
+        type=str,
+        default=None,
+        help='Target role title (e.g. "Senior Python Backend Engineer"). '
+        "Anchors the whole analysis on this role and runs LLM #5 match "
+        "assessment. When omitted, the auto-detected best-fit role is used.",
+    )
     args = parser.parse_args()
 
     if not args.cv_path.exists():
@@ -29,7 +37,7 @@ def main() -> int:
         return 2
 
     file_bytes = args.cv_path.read_bytes()
-    result = analyze_cv(file_bytes, args.cv_path.name)
+    result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
 
     if args.json:
         print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
@@ -40,8 +48,20 @@ def main() -> int:
 
 
 def _print_summary(result: CVAnalysis) -> None:
-    print(f"Role: {result.detected_role} (CZ-ISCO {result.cz_isco_code})")
+    source_label = "target" if result.role_source == "target" else "auto-detected"
+    print(
+        f"Analyzed for role: {result.analysis_role} "
+        f"(CZ-ISCO {result.cz_isco_code}, {source_label})"
+    )
+    if result.role_source == "target":
+        print(f"Best-fit per CV: {result.detected_role}")
     print(f"Language: {result.language}")
+
+    if result.target is not None:
+        t = result.target
+        print(f"\nMatch score vs {t.target_role}: {t.match_score}/100")
+        print(f"  {t.rationale}")
+        print("  Tip: pro analýzu best-fit role spusť bez --target-role na stejné CV.")
 
     market = result.track_explicit.salary_estimate
     print(

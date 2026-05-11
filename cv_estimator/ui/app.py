@@ -1,8 +1,10 @@
 """Streamlit UI — thin wrapper around `pipeline.analyze_cv`.
 
-Branch A: parallel buzzword-baseline vs hidden-assets-included cards,
-plus a market-range chart so the candidate's salary point estimate is shown
-in the context of the full ISPV P25-P90 band for the role.
+Single analysis per run, anchored on either the user-supplied target role
+or the auto-detected best-fit role from the CV. Parallel buzzword-baseline
+vs hidden-assets-included cards + a market-range chart show where the
+candidate's salary point estimate sits within the ISPV P25-P90 band for
+the chosen role.
 """
 
 import os
@@ -24,28 +26,62 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
     st.error("Chybí `ANTHROPIC_API_KEY`. Vytvoř `.env` ze `.env.example` a doplň klíč.")
     st.stop()
 
+
+# -------------------------- Inputs ---------------------------------------
+
+target_role_input = st.text_input(
+    "Pozice, na kterou se hlásíš (volitelné)",
+    placeholder="např. Senior Python Backend Engineer",
+    help=(
+        "Když vyplníš, celá analýza (plat, hidden assets, recommendations) "
+        "se počítá pro tuto roli a model vyhodnotí match. Když necháš prázdné, "
+        "použije se auto-detekovaná best-fit role z CV."
+    ),
+)
+target_role = target_role_input.strip() or None
+
 uploaded = st.file_uploader("Nahraj CV (PDF nebo DOCX)", type=["pdf", "docx"])
 
 if uploaded is None:
     st.info("👈 Vyber soubor pro analýzu.")
     st.stop()
 
-with st.spinner("Analyzuji CV (4 LLM volání)…"):
+spinner_label = "Analyzuji CV (5 LLM volání)…" if target_role else "Analyzuji CV (4 LLM volání)…"
+with st.spinner(spinner_label):
     try:
-        result: CVAnalysis = analyze_cv(uploaded.getvalue(), uploaded.name)
+        result: CVAnalysis = analyze_cv(uploaded.getvalue(), uploaded.name, target_role=target_role)
     except Exception as e:  # noqa: BLE001 — surface anything to user
         st.error(f"Pipeline error: {e}")
         st.stop()
 
 
-# -------------------------- Header strip ---------------------------------
+# -------------------------- Header label ---------------------------------
 
-col_role, col_lang, col_isco = st.columns(3)
-col_role.metric("Detekovaná role", result.detected_role)
-col_lang.metric("Jazyk CV", result.language.upper())
-col_isco.metric("CZ-ISCO", result.cz_isco_code)
+source_badge = "target" if result.role_source == "target" else "auto-detected"
+st.subheader(
+    f"📌 Analyzováno pro pozici: **{result.analysis_role}** "
+    f":blue-badge[{source_badge}] · CZ-ISCO {result.cz_isco_code} · jazyk {result.language.upper()}"
+)
+if result.role_source == "target":
+    st.caption(
+        f"💡 Best-fit podle CV: **{result.detected_role}**. Pokud chceš vidět "
+        "analýzu pro tuto auto-detekovanou roli, spusť znovu se stejným CV a "
+        "prázdným polem `Pozice`."
+    )
 
 st.divider()
+
+
+# -------------------------- Match panel (only with target) ---------------
+
+if result.target:
+    t = result.target
+    st.subheader(f"🎯 Match na pozici: {t.target_role}")
+    tc1, tc2, tc3 = st.columns([1, 1, 2])
+    tc1.metric("Match score", f"{t.match_score}/100")
+    tc2.metric("CZ-ISCO", t.target_cz_isco)
+    tc3.markdown(f"**Hodnocení:** {t.rationale}")
+    st.divider()
 
 
 # -------------------------- Salary range chart ---------------------------
@@ -58,7 +94,6 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
     inferred_pt = result.track_with_inferred.salary_estimate.median
 
     fig = go.Figure()
-    # Market band as a thick horizontal segment from P25 to P90
     fig.add_shape(
         type="line",
         x0=s.market_p25,
@@ -67,7 +102,6 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
         y1=0,
         line=dict(color="#d0d0d0", width=18),
     )
-    # P50 reference tick
     fig.add_shape(
         type="line",
         x0=s.market_p50,
@@ -76,7 +110,6 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
         y1=0.4,
         line=dict(color="#888", width=2, dash="dot"),
     )
-    # P75 reference tick
     fig.add_shape(
         type="line",
         x0=s.market_p75,
@@ -85,7 +118,6 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
         y1=0.4,
         line=dict(color="#888", width=2, dash="dot"),
     )
-    # Markers — explicit baseline (skeptical) + with-inferred (ceiling)
     fig.add_trace(
         go.Scatter(
             x=[explicit_pt],
@@ -132,7 +164,7 @@ def _range_chart(result: CVAnalysis) -> go.Figure:
     return fig
 
 
-st.subheader("💰 Tržní rozmezí pro tuto roli")
+st.subheader(f"💰 Tržní rozmezí pro pozici {result.analysis_role}")
 st.plotly_chart(_range_chart(result), width="stretch")
 
 
@@ -200,10 +232,10 @@ st.divider()
 # -------------------------- Hidden assets list ---------------------------
 
 if result.inferred_capabilities:
-    st.subheader(f"🧠 Hidden assets pro roli: {result.detected_role}")
+    st.subheader(f"🧠 Hidden assets pro roli: {result.analysis_role}")
     st.caption(
         "Schopnosti odvozené z celého CV (work, education, hobbies) a relevantní "
-        "pro detekovanou roli. Model je instruován ke skepticismu."
+        "pro analyzovanou roli. Model je instruován ke skepticismu."
     )
 
     must_have = [c for c in result.inferred_capabilities if c.relevance == "must_have"]

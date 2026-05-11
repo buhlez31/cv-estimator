@@ -27,7 +27,18 @@ streamlit run cv_estimator/ui/app.py
 # CLI
 python scripts/run_analysis.py path/to/cv.pdf
 python scripts/run_analysis.py path/to/cv.pdf --json
+python scripts/run_analysis.py path/to/cv.pdf --target-role "Senior Python Backend Engineer"
 ```
+
+### Target-role mode
+
+If the candidate is applying to a specific role, supplying it via the
+text field in the UI (or `--target-role` on the CLI) anchors the **entire
+analysis** on that role: CZ-ISCO lookup, salary band, hidden-asset
+scoping, and a 5th LLM call that scores how well the CV matches. When
+the field is empty, the auto-detected best-fit role from the CV drives
+everything. To compare both views, run the analysis twice — once with
+the target field set, once empty.
 
 ## Pipeline
 
@@ -50,6 +61,9 @@ python scripts/run_analysis.py path/to/cv.pdf --json
         │
         ├── LLM #3  explanation/narrative.py →  strengths + gaps (3-5 each, language-aware)
         ├── LLM #4  explanation/roadmap.py   →  exactly 3 recommendations
+        │
+        ├── LLM #5  explanation/match_assess.py  → target-role fit score + rationale
+        │           (only when target_role supplied; otherwise skipped)
         │
         └── validation/sanity.py             →  output-range invariants
                               │
