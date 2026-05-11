@@ -67,7 +67,14 @@ def _interpolate(score: int, p25: int, p50: int, p75: int, p90: int) -> tuple[in
     Anchors: score 25→P25, 50→P50, 75→P75, 90→P90. Linear in between.
     """
     score = max(0, min(100, score))
-    anchors = [(0, p25, 25), (25, p25, 25), (50, p50, 50), (75, p75, 75), (90, p90, 90), (100, p90, 90)]
+    anchors = [
+        (0, p25, 25),
+        (25, p25, 25),
+        (50, p50, 50),
+        (75, p75, 75),
+        (90, p90, 90),
+        (100, p90, 90),
+    ]
     for i in range(len(anchors) - 1):
         s_low, v_low, perc_low = anchors[i]
         s_high, v_high, perc_high = anchors[i + 1]

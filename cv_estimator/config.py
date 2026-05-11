@@ -20,44 +20,109 @@ WEIGHT_EDUCATION = 0.15
 YEARS_CAP = 15  # 15+ years saturates at 100
 
 # --- Skills tier weights (used by scoring/components.py) ---
-SKILL_TIER_HIGH = 1.0   # senior-signal tech (k8s, system design, ML infra, ...)
-SKILL_TIER_MID = 0.6    # mainstream production tools (Docker, AWS, Kafka, ...)
-SKILL_TIER_LOW = 0.3    # generic / commodity (Excel, basic Office, ...)
+SKILL_TIER_HIGH = 1.0  # senior-signal tech (k8s, system design, ML infra, ...)
+SKILL_TIER_MID = 0.6  # mainstream production tools (Docker, AWS, Kafka, ...)
+SKILL_TIER_LOW = 0.3  # generic / commodity (Excel, basic Office, ...)
 
 # Heuristic skill→tier lookup (lower-case match). Extend as needed.
 SKILL_TIERS_HIGH = {
-    "kubernetes", "k8s", "system design", "distributed systems",
-    "machine learning infrastructure", "mlops", "site reliability",
-    "platform engineering", "kafka streams", "rust", "go",
-    "terraform", "spark", "airflow", "kubeflow",
+    "kubernetes",
+    "k8s",
+    "system design",
+    "distributed systems",
+    "machine learning infrastructure",
+    "mlops",
+    "site reliability",
+    "platform engineering",
+    "kafka streams",
+    "rust",
+    "go",
+    "terraform",
+    "spark",
+    "airflow",
+    "kubeflow",
 }
 SKILL_TIERS_MID = {
-    "python", "sql", "docker", "aws", "azure", "gcp", "postgres",
-    "postgresql", "react", "typescript", "node", "node.js", "kafka",
-    "redis", "elasticsearch", "snowflake", "bigquery", "fastapi",
-    "django", "flask", "git", "ci/cd", "pandas", "numpy", "pytorch",
+    "python",
+    "sql",
+    "docker",
+    "aws",
+    "azure",
+    "gcp",
+    "postgres",
+    "postgresql",
+    "react",
+    "typescript",
+    "node",
+    "node.js",
+    "kafka",
+    "redis",
+    "elasticsearch",
+    "snowflake",
+    "bigquery",
+    "fastapi",
+    "django",
+    "flask",
+    "git",
+    "ci/cd",
+    "pandas",
+    "numpy",
+    "pytorch",
     "tensorflow",
 }
 SKILL_TIERS_LOW = {
-    "excel", "powerpoint", "word", "office", "jira", "confluence",
-    "slack", "outlook",
+    "excel",
+    "powerpoint",
+    "word",
+    "office",
+    "jira",
+    "confluence",
+    "slack",
+    "outlook",
 }
 
 # --- Role progression heuristics ---
 SENIOR_TITLE_KEYWORDS = {
-    "senior", "principal", "staff", "lead", "head", "director",
-    "architect", "manager", "vp", "chief",
+    "senior",
+    "principal",
+    "staff",
+    "lead",
+    "head",
+    "director",
+    "architect",
+    "manager",
+    "vp",
+    "chief",
 }
 JUNIOR_TITLE_KEYWORDS = {"junior", "intern", "trainee", "graduate"}
 
 # --- Education ---
 HIGHER_ED_KEYWORDS = {
-    "bachelor", "master", "msc", "bsc", "phd", "mba", "doctorate",
-    "ing.", "mgr.", "bc.",
+    "bachelor",
+    "master",
+    "msc",
+    "bsc",
+    "phd",
+    "mba",
+    "doctorate",
+    "ing.",
+    "mgr.",
+    "bc.",
 }
 PRESTIGE_INSTITUTION_KEYWORDS = {
-    "mit", "stanford", "harvard", "oxford", "cambridge", "eth",
-    "cvut", "čvut", "vse", "vše", "muni", "uk praha", "charles university",
+    "mit",
+    "stanford",
+    "harvard",
+    "oxford",
+    "cambridge",
+    "eth",
+    "cvut",
+    "čvut",
+    "vse",
+    "vše",
+    "muni",
+    "uk praha",
+    "charles university",
 }
 
 # --- CZ-ISCO IT-relevant code prefixes ---
