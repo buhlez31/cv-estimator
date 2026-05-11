@@ -8,6 +8,7 @@ from cv_estimator.salary import lookup, role_mapping
 @pytest.mark.parametrize(
     "role,expected_code",
     [
+        # Tech
         ("Senior Software Engineer", "2512"),
         ("Software Developer", "2512"),
         ("Data Scientist", "2519"),
@@ -16,9 +17,34 @@ from cv_estimator.salary import lookup, role_mapping
         ("DevOps Engineer", "2523"),
         ("Database Administrator", "2521"),
         ("IT Support Specialist", "3512"),
+        # C-suite
         ("CTO", "1330"),
         ("Head of IT", "1330"),
-        ("Random Title", "2519"),  # fallback
+        ("CEO", "1120"),
+        ("Managing Director", "1120"),
+        ("CFO", "1211"),
+        ("Head of Marketing", "1221"),
+        # Mid management
+        ("Marketing Manager", "1221"),
+        ("Sales Manager", "1221"),
+        ("HR Manager", "1212"),
+        ("Finance Manager", "1211"),
+        # Non-tech professionals
+        ("Lawyer", "2611"),
+        ("Legal Counsel", "2611"),
+        ("Accountant", "2411"),
+        ("Financial Analyst", "2411"),
+        ("Recruiter", "2423"),
+        ("Marketing Specialist", "2431"),
+        ("Doctor", "2211"),
+        ("Registered Nurse", "2221"),
+        ("Pharmacist", "2262"),
+        ("Teacher", "2330"),
+        ("UX Designer", "2166"),
+        ("Customer Success Manager", "4222"),
+        ("Paralegal", "3411"),
+        # Fallback
+        ("Random Title", "2519"),
     ],
 )
 def test_role_mapping(role, expected_code):
