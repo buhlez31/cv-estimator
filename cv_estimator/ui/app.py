@@ -57,7 +57,7 @@ radar.update_layout(
     height=400,
 )
 st.subheader("Breakdown komponent")
-st.plotly_chart(radar, use_container_width=True)
+st.plotly_chart(radar, width="stretch")
 
 # --- Strengths & gaps ---
 c1, c2 = st.columns(2)
