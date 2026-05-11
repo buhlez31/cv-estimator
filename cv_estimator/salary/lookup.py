@@ -7,7 +7,9 @@ import pandas as pd
 from cv_estimator.config import DATA_DIR, SALARY_CEILING, SALARY_FLOOR
 from cv_estimator.models import SalaryEstimate
 
-ISPV_CSV = DATA_DIR / "ispv_2024.csv"
+ISPV_CSV = DATA_DIR / "ispv_2025.csv"
+ISPV_PERIOD = "rok 2025"
+ISPV_SPHERE = "MZDOVA"  # private-sector wages
 
 
 @lru_cache(maxsize=1)
@@ -15,7 +17,7 @@ def _load_ispv() -> pd.DataFrame:
     if not ISPV_CSV.exists():
         raise FileNotFoundError(
             f"ISPV CSV missing at {ISPV_CSV}. "
-            "Run scripts/prepare_ispv_data.py or commit data/ispv_2024.csv."
+            "Run scripts/prepare_ispv_data.py or commit data/ispv_2025.csv."
         )
     df = pd.read_csv(ISPV_CSV, dtype={"cz_isco_code": str})
     df = df.set_index("cz_isco_code")

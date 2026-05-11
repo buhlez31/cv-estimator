@@ -31,8 +31,8 @@ def test_role_mapping_empty_string():
 
 def test_salary_p50_matches_score_50():
     est = lookup.estimate_salary("2512", 50)
-    # P50 from CSV for 2512 is 70000
-    assert est.median == 70_000
+    # P50 from ISPV 2025 CSV for 2512 (Software developer, MZDOVA) is 101103 CZK.
+    assert est.median == 101_103
     assert est.percentile_position == 50
 
 

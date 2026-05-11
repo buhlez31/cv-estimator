@@ -70,11 +70,14 @@ Official Czech earnings statistics, published by the Ministry of Labour and
 Social Affairs with quantiles (P25 / P50 / P75 / P90) per CZ-ISCO occupation
 code. Used by ČSÚ for pension valorization — defensible, free, no scraping.
 
-The committed [`data/ispv_2024.csv`](data/ispv_2024.csv) is a 14-row snapshot
-filtered to IT-relevant CZ-ISCO codes (251x developers, 252x DB / network,
-1330 ICT managers, 351x technicians). The preprocessing path is exposed via
-[`scripts/prepare_ispv_data.py`](scripts/prepare_ispv_data.py) so the table
-can be regenerated when MPSV publishes new figures.
+The committed [`data/ispv_2025.csv`](data/ispv_2025.csv) is a 14-row snapshot
+generated from the official MPSV JSON export (period: `rok 2025`, sphere:
+`MZDOVA` — private-sector wages, where almost all IT employment sits).
+Filtered to IT-relevant CZ-ISCO codes (251x developers, 252x DB / network,
+1330 ICT managers, 351x technicians). The preprocessing pipeline is in
+[`scripts/prepare_ispv_data.py`](scripts/prepare_ispv_data.py); drop the raw
+`ispv-zamestnani.json` into `data/raw/` and the script regenerates the
+lookup table.
 
 **Role → CZ-ISCO mapping** ([`cv_estimator/salary/role_mapping.py`](cv_estimator/salary/role_mapping.py))
 is a priority-ranked keyword rule table — deterministic, testable, no LLM
@@ -153,7 +156,7 @@ cv_estimator/                 # main package — imported via `pip install -e .`
 ├── validation/               # output sanity checks
 ├── prompts/                  # 4 LLM prompts as .md artefacts
 └── ui/app.py                 # Streamlit
-data/ispv_2024.csv            # preprocessed ISPV snapshot
+data/ispv_2025.csv            # preprocessed ISPV snapshot (rok 2025, MZDOVA)
 tests/                        # pytest suite + fixtures
 scripts/                      # CLI entry points
 ```

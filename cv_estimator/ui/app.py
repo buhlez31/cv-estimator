@@ -93,5 +93,7 @@ with st.expander("🔧 Raw JSON output"):
 
 st.caption(
     f"Zpracováno za {result.processing_metadata.get('elapsed_seconds', '?')} s "
-    f"({result.processing_metadata.get('raw_text_chars', 0)} znaků)."
+    f"({result.processing_metadata.get('raw_text_chars', 0)} znaků). "
+    f"Mzda: ISPV {result.processing_metadata.get('ispv_period', '?')}, "
+    f"sféra {result.processing_metadata.get('ispv_sphere', '?')}."
 )

@@ -49,6 +49,8 @@ def analyze_cv(file_bytes: bytes, filename: str) -> CVAnalysis:
             "filename": filename,
             "elapsed_seconds": round(time.time() - started, 2),
             "raw_text_chars": len(raw_text),
+            "ispv_period": lookup.ISPV_PERIOD,
+            "ispv_sphere": lookup.ISPV_SPHERE,
         },
     )
     sanity.validate(result)

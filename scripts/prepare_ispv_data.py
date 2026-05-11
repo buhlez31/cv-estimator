@@ -1,61 +1,106 @@
 #!/usr/bin/env python3
-"""Preprocess raw MPSV / ISPV download → `data/ispv_2024.csv`.
+"""Preprocess raw MPSV / ISPV download → `data/ispv_<year>.csv`.
 
 The ISPV portal (https://data.mpsv.cz/web/data/ispv-zamestnani) publishes
-gross monthly earnings by CZ-ISCO classification with P10/P25/P50/P75/P90
-quantiles. Their raw export is a wide Excel sheet with all professions.
+gross monthly earnings by CZ-ISCO classification with decile / quartile
+breakdowns in JSON, JSON-LD, and JSON-schema form.
 
 This script:
-1. Reads `data/raw/ispv_*.xlsx` (or `.csv`) — gitignored.
+1. Reads `data/raw/ispv-zamestnani.json` (gitignored).
 2. Filters to IT CZ-ISCO codes (prefixes 251x, 252x, 1330, 351x).
-3. Writes the slim 8-column lookup table to `data/ispv_2024.csv`.
-
-If no raw file is present, prints instructions and exits.
+3. Filters to the MZDOVA sphere (private-sector wages; most relevant for IT).
+4. Maps the verbose Czech field names to a slim lookup schema.
+5. Writes the table to `data/ispv_<year>.csv`.
 """
 
+import json
+import re
 import sys
 
 import pandas as pd
 
 from cv_estimator.config import DATA_DIR, IT_ISCO_PREFIXES
 
-RAW_DIR = DATA_DIR / "raw"
-OUTPUT = DATA_DIR / "ispv_2024.csv"
+RAW_FILE = DATA_DIR / "raw" / "ispv-zamestnani.json"
+
+# CZ-ISCO 4-digit → (English label, Czech label). IT-only.
+# Source: ČSÚ CZ-ISCO classifier.
+ROLE_LABELS: dict[str, tuple[str, str]] = {
+    "1330": ("ICT services manager", "Manažer v oblasti ICT"),
+    "2511": ("Systems analyst", "Systémový analytik"),
+    "2512": ("Software developer", "Vývojář software"),
+    "2513": ("Web and multimedia developer", "Vývojář webu a multimédií"),
+    "2514": ("Application programmer", "Aplikační programátor"),
+    "2519": ("Software developer NEC", "Vývojář software jinde neuvedený"),
+    "2521": ("Database designer/administrator", "Návrhář a správce databází"),
+    "2522": ("Systems administrator", "Systémový administrátor"),
+    "2523": ("Computer network professional", "Specialista počítačových sítí"),
+    "2529": ("Database and network professional NEC", "Specialista DB a sítí jinde neuvedený"),
+    "3511": ("ICT operations technician", "Technik provozu ICT"),
+    "3512": ("ICT user support technician", "Technik uživatelské podpory ICT"),
+    "3513": ("Computer network technician", "Technik počítačových sítí"),
+    "3514": ("Web technician", "Webový technik"),
+}
+
+
+def _strip_isco_prefix(value: str) -> str:
+    # "CzIsco/2512" → "2512"
+    return value.rsplit("/", 1)[-1]
+
+
+def _parse_year(period: str) -> int:
+    # "rok 2025" → 2025
+    m = re.search(r"(\d{4})", period)
+    if not m:
+        raise ValueError(f"Could not parse year from period {period!r}")
+    return int(m.group(1))
 
 
 def main() -> int:
-    raw_files = sorted(RAW_DIR.glob("ispv_*.xlsx")) + sorted(RAW_DIR.glob("ispv_*.csv"))
-    if not raw_files:
+    if not RAW_FILE.exists():
         print(
-            "No raw ISPV file found in data/raw/.\n"
+            f"Raw ISPV file not found at {RAW_FILE}.\n"
             "Download from https://data.mpsv.cz/web/data/ispv-zamestnani\n"
-            "and place as data/raw/ispv_<year>.xlsx (or .csv).\n"
-            "The committed data/ispv_2024.csv is a pre-built snapshot."
+            "and place the JSON export as data/raw/ispv-zamestnani.json.",
+            file=sys.stderr,
         )
         return 1
 
-    src = raw_files[-1]
-    print(f"Reading {src} …")
-    df = pd.read_excel(src) if src.suffix == ".xlsx" else pd.read_csv(src)
+    with RAW_FILE.open(encoding="utf-8") as f:
+        items = json.load(f)["polozky"]
 
-    # Expected columns (adapt as needed for the actual ISPV export schema):
-    # KZAM_kod (CZ-ISCO code), KZAM_nazev (role name), P25, P50, P75, P90
-    df.columns = [c.lower() for c in df.columns]
-    code_col = next((c for c in df.columns if "kzam_kod" in c or "isco" in c), None)
-    name_col = next((c for c in df.columns if "kzam_nazev" in c or "nazev" in c), None)
-    if not code_col or not name_col:
-        print(f"Unexpected schema. Columns: {list(df.columns)}", file=sys.stderr)
+    rows = []
+    for it in items:
+        code = _strip_isco_prefix(it["czIsco"])
+        if not any(code.startswith(p) for p in IT_ISCO_PREFIXES):
+            continue
+        # MZDOVA = private-sector wages; PLATOVA = public-sector salaries.
+        # IT in the private sector dominates the market — use MZDOVA as canonical.
+        if it.get("sfera") != "MZDOVA":
+            continue
+        label_en, label_cs = ROLE_LABELS.get(code, (f"CZ-ISCO {code}", f"CZ-ISCO {code}"))
+        rows.append(
+            {
+                "cz_isco_code": code,
+                "role_label_en": label_en,
+                "role_label_cs": label_cs,
+                "p25": int(it["diferenciaceQ1M"]),
+                "p50": int(it["medianMzda"]),
+                "p75": int(it["diferenciaceQ3M"]),
+                "p90": int(it["diferenciaceD9M"]),
+            }
+        )
+
+    if not rows:
+        print("No matching IT rows found.", file=sys.stderr)
         return 2
 
-    df[code_col] = df[code_col].astype(str)
-    mask = df[code_col].str.startswith(IT_ISCO_PREFIXES)
-    sub = df.loc[mask, [code_col, name_col, "p25", "p50", "p75", "p90"]].copy()
-    sub.columns = ["cz_isco_code", "role_label_cs", "p25", "p50", "p75", "p90"]
-    sub.insert(1, "role_label_en", sub["role_label_cs"])  # placeholder, fill manually
-
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    sub.to_csv(OUTPUT, index=False)
-    print(f"Wrote {len(sub)} rows → {OUTPUT}")
+    df = pd.DataFrame(rows).sort_values("cz_isco_code").reset_index(drop=True)
+    year = _parse_year(items[0]["obdobi"])
+    out_path = DATA_DIR / f"ispv_{year}.csv"
+    df.to_csv(out_path, index=False)
+    print(f"Wrote {len(df)} rows → {out_path}")
+    print(df.to_string(index=False))
     return 0
 
 
