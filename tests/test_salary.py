@@ -232,3 +232,58 @@ def test_salary_percentile_position_unaffected_by_region():
     nat = lookup.estimate_salary("2512", 70)
     pra = lookup.estimate_salary("2512", 70, region="CZ010")
     assert nat.percentile_position == pra.percentile_position == 50
+
+
+# ----- Layer C: platy.cz role refinement ---------------------------------
+
+
+def test_platycz_matcher_picks_backend_developer():
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    m = platycz.find_match("Senior Backend Engineer")
+    assert m is not None
+    assert m.position_slug == "backend-developer"
+
+
+def test_platycz_matcher_picks_lawyer_via_alias():
+    """English 'Lawyer' should resolve to Czech Advokát/Právník via alias."""
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    m = platycz.find_match("Lawyer")
+    assert m is not None
+    assert m.position_slug in {"advokat", "pravnik"}
+
+
+def test_platycz_matcher_returns_none_for_garbage():
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    assert platycz.find_match("Quantum Llama Whisperer") is None
+
+
+def test_platycz_matcher_returns_none_for_generic_only():
+    """Input that only contains generic tokens (senior / junior) has no
+    specific signal → no match."""
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    assert platycz.find_match("Senior") is None
+
+
+def test_estimate_salary_uses_platycz_when_match():
+    """Backend Developer + 2512 → median shifts vs ISPV-only baseline."""
+    baseline = lookup.estimate_salary("2512", 70)  # no role
+    refined = lookup.estimate_salary("2512", 70, role="Backend Developer")
+    assert refined.platycz_position == "Backend developer"
+    assert refined.platycz_url and "platy.cz" in refined.platycz_url
+    assert refined.median != baseline.median  # blended away from pure ISPV
+
+
+def test_estimate_salary_unchanged_when_no_match():
+    """Garbage role → no platy.cz match → behaviour identical to no-role."""
+    baseline = lookup.estimate_salary("2512", 70)
+    no_match = lookup.estimate_salary("2512", 70, role="Quantum Llama Whisperer")
+    assert no_match.platycz_position is None
+    assert no_match.median == baseline.median

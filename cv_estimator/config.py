@@ -301,3 +301,10 @@ SALARY_BAND_PCT_LOW = 0.25  # ±25 % widening when sample is thin
 
 # --- Regional wage multipliers (Layer B) ---
 REGIONAL_MULTIPLIERS_PATH = PACKAGE_ROOT / "data" / "regional_multipliers_2025.csv"
+
+# --- platy.cz role refinement (Layer C) ---
+# Weight given to the platy.cz role-title proxy when it overlaps with the
+# CV's analysis_role. ISPV stays the dominant anchor (1 - weight) since
+# it's the official sample; platy.cz refines for role specificity within
+# the occupation class.
+PLATYCZ_BLEND_WEIGHT = 0.40

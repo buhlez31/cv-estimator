@@ -1,9 +1,11 @@
 """CZ-ISCO + seniority score → SalaryEstimate from ISPV quantile table.
 
-Three layers feed the final number:
+Four layers feed the final number:
   1. ISPV base distribution per CZ-ISCO (P10/P25/P50/P75/P90/mean + sample_n)
   2. Bonus + supplement share → total-comp variant
   3. Regional multiplier (Praha, kraje) applied before band interpolation
+  4. platy.cz role-title refinement blended into the bucket-interpolated
+     median when the matcher finds a position-level row for `role`
 """
 
 from functools import lru_cache
@@ -14,12 +16,14 @@ from cv_estimator.config import (
     DATA_DIR,
     HIGH_SAMPLE_THRESHOLD,
     LOW_SAMPLE_THRESHOLD,
+    PLATYCZ_BLEND_WEIGHT,
     SALARY_BAND_PCT_HIGH,
     SALARY_BAND_PCT_LOW,
     SALARY_CEILING,
     SALARY_FLOOR,
 )
 from cv_estimator.models import SalaryEstimate
+from cv_estimator.salary import platycz
 from cv_estimator.salary.region import resolve_region_multiplier
 
 ISPV_CSV = DATA_DIR / "ispv_2025.csv"
@@ -114,6 +118,31 @@ def estimate_salary(
     high = min(SALARY_CEILING, high)
     median = max(low, min(high, median))
 
+    # Layer C — platy.cz role-title refinement. Only fires when the
+    # matcher found a position-level row for the candidate's role.
+    platycz_position: str | None = None
+    platycz_url: str | None = None
+    match = platycz.find_match(role) if role else None
+    if match is not None:
+        # Derive a platy.cz proxy at the candidate's percentile by linear
+        # interpolation inside their P10..P90 band, then bias the same
+        # regional adjustment that ISPV got so absolute amounts stay
+        # comparable.
+        bucket_frac = max(0.0, min(1.0, (percentile - 10) / 80.0))
+        platycz_at_bucket = int((match.p10 + bucket_frac * (match.p90 - match.p10)) * mult)
+        blended = int(
+            median * (1 - PLATYCZ_BLEND_WEIGHT) + platycz_at_bucket * PLATYCZ_BLEND_WEIGHT
+        )
+        if median > 0:
+            ratio = blended / median
+            low = max(SALARY_FLOOR, int(low * ratio))
+            high = min(SALARY_CEILING, int(high * ratio))
+        low = min(low, blended)
+        high = max(high, blended)
+        median = blended
+        platycz_position = match.position_label
+        platycz_url = match.url
+
     # Total-comp = base × (1 + bonus + supplement). ISPV reports as % so divide.
     comp_mult = 1.0 + (bonus_pct / 100.0) + (supplement_pct / 100.0)
     total_comp_low = int(low * comp_mult)
@@ -141,6 +170,8 @@ def estimate_salary(
         confidence=confidence,
         region=region_code,
         region_multiplier=mult,
+        platycz_position=platycz_position,
+        platycz_url=platycz_url,
     )
 
 

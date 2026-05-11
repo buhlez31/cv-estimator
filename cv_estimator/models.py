@@ -62,6 +62,12 @@ class SalaryEstimate(BaseModel):
     region: str | None = None
     region_multiplier: float = 1.0
 
+    # Layer C — platy.cz role refinement. Populated when the matcher found
+    # a role-title-level platy.cz row blended into the median; None when
+    # the ISPV-only number stands.
+    platycz_position: str | None = None
+    platycz_url: str | None = None
+
 
 class Recommendation(BaseModel):
     action: str

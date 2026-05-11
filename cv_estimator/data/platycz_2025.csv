@@ -1,0 +1,514 @@
+category_slug,position_slug,position_label,p10,p90,median_proxy,url
+administrativa,administrativni-pracovnik-referent,"Administrativní pracovník, referent",27762,50329,39045,https://www.platy.cz/platy/administrativa/administrativni-pracovnik-referent
+administrativa,asistent,Asistent,28521,53049,40785,https://www.platy.cz/platy/administrativa/asistent
+administrativa,asistent-projektoveho-manazera,Asistent projektového manažera,32404,55721,44062,https://www.platy.cz/platy/administrativa/asistent-projektoveho-manazera
+administrativa,project-planner,Project planner,41718,92462,67090,https://www.platy.cz/platy/administrativa/project-planner
+administrativa,recepcni,Recepční,24476,41845,33160,https://www.platy.cz/platy/administrativa/recepcni
+administrativa,sekretar,Sekretář,26841,52729,39785,https://www.platy.cz/platy/administrativa/sekretar
+administrativa,specialista-csr,Specialista CSR,37202,69922,53562,https://www.platy.cz/platy/administrativa/specialista-csr
+administrativa,specialista-pro-verejne-zakazky,Specialista pro veřejné zakázky,38082,81746,59914,https://www.platy.cz/platy/administrativa/specialista-pro-verejne-zakazky
+administrativa,spravce-smluv,Správce smluv,34699,72291,53495,https://www.platy.cz/platy/administrativa/spravce-smluv
+administrativa,telefonni-operator,Telefonní operátor,27303,51158,39230,https://www.platy.cz/platy/administrativa/telefonni-operator
+administrativa,vedouci-recepce,Vedoucí recepce,30321,51115,40718,https://www.platy.cz/platy/administrativa/vedouci-recepce
+automobilovy-prumysl,autoelektrikar,Autoelektrikář,32255,63728,47991,https://www.platy.cz/platy/automobilovy-prumysl/autoelektrikar
+automobilovy-prumysl,autoklempir,Autoklempíř,32469,70530,51499,https://www.platy.cz/platy/automobilovy-prumysl/autoklempir
+automobilovy-prumysl,automechanik,Automechanik,28326,62802,45564,https://www.platy.cz/platy/automobilovy-prumysl/automechanik
+automobilovy-prumysl,konstrukter,Konstruktér,41102,75047,58074,https://www.platy.cz/platy/automobilovy-prumysl/konstrukter
+automobilovy-prumysl,kontrolor-kvality,Kontrolor kvality,30136,54444,42290,https://www.platy.cz/platy/automobilovy-prumysl/kontrolor-kvality
+automobilovy-prumysl,lakyrnik,Lakýrník,29669,63516,46592,https://www.platy.cz/platy/automobilovy-prumysl/lakyrnik
+automobilovy-prumysl,pracovnik-pneuservisu,Pracovník pneuservisu,27539,56240,41889,https://www.platy.cz/platy/automobilovy-prumysl/pracovnik-pneuservisu
+automobilovy-prumysl,prijimaci-technik,Přijímací technik,34900,66011,50455,https://www.platy.cz/platy/automobilovy-prumysl/prijimaci-technik
+automobilovy-prumysl,procesni-inzenyr,Procesní inženýr,45936,83056,64496,https://www.platy.cz/platy/automobilovy-prumysl/procesni-inzenyr
+automobilovy-prumysl,technik-udrzby,Technik údržby,35961,66208,51084,https://www.platy.cz/platy/automobilovy-prumysl/technik-udrzby
+automobilovy-prumysl,technolog,Technolog,39690,72401,56045,https://www.platy.cz/platy/automobilovy-prumysl/technolog
+bankovnictvi,custody-specialista,Custody specialista,40125,84746,62435,https://www.platy.cz/platy/bankovnictvi/custody-specialista
+bankovnictvi,dealer-trader,Dealer/Trader,51940,211009,131474,https://www.platy.cz/platy/bankovnictvi/dealer-trader
+bankovnictvi,financni-analytik,Finanční analytik,46807,97942,72374,https://www.platy.cz/platy/bankovnictvi/financni-analytik
+bankovnictvi,hypotecni-specialista,Hypoteční specialista,42538,72259,57398,https://www.platy.cz/platy/bankovnictvi/hypotecni-specialista
+bankovnictvi,klientsky-pracovnik,Klientský pracovník,28483,56135,42309,https://www.platy.cz/platy/bankovnictvi/klientsky-pracovnik
+bankovnictvi,makler,Makléř,38897,139335,89116,https://www.platy.cz/platy/bankovnictvi/makler
+bankovnictvi,osobni-banker,Osobní bankéř,37212,65927,51569,https://www.platy.cz/platy/bankovnictvi/osobni-banker
+bankovnictvi,privatni-banker,Privátní bankéř,52443,118098,85270,https://www.platy.cz/platy/bankovnictvi/privatni-banker
+bankovnictvi,specialista-back-office,Specialista back office,33485,62677,48081,https://www.platy.cz/platy/bankovnictvi/specialista-back-office
+bankovnictvi,specialista-proti-prani-penez,Specialista proti praní peněz,38541,82980,60760,https://www.platy.cz/platy/bankovnictvi/specialista-proti-prani-penez
+bankovnictvi,vztahovy-manazer,Vztahový manažer,55008,159151,107079,https://www.platy.cz/platy/bankovnictvi/vztahovy-manazer
+bezpecnost-a-ochrana,bezpecnostni-specialista,Bezpečnostní specialista,41179,99982,70580,https://www.platy.cz/platy/bezpecnost-a-ochrana/bezpecnostni-specialista
+bezpecnost-a-ochrana,hasic-zachranar,"Hasič, záchranář",33986,69972,51979,https://www.platy.cz/platy/bezpecnost-a-ochrana/hasic-zachranar
+bezpecnost-a-ochrana,policista,Policista,38947,73156,56051,https://www.platy.cz/platy/bezpecnost-a-ochrana/policista
+bezpecnost-a-ochrana,technik-bezpecnostni-sluzby,Technik bezpečnostní služby,36421,72745,54583,https://www.platy.cz/platy/bezpecnost-a-ochrana/technik-bezpecnostni-sluzby
+bezpecnost-a-ochrana,technik-bozp,Technik BOZP,39016,75174,57095,https://www.platy.cz/platy/bezpecnost-a-ochrana/technik-bozp
+bezpecnost-a-ochrana,vezensky-dozorce,Vězeňský dozorce,36349,67866,52107,https://www.platy.cz/platy/bezpecnost-a-ochrana/vezensky-dozorce
+bezpecnost-a-ochrana,vojak,Voják,46936,88231,67583,https://www.platy.cz/platy/bezpecnost-a-ochrana/vojak
+cestovni-ruch-gastronomie-hotelnictvi,barman,Barman,22400,51650,37025,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/barman
+cestovni-ruch-gastronomie-hotelnictvi,cisnik,Číšník,22400,52908,37654,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/cisnik
+cestovni-ruch-gastronomie-hotelnictvi,cisnik-pokojova-sluzba,Číšník - pokojová služba,24172,48738,36455,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/cisnik-pokojova-sluzba
+cestovni-ruch-gastronomie-hotelnictvi,krupier,Krupiér,27647,63137,45392,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/krupier
+cestovni-ruch-gastronomie-hotelnictvi,kuchar,Kuchař,23341,54557,38949,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/kuchar
+cestovni-ruch-gastronomie-hotelnictvi,lodnik,Lodník,39863,95145,67504,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/lodnik
+cestovni-ruch-gastronomie-hotelnictvi,palubni-pruvodci-steward-letuska,Palubní průvodčí/steward/letuška,32556,72126,52341,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/palubni-pruvodci-steward-letuska
+cestovni-ruch-gastronomie-hotelnictvi,plavcik,Plavčík,22464,41136,31800,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/plavcik
+cestovni-ruch-gastronomie-hotelnictvi,pomocny-kuchar,Pomocný kuchař,22400,33909,28154,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/pomocny-kuchar
+cestovni-ruch-gastronomie-hotelnictvi,pracovnik-rychleho-obcerstveni,Pracovník rychlého občerstvení,22400,45374,33887,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/pracovnik-rychleho-obcerstveni
+cestovni-ruch-gastronomie-hotelnictvi,prodejce-letenek-zajezdu,Prodejce letenek/zájezdů,27541,59809,43675,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/prodejce-letenek-zajezdu
+cestovni-ruch-gastronomie-hotelnictvi,provozovatel-lanovky,Provozovatel lanovky,35196,70460,52828,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/provozovatel-lanovky
+cestovni-ruch-gastronomie-hotelnictvi,recepcni,Recepční,26556,44580,35568,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/recepcni
+cestovni-ruch-gastronomie-hotelnictvi,restauracni-pracovnik,Restaurační pracovník,25003,46806,35904,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/restauracni-pracovnik
+cestovni-ruch-gastronomie-hotelnictvi,sefkuchar,Šéfkuchař,33223,91553,62388,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/sefkuchar
+cestovni-ruch-gastronomie-hotelnictvi,sommelier,Sommeliér,29607,58038,43822,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/sommelier
+cestovni-ruch-gastronomie-hotelnictvi,spa-terapeut,Spa terapeut,26754,60567,43660,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/spa-terapeut
+cestovni-ruch-gastronomie-hotelnictvi,spravce-ubytovaciho-zarizeni,Správce ubytovacího zařízení,28176,69150,48663,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/spravce-ubytovaciho-zarizeni
+cestovni-ruch-gastronomie-hotelnictvi,vedouci-zmeny,Vedoucí změny,31211,65150,48180,https://www.platy.cz/platy/cestovni-ruch-gastronomie-hotelnictvi/vedouci-zmeny
+chemicky-prumysl,chemicky-inzenyr,Chemický inženýr,40090,74892,57491,https://www.platy.cz/platy/chemicky-prumysl/chemicky-inzenyr
+chemicky-prumysl,chemicky-laborant,Chemický laborant,29145,49887,39516,https://www.platy.cz/platy/chemicky-prumysl/chemicky-laborant
+chemicky-prumysl,chemik,Chemik,32924,62260,47592,https://www.platy.cz/platy/chemicky-prumysl/chemik
+chemicky-prumysl,technolog,Technolog,37683,73996,55839,https://www.platy.cz/platy/chemicky-prumysl/technolog
+doprava-spedice-logistika,celni-deklarant,Celní deklarant,32060,59425,45742,https://www.platy.cz/platy/doprava-spedice-logistika/celni-deklarant
+doprava-spedice-logistika,dispecer,Dispečer,33157,60681,46919,https://www.platy.cz/platy/doprava-spedice-logistika/dispecer
+doprava-spedice-logistika,disponent,Disponent,35109,60467,47788,https://www.platy.cz/platy/doprava-spedice-logistika/disponent
+doprava-spedice-logistika,dopravni-inzenyr,Dopravní inženýr,38171,76526,57348,https://www.platy.cz/platy/doprava-spedice-logistika/dopravni-inzenyr
+doprava-spedice-logistika,expedient,Expedient,26806,46393,36599,https://www.platy.cz/platy/doprava-spedice-logistika/expedient
+doprava-spedice-logistika,koordinator,Koordinátor,32340,68734,50537,https://www.platy.cz/platy/doprava-spedice-logistika/koordinator
+doprava-spedice-logistika,kuryr,Kurýr,24592,57718,41155,https://www.platy.cz/platy/doprava-spedice-logistika/kuryr
+doprava-spedice-logistika,letecky-inzenyr,Letecký inženýr,49720,115568,82644,https://www.platy.cz/platy/doprava-spedice-logistika/letecky-inzenyr
+doprava-spedice-logistika,letecky-mechanik,Letecký mechanik,32526,84960,58743,https://www.platy.cz/platy/doprava-spedice-logistika/letecky-mechanik
+doprava-spedice-logistika,postovni-dorucovatel,Poštovní doručovatel,24005,31379,27692,https://www.platy.cz/platy/doprava-spedice-logistika/postovni-dorucovatel
+doprava-spedice-logistika,pracovnik-posty,Pracovník pošty,25778,37276,31527,https://www.platy.cz/platy/doprava-spedice-logistika/pracovnik-posty
+doprava-spedice-logistika,pracovnik-rizeni-zeleznicniho-provozu-posunovac,"Pracovník řízení železničního provozu (posunovač,",29656,66344,48000,https://www.platy.cz/platy/doprava-spedice-logistika/pracovnik-rizeni-zeleznicniho-provozu-posunovac
+doprava-spedice-logistika,prepazkovy-pracovnik,Přepážkový pracovník,27705,37923,32814,https://www.platy.cz/platy/doprava-spedice-logistika/prepazkovy-pracovnik
+doprava-spedice-logistika,pruvodci-vlaku,Průvodčí vlaků,31775,67049,49412,https://www.platy.cz/platy/doprava-spedice-logistika/pruvodci-vlaku
+doprava-spedice-logistika,ridic,Řidič,27115,50908,39011,https://www.platy.cz/platy/doprava-spedice-logistika/ridic
+doprava-spedice-logistika,ridic-autobusu,Řidič autobusu,33864,73216,53540,https://www.platy.cz/platy/doprava-spedice-logistika/ridic-autobusu
+doprava-spedice-logistika,ridic-kamionu,Řidič kamionu,29277,73345,51311,https://www.platy.cz/platy/doprava-spedice-logistika/ridic-kamionu
+doprava-spedice-logistika,ridic-osobniho-vozu,Řidič osobního vozu,24858,54482,39670,https://www.platy.cz/platy/doprava-spedice-logistika/ridic-osobniho-vozu
+doprava-spedice-logistika,ridic-taxiku,Řidič taxíku,31093,76967,54030,https://www.platy.cz/platy/doprava-spedice-logistika/ridic-taxiku
+doprava-spedice-logistika,ridic-tramvaje,Řidič tramvaje,39703,74398,57050,https://www.platy.cz/platy/doprava-spedice-logistika/ridic-tramvaje
+doprava-spedice-logistika,skladnik,Skladník,26911,46513,36712,https://www.platy.cz/platy/doprava-spedice-logistika/skladnik
+doprava-spedice-logistika,strojvedouci,Strojvedoucí,38216,79502,58859,https://www.platy.cz/platy/doprava-spedice-logistika/strojvedouci
+doprava-spedice-logistika,vypravci,Výpravčí,33495,62011,47753,https://www.platy.cz/platy/doprava-spedice-logistika/vypravci
+drevozpracujici-prumysl,drevarsky-inzenyr,Dřevařský inženýr,33769,63779,48774,https://www.platy.cz/platy/drevozpracujici-prumysl/drevarsky-inzenyr
+drevozpracujici-prumysl,drevarsky-technik,Dřevařský technik,27648,58158,42903,https://www.platy.cz/platy/drevozpracujici-prumysl/drevarsky-technik
+drevozpracujici-prumysl,drevorubec,Dřevorubec,26218,61708,43963,https://www.platy.cz/platy/drevozpracujici-prumysl/drevorubec
+drevozpracujici-prumysl,nabytkar,Nábytkář,22836,49171,36003,https://www.platy.cz/platy/drevozpracujici-prumysl/nabytkar
+drevozpracujici-prumysl,truhlar,Truhlář,25431,46231,35831,https://www.platy.cz/platy/drevozpracujici-prumysl/truhlar
+ekonomika-finance-ucetnictvi,analytik-dat,Analytik dat,43257,89573,66415,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/analytik-dat
+ekonomika-finance-ucetnictvi,asistent-auditora,Asistent auditora,38469,62880,50674,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/asistent-auditora
+ekonomika-finance-ucetnictvi,asistent-danoveho-poradce,Asistent daňového poradce,35779,59159,47469,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/asistent-danoveho-poradce
+ekonomika-finance-ucetnictvi,asistent-financniho-kontrolora,Asistent finančního kontrolora,36719,82311,59515,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/asistent-financniho-kontrolora
+ekonomika-finance-ucetnictvi,auditor,Auditor,40896,128441,84668,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/auditor
+ekonomika-finance-ucetnictvi,controller,Controller,46574,95158,70866,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/controller
+ekonomika-finance-ucetnictvi,danovy-poradce,Daňový poradce,51457,132258,91857,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/danovy-poradce
+ekonomika-finance-ucetnictvi,dph-specialista,DPH specialista,35794,90585,63189,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/dph-specialista
+ekonomika-finance-ucetnictvi,ekonom,Ekonom,37567,87407,62487,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/ekonom
+ekonomika-finance-ucetnictvi,fakturant,Fakturant,28864,48494,38679,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/fakturant
+ekonomika-finance-ucetnictvi,financni-agent,Finanční agent,45935,82783,64359,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/financni-agent
+ekonomika-finance-ucetnictvi,financni-poradce,Finanční poradce,37556,131254,84405,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/financni-poradce
+ekonomika-finance-ucetnictvi,hlavni-ucetni,Hlavní účetní,36940,80945,58942,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/hlavni-ucetni
+ekonomika-finance-ucetnictvi,junior-statistik,Junior statistik,33768,60840,47304,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/junior-statistik
+ekonomika-finance-ucetnictvi,konzultant,Konzultant,39098,108072,73585,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/konzultant
+ekonomika-finance-ucetnictvi,manazer-ucetnich-sluzeb,Manažer účetních služeb,59395,142301,100848,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/manazer-ucetnich-sluzeb
+ekonomika-finance-ucetnictvi,mzdovy-ucetni,Mzdový účetní,34050,61848,47949,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/mzdovy-ucetni
+ekonomika-finance-ucetnictvi,rozpoctar-kalkulant,Rozpočtář/kalkulant,34114,68376,51245,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/rozpoctar-kalkulant
+ekonomika-finance-ucetnictvi,senior-ucetni,Senior účetní,38609,73446,56027,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/senior-ucetni
+ekonomika-finance-ucetnictvi,statistik,Statistik,34008,78606,56307,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/statistik
+ekonomika-finance-ucetnictvi,treasury-specialista,Treasury specialista,45738,146242,95990,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/treasury-specialista
+ekonomika-finance-ucetnictvi,ucetni,Účetní,32375,56877,44626,https://www.platy.cz/platy/ekonomika-finance-ucetnictvi/ucetni
+elektrotechnika-a-energetika,elektrikar,Elektrikář,30914,61278,46096,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektrikar
+elektrotechnika-a-energetika,elektromechanik,Elektromechanik,32921,60591,46756,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektromechanik
+elektrotechnika-a-energetika,elektromonter,Elektromontér,31573,59476,45524,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektromonter
+elektrotechnika-a-energetika,elektronik,Elektronik,35952,76451,56201,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektronik
+elektrotechnika-a-energetika,elektrotechnicky-inzenyr,Elektrotechnický inženýr,48078,95083,71580,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektrotechnicky-inzenyr
+elektrotechnika-a-energetika,elektrotechnik,Elektrotechnik,34787,65839,50313,https://www.platy.cz/platy/elektrotechnika-a-energetika/elektrotechnik
+elektrotechnika-a-energetika,energetik,Energetik,40873,88330,64601,https://www.platy.cz/platy/elektrotechnika-a-energetika/energetik
+elektrotechnika-a-energetika,instalator-telekomunikacni-site,Instalátor telekomunikační sítě,32698,66146,49422,https://www.platy.cz/platy/elektrotechnika-a-energetika/instalator-telekomunikacni-site
+elektrotechnika-a-energetika,konstrukter,Konstruktér,43522,77807,60664,https://www.platy.cz/platy/elektrotechnika-a-energetika/konstrukter
+elektrotechnika-a-energetika,obsluha-energetickych-zarizeni,Obsluha energetických zařízení,35247,78685,56966,https://www.platy.cz/platy/elektrotechnika-a-energetika/obsluha-energetickych-zarizeni
+elektrotechnika-a-energetika,opravar,Opravář,33569,53480,43524,https://www.platy.cz/platy/elektrotechnika-a-energetika/opravar
+elektrotechnika-a-energetika,procesni-inzenyr,Procesní inženýr,44019,81164,62591,https://www.platy.cz/platy/elektrotechnika-a-energetika/procesni-inzenyr
+elektrotechnika-a-energetika,programator-plc,Programátor PLC,45305,89031,67168,https://www.platy.cz/platy/elektrotechnika-a-energetika/programator-plc
+elektrotechnika-a-energetika,projektant,Projektant,39238,79419,59328,https://www.platy.cz/platy/elektrotechnika-a-energetika/projektant
+elektrotechnika-a-energetika,revizni-technik,Revizní technik,35442,69959,52700,https://www.platy.cz/platy/elektrotechnika-a-energetika/revizni-technik
+elektrotechnika-a-energetika,servisni-inzenyr,Servisní inženýr,48108,87707,67907,https://www.platy.cz/platy/elektrotechnika-a-energetika/servisni-inzenyr
+elektrotechnika-a-energetika,servisni-technik,Servisní technik,35610,69788,52699,https://www.platy.cz/platy/elektrotechnika-a-energetika/servisni-technik
+elektrotechnika-a-energetika,technik,Technik,35123,61131,48127,https://www.platy.cz/platy/elektrotechnika-a-energetika/technik
+elektrotechnika-a-energetika,technik-udrzby,Technik údržby,37988,68552,53270,https://www.platy.cz/platy/elektrotechnika-a-energetika/technik-udrzby
+farmaceuticky-prumysl,farmaceut,Farmaceut,46927,80111,63519,https://www.platy.cz/platy/farmaceuticky-prumysl/farmaceut
+farmaceuticky-prumysl,farmaceuticky-laborant,Farmaceutický laborant,35014,54229,44621,https://www.platy.cz/platy/farmaceuticky-prumysl/farmaceuticky-laborant
+farmaceuticky-prumysl,hlavni-farmaceut,Hlavní farmaceut,58418,98664,78541,https://www.platy.cz/platy/farmaceuticky-prumysl/hlavni-farmaceut
+farmaceuticky-prumysl,lekarsky-poradce-medical-advisor,Lékařský poradce (Medical advisor),81095,159852,120473,https://www.platy.cz/platy/farmaceuticky-prumysl/lekarsky-poradce-medical-advisor
+farmaceuticky-prumysl,monitor-klinickych-studii,Monitor klinických studií,54851,116368,85609,https://www.platy.cz/platy/farmaceuticky-prumysl/monitor-klinickych-studii
+farmaceuticky-prumysl,spravce-klinickych-dat,Správce klinických dat,39589,128393,83991,https://www.platy.cz/platy/farmaceuticky-prumysl/spravce-klinickych-dat
+hornictvi-hutnictvi-tezba,inzenyr-v-ropnem-prumyslu,Inženýr v ropném průmyslu,50158,123173,86665,https://www.platy.cz/platy/hornictvi-hutnictvi-tezba/inzenyr-v-ropnem-prumyslu
+hornictvi-hutnictvi-tezba,slevac,Slévač,30231,70710,50470,https://www.platy.cz/platy/hornictvi-hutnictvi-tezba/slevac
+informacni-technologie,agile-coach,Agile coach,46723,184719,115721,https://www.platy.cz/platy/informacni-technologie/agile-coach
+informacni-technologie,ai-inzenyr,AI inženýr,50871,134582,92726,https://www.platy.cz/platy/informacni-technologie/ai-inzenyr
+informacni-technologie,backend-developer,Backend developer,49594,136145,92869,https://www.platy.cz/platy/informacni-technologie/backend-developer
+informacni-technologie,business-intelligence-specialist,Business Intelligence Specialist,50504,114134,82319,https://www.platy.cz/platy/informacni-technologie/business-intelligence-specialist
+informacni-technologie,cloud-specialista,Cloud specialista,61877,139152,100514,https://www.platy.cz/platy/informacni-technologie/cloud-specialista
+informacni-technologie,data-protection-officer,Data Protection Officer,43688,125549,84618,https://www.platy.cz/platy/informacni-technologie/data-protection-officer
+informacni-technologie,data-scientist,Data scientist,55660,122661,89160,https://www.platy.cz/platy/informacni-technologie/data-scientist
+informacni-technologie,databazovy-administrator,Databázový administrátor,41552,112880,77216,https://www.platy.cz/platy/informacni-technologie/databazovy-administrator
+informacni-technologie,databazovy-analytik,Databázový analytik,46507,100527,73517,https://www.platy.cz/platy/informacni-technologie/databazovy-analytik
+informacni-technologie,designer-her,Designer her,43101,120132,81616,https://www.platy.cz/platy/informacni-technologie/designer-her
+informacni-technologie,devops-specialista,DevOps specialista,62028,155412,108720,https://www.platy.cz/platy/informacni-technologie/devops-specialista
+informacni-technologie,erp-programator,ERP programátor,44370,105726,75048,https://www.platy.cz/platy/informacni-technologie/erp-programator
+informacni-technologie,frontend-developer,Frontend developer,45334,115014,80174,https://www.platy.cz/platy/informacni-technologie/frontend-developer
+informacni-technologie,game-developer,Game developer,38301,101345,69823,https://www.platy.cz/platy/informacni-technologie/game-developer
+informacni-technologie,go-programator,Go programator,55336,159473,107404,https://www.platy.cz/platy/informacni-technologie/go-programator
+informacni-technologie,hlavni-vyvojar,Hlavní vývojář,62742,171125,116933,https://www.platy.cz/platy/informacni-technologie/hlavni-vyvojar
+informacni-technologie,incident-manager,Incident manager,49930,112149,81039,https://www.platy.cz/platy/informacni-technologie/incident-manager
+informacni-technologie,ios-programator,iOS programátor,74695,181335,128015,https://www.platy.cz/platy/informacni-technologie/ios-programator
+informacni-technologie,it-analytik,IT analytik,47855,111722,79788,https://www.platy.cz/platy/informacni-technologie/it-analytik
+informacni-technologie,it-architekt,IT architekt,78003,183937,130970,https://www.platy.cz/platy/informacni-technologie/it-architekt
+informacni-technologie,it-auditor,IT auditor,54504,123236,88870,https://www.platy.cz/platy/informacni-technologie/it-auditor
+informacni-technologie,it-business-analyst,IT Business Analyst,54228,113814,84021,https://www.platy.cz/platy/informacni-technologie/it-business-analyst
+informacni-technologie,it-konzultant,IT konzultant,45235,119978,82606,https://www.platy.cz/platy/informacni-technologie/it-konzultant
+informacni-technologie,it-projektovy-manazer,IT projektový manažer,55259,134861,95060,https://www.platy.cz/platy/informacni-technologie/it-projektovy-manazer
+informacni-technologie,it-tester,IT tester,38199,82938,60568,https://www.platy.cz/platy/informacni-technologie/it-tester
+informacni-technologie,it-tester-automatizovane-testy,IT tester - automatizované testy,46196,106739,76467,https://www.platy.cz/platy/informacni-technologie/it-tester-automatizovane-testy
+informacni-technologie,mikrokontroler-programator,Mikrokontrolér programátor,48903,111693,80298,https://www.platy.cz/platy/informacni-technologie/mikrokontroler-programator
+informacni-technologie,problem-manager,Problem Manager,51220,133072,92146,https://www.platy.cz/platy/informacni-technologie/problem-manager
+informacni-technologie,programator,Programátor,42314,131104,86709,https://www.platy.cz/platy/informacni-technologie/programator
+informacni-technologie,programator-abap,Programátor ABAP,48596,137225,92910,https://www.platy.cz/platy/informacni-technologie/programator-abap
+informacni-technologie,programator-aspdotnet,Programátor ASP.NET,42048,105251,73649,https://www.platy.cz/platy/informacni-technologie/programator-aspdotnet
+informacni-technologie,programator-cpp,Programátor C++,53473,114067,83770,https://www.platy.cz/platy/informacni-technologie/programator-cpp
+informacni-technologie,programator-dotnet,Programátor .NET,46801,115909,81355,https://www.platy.cz/platy/informacni-technologie/programator-dotnet
+informacni-technologie,programator-java,Programátor Java,49983,133654,91818,https://www.platy.cz/platy/informacni-technologie/programator-java
+informacni-technologie,programator-javascript,Programátor Javascript,46229,130153,88191,https://www.platy.cz/platy/informacni-technologie/programator-javascript
+informacni-technologie,programator-objective-c,Programátor Objective-C,39249,150204,94726,https://www.platy.cz/platy/informacni-technologie/programator-objective-c
+informacni-technologie,programator-oracle,Programátor Oracle,57541,116151,86846,https://www.platy.cz/platy/informacni-technologie/programator-oracle
+informacni-technologie,programator-perl,Programátor Perl,36705,102809,69757,https://www.platy.cz/platy/informacni-technologie/programator-perl
+informacni-technologie,programator-php,Programátor PHP,46079,107955,77017,https://www.platy.cz/platy/informacni-technologie/programator-php
+informacni-technologie,r-programator,R programátor,41392,100795,71093,https://www.platy.cz/platy/informacni-technologie/r-programator
+informacni-technologie,rpa-inzenyr,RPA inženýr,59790,218180,138985,https://www.platy.cz/platy/informacni-technologie/rpa-inzenyr
+informacni-technologie,ruby-developer-programmer,Ruby Developer / Programmer,50713,147449,99081,https://www.platy.cz/platy/informacni-technologie/ruby-developer-programmer
+informacni-technologie,sap-konzultant,SAP konzultant,50017,176969,113493,https://www.platy.cz/platy/informacni-technologie/sap-konzultant
+informacni-technologie,sap-specialista,SAP specialista,50136,125908,88022,https://www.platy.cz/platy/informacni-technologie/sap-specialista
+informacni-technologie,servisni-inzenyr,Servisní inženýr,40219,103203,71711,https://www.platy.cz/platy/informacni-technologie/servisni-inzenyr
+informacni-technologie,servisni-technik,Servisní technik,32454,59540,45997,https://www.platy.cz/platy/informacni-technologie/servisni-technik
+informacni-technologie,softwarovy-inzenyr,Softwarový inženýr,59773,166000,112886,https://www.platy.cz/platy/informacni-technologie/softwarovy-inzenyr
+informacni-technologie,softwarovy-konzultant,Softwarový konzultant,41851,132982,87416,https://www.platy.cz/platy/informacni-technologie/softwarovy-konzultant
+informacni-technologie,solution-architekt,Solution architekt,64089,212659,138374,https://www.platy.cz/platy/informacni-technologie/solution-architekt
+informacni-technologie,specialista-it-bezpecnosti,Specialista IT bezpečnosti,48018,128940,88479,https://www.platy.cz/platy/informacni-technologie/specialista-it-bezpecnosti
+informacni-technologie,specialista-technicke-podpory-it,Specialista technické podpory/IT,37711,71530,54620,https://www.platy.cz/platy/informacni-technologie/specialista-technicke-podpory-it
+informacni-technologie,spravce-informacniho-systemu,Správce informačního systému,39841,87377,63609,https://www.platy.cz/platy/informacni-technologie/spravce-informacniho-systemu
+informacni-technologie,spravce-pocitacove-site,Správce počítačové sítě,38725,88587,63656,https://www.platy.cz/platy/informacni-technologie/spravce-pocitacove-site
+informacni-technologie,sre-site-reliability-engineer,SRE – Site Reliability Engineer,60101,220819,140460,https://www.platy.cz/platy/informacni-technologie/sre-site-reliability-engineer
+informacni-technologie,systemovy-administrator,Systémový administrátor,41786,91855,66820,https://www.platy.cz/platy/informacni-technologie/systemovy-administrator
+informacni-technologie,systemovy-inzenyr,Systémový inženýr,51338,112917,82127,https://www.platy.cz/platy/informacni-technologie/systemovy-inzenyr
+informacni-technologie,technical-writer,Technical writer,44224,94741,69482,https://www.platy.cz/platy/informacni-technologie/technical-writer
+informacni-technologie,user-experience-expert,User Experience Expert,50858,131172,91015,https://www.platy.cz/platy/informacni-technologie/user-experience-expert
+informacni-technologie,web-designer,Web designér,44197,102131,73164,https://www.platy.cz/platy/informacni-technologie/web-designer
+informacni-technologie,webmaster,Webmaster,33146,75468,54307,https://www.platy.cz/platy/informacni-technologie/webmaster
+leasing,referent-spravy-pohledavek,Referent správy pohledávek,23094,71084,47089,https://www.platy.cz/platy/leasing/referent-spravy-pohledavek
+leasing,vedouci-oddeleni-leasingu,Vedoucí oddělení leasingu,60295,256287,158291,https://www.platy.cz/platy/leasing/vedouci-oddeleni-leasingu
+lidske-zdroje-a-personalistika,hr-asistent,HR asistent,32748,56613,44680,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/hr-asistent
+lidske-zdroje-a-personalistika,hr-business-partner,HR Business Partner,50232,97321,73776,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/hr-business-partner
+lidske-zdroje-a-personalistika,hr-koordinator,HR Koordinátor,37604,62218,49911,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/hr-koordinator
+lidske-zdroje-a-personalistika,lektor-skolitel,"Lektor, školitel",34998,80907,57952,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/lektor-skolitel
+lidske-zdroje-a-personalistika,pracovni-psycholog,Pracovní psycholog,34802,68930,51866,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/pracovni-psycholog
+lidske-zdroje-a-personalistika,recruiter-specialista-pro-nabor,"Recruiter, specialista pro nábor",37000,75356,56178,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/recruiter-specialista-pro-nabor
+lidske-zdroje-a-personalistika,specialista-odmenovani-a-benefitu,Specialista odměňování a benefitů,48369,84728,66548,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/specialista-odmenovani-a-benefitu
+lidske-zdroje-a-personalistika,specialista-pro-vzdelavani,Specialista pro vzdělávání,39050,78963,59006,https://www.platy.cz/platy/lidske-zdroje-a-personalistika/specialista-pro-vzdelavani
+management,art-director,Art director,47532,101892,74712,https://www.platy.cz/platy/management/art-director
+management,brand-manager,Brand manager,46348,104995,75671,https://www.platy.cz/platy/management/brand-manager
+management,business-development-manager,Business Development Manager,54610,150088,102349,https://www.platy.cz/platy/management/business-development-manager
+management,contract-manager,Contract Manager,51461,109512,80486,https://www.platy.cz/platy/management/contract-manager
+management,design-manager,Design manager,50001,152933,101467,https://www.platy.cz/platy/management/design-manager
+management,esg-manazer,ESG manažer,50562,115500,83031,https://www.platy.cz/platy/management/esg-manazer
+management,facility-manager,Facility manager,42383,83392,62887,https://www.platy.cz/platy/management/facility-manager
+management,manazer-bezpecnostni-sluzby,Manažer bezpečnostní služby,35395,131512,83453,https://www.platy.cz/platy/management/manazer-bezpecnostni-sluzby
+management,manazer-call-centra,Manažer call centra,47353,113189,80271,https://www.platy.cz/platy/management/manazer-call-centra
+management,manazer-hotelu,Manažér hotelu,38658,81782,60220,https://www.platy.cz/platy/management/manazer-hotelu
+management,manazer-kvality,Manažer kvality,45060,114433,79746,https://www.platy.cz/platy/management/manazer-kvality
+management,manazer-reklamacniho-oddeleni,Manažer reklamačního oddělení,37764,90134,63949,https://www.platy.cz/platy/management/manazer-reklamacniho-oddeleni
+management,manazer-restaurace,Manažer restaurace,32405,79719,56062,https://www.platy.cz/platy/management/manazer-restaurace
+management,manazer-vozoveho-parku,Manažer vozového parku,40893,80815,60854,https://www.platy.cz/platy/management/manazer-vozoveho-parku
+management,marketingovy-manazer,Marketingový manažer,44119,109823,76971,https://www.platy.cz/platy/management/marketingovy-manazer
+management,mistr-ve-vyrobe,Mistr ve výrobě,36955,67829,52392,https://www.platy.cz/platy/management/mistr-ve-vyrobe
+management,obchodni-manazer,Obchodní manažer,44376,131230,87803,https://www.platy.cz/platy/management/obchodni-manazer
+management,personalni-manazer,Personální manažer,53335,137342,95338,https://www.platy.cz/platy/management/personalni-manazer
+management,procesni-manazer,Procesní manažer,50428,113755,82091,https://www.platy.cz/platy/management/procesni-manazer
+management,projektovy-manazer,Projektový manažer,45042,101463,73252,https://www.platy.cz/platy/management/projektovy-manazer
+management,provozar,Provozář,29212,61706,45459,https://www.platy.cz/platy/management/provozar
+management,regionalni-oblastni-manazer,Regionální / Oblastní manažer,47993,131780,89886,https://www.platy.cz/platy/management/regionalni-oblastni-manazer
+management,risk-manager,Risk manager,52317,142196,97256,https://www.platy.cz/platy/management/risk-manager
+management,sefredaktor,Šéfredaktor,36198,91136,63667,https://www.platy.cz/platy/management/sefredaktor
+management,senior-projektovy-manazer,Senior projektový manažer,59752,143703,101727,https://www.platy.cz/platy/management/senior-projektovy-manazer
+management,team-leader,Team leader,42565,110237,76401,https://www.platy.cz/platy/management/team-leader
+management,technicky-manazer,Technický manažer,53412,151290,102351,https://www.platy.cz/platy/management/technicky-manazer
+management,testing-manager,Testing manager,59974,133909,96941,https://www.platy.cz/platy/management/testing-manager
+management,vedouci-controllingu,Vedoucí controllingu,58630,166728,112679,https://www.platy.cz/platy/management/vedouci-controllingu
+management,vedouci-dopravy,Vedoucí dopravy,42298,90309,66303,https://www.platy.cz/platy/management/vedouci-dopravy
+management,vedouci-nakupu,Vedoucí nákupu,43896,120020,81958,https://www.platy.cz/platy/management/vedouci-nakupu
+management,vedouci-obchodni-skupiny,Vedoucí obchodní skupiny,40622,144236,92429,https://www.platy.cz/platy/management/vedouci-obchodni-skupiny
+management,vedouci-odbytu,Vedoucí odbytu,30803,102672,66737,https://www.platy.cz/platy/management/vedouci-odbytu
+management,vedouci-oddeleni,Vedoucí oddělení,40800,102813,71806,https://www.platy.cz/platy/management/vedouci-oddeleni
+management,vedouci-oddeleni-mestskeho-uradu,Vedoucí oddělení městského úřadu,40446,71167,55806,https://www.platy.cz/platy/management/vedouci-oddeleni-mestskeho-uradu
+management,vedouci-posty,Vedoucí pošty,29370,50153,39761,https://www.platy.cz/platy/management/vedouci-posty
+management,vedouci-pravniho-oddeleni,Vedoucí právního oddělení,62442,233583,148012,https://www.platy.cz/platy/management/vedouci-pravniho-oddeleni
+management,vedouci-servisu,Vedoucí servisu,40450,93894,67172,https://www.platy.cz/platy/management/vedouci-servisu
+management,vedouci-udrzby,Vedoucí údržby,44252,91746,67999,https://www.platy.cz/platy/management/vedouci-udrzby
+management,vedouci-vyroby,Vedoucí výroby,44061,100316,72188,https://www.platy.cz/platy/management/vedouci-vyroby
+management,vedouci-vyvoje-produktu,Vedoucí vývoje produktu,55942,178558,117250,https://www.platy.cz/platy/management/vedouci-vyvoje-produktu
+management,vedouci-zakaznicke-podpory,Vedoucí zákaznické podpory,38662,94796,66729,https://www.platy.cz/platy/management/vedouci-zakaznicke-podpory
+management-kvality,kontrolor-kvality,Kontrolor kvality,32166,56618,44392,https://www.platy.cz/platy/management-kvality/kontrolor-kvality
+management-kvality,planovac-kvality,Plánovač kvality,38508,79046,58777,https://www.platy.cz/platy/management-kvality/planovac-kvality
+management-kvality,specialista-iso,Specialista ISO,37995,76167,57081,https://www.platy.cz/platy/management-kvality/specialista-iso
+marketing-reklama-pr,account-executive,Account executive,33943,58016,45979,https://www.platy.cz/platy/marketing-reklama-pr/account-executive
+marketing-reklama-pr,account-manager,Account manager,42895,82231,62563,https://www.platy.cz/platy/marketing-reklama-pr/account-manager
+marketing-reklama-pr,copywriter,Copywriter,34974,71695,53334,https://www.platy.cz/platy/marketing-reklama-pr/copywriter
+marketing-reklama-pr,crm-specialista,CRM specialista,40433,78684,59558,https://www.platy.cz/platy/marketing-reklama-pr/crm-specialista
+marketing-reklama-pr,digital-marketing-manager,Digital marketing manager,46364,112286,79325,https://www.platy.cz/platy/marketing-reklama-pr/digital-marketing-manager
+marketing-reklama-pr,graficky-designer,Grafický designér,32341,63773,48057,https://www.platy.cz/platy/marketing-reklama-pr/graficky-designer
+marketing-reklama-pr,marketingovy-pracovnik,Marketingový pracovník,30804,59838,45321,https://www.platy.cz/platy/marketing-reklama-pr/marketingovy-pracovnik
+marketing-reklama-pr,marketingovy-specialista,Marketingový specialista,35418,67048,51233,https://www.platy.cz/platy/marketing-reklama-pr/marketingovy-specialista
+marketing-reklama-pr,media-buyer,Media buyer,46245,72958,59601,https://www.platy.cz/platy/marketing-reklama-pr/media-buyer
+marketing-reklama-pr,media-planner,Media planner,41535,87398,64466,https://www.platy.cz/platy/marketing-reklama-pr/media-planner
+marketing-reklama-pr,ppc-specialista,PPC specialista,37801,73191,55496,https://www.platy.cz/platy/marketing-reklama-pr/ppc-specialista
+marketing-reklama-pr,produktovy-manazer,Produktový manažer,38341,101104,69722,https://www.platy.cz/platy/marketing-reklama-pr/produktovy-manazer
+marketing-reklama-pr,seo-analytik,SEO analytik,36063,77677,56870,https://www.platy.cz/platy/marketing-reklama-pr/seo-analytik
+marketing-reklama-pr,social-media-specialist,Social media specialist,32930,65662,49296,https://www.platy.cz/platy/marketing-reklama-pr/social-media-specialist
+marketing-reklama-pr,specialista-interni-komunikace,Specialista interní komunikace,42217,79320,60768,https://www.platy.cz/platy/marketing-reklama-pr/specialista-interni-komunikace
+marketing-reklama-pr,specialista-marketingovych-analyz,Specialista marketingových analýz,40187,85757,62972,https://www.platy.cz/platy/marketing-reklama-pr/specialista-marketingovych-analyz
+obchod,account-manager,Account manager,41649,97834,69741,https://www.platy.cz/platy/obchod/account-manager
+obchod,administrator-internetoveho-obchodu,Administrator internetového obchodu,27227,51174,39200,https://www.platy.cz/platy/obchod/administrator-internetoveho-obchodu
+obchod,bookmaker,Bookmaker,50758,74513,62635,https://www.platy.cz/platy/obchod/bookmaker
+obchod,doplnovac-zbozi-merchandiser,Doplňovač zboží/merchandiser,25111,44122,34616,https://www.platy.cz/platy/obchod/doplnovac-zbozi-merchandiser
+obchod,e-commerce-specialist,E-commerce specialist,37502,63897,50699,https://www.platy.cz/platy/obchod/e-commerce-specialist
+obchod,junior-obchodni-zastupce,Junior obchodní zástupce,35055,64138,49596,https://www.platy.cz/platy/obchod/junior-obchodni-zastupce
+obchod,obchodni-konzultant,Obchodní konzultant,32777,92530,62653,https://www.platy.cz/platy/obchod/obchodni-konzultant
+obchod,obchodni-referent,Obchodní referent,30659,54091,42375,https://www.platy.cz/platy/obchod/obchodni-referent
+obchod,obchodni-zastupce,Obchodní zástupce,37314,80251,58782,https://www.platy.cz/platy/obchod/obchodni-zastupce
+obchod,odborny-prodejce,Odborný prodejce,27678,56609,42143,https://www.platy.cz/platy/obchod/odborny-prodejce
+obchod,prodavac,Prodavač,22434,39235,30834,https://www.platy.cz/platy/obchod/prodavac
+obchod,prodavac-automobilu,Prodavač automobilů,32264,71438,51851,https://www.platy.cz/platy/obchod/prodavac-automobilu
+obchod,prodejni-inzenyr,Prodejní inženýr,45009,112033,78521,https://www.platy.cz/platy/obchod/prodejni-inzenyr
+obchod,produktovy-manazer,Produktový manažer,38747,94115,66431,https://www.platy.cz/platy/obchod/produktovy-manazer
+obchod,referent-odbytu,Referent odbytu,30982,49293,40137,https://www.platy.cz/platy/obchod/referent-odbytu
+obchod,senior-obchodni-zastupce,Senior obchodní zástupce,44978,106756,75867,https://www.platy.cz/platy/obchod/senior-obchodni-zastupce
+obchod,telemarketingovy-pracovnik,Telemarketingový pracovník,23333,62324,42828,https://www.platy.cz/platy/obchod/telemarketingovy-pracovnik
+obchod,vedouci-useku-prodejny,Vedoucí úseku prodejny,30979,55792,43385,https://www.platy.cz/platy/obchod/vedouci-useku-prodejny
+obchod,visual-merchandiser,Visual merchandiser,29499,52648,41073,https://www.platy.cz/platy/obchod/visual-merchandiser
+obchod,zastupce-vedouciho-prodejny,Zástupce vedoucího prodejny,28479,53559,41019,https://www.platy.cz/platy/obchod/zastupce-vedouciho-prodejny
+pojistovnictvi,likvidator-skod,Likvidátor škod,36932,66536,51734,https://www.platy.cz/platy/pojistovnictvi/likvidator-skod
+pojistovnictvi,pojistovaci-poradce,Pojišťovací poradce,27950,90712,59331,https://www.platy.cz/platy/pojistovnictvi/pojistovaci-poradce
+pojistovnictvi,referent-spravy-registru,Referent správy registrů,30226,65780,48003,https://www.platy.cz/platy/pojistovnictvi/referent-spravy-registru
+pojistovnictvi,referent-spravy-smluv,Referent správy smluv,29858,59579,44718,https://www.platy.cz/platy/pojistovnictvi/referent-spravy-smluv
+pojistovnictvi,referent-vyberu-pojistneho,Referent výběru pojistného,28548,61018,44783,https://www.platy.cz/platy/pojistovnictvi/referent-vyberu-pojistneho
+pojistovnictvi,referent-zuctovani,Referent zúčtování,33107,57307,45207,https://www.platy.cz/platy/pojistovnictvi/referent-zuctovani
+pojistovnictvi,revizni-lekar,Revizní lékař,50489,120260,85374,https://www.platy.cz/platy/pojistovnictvi/revizni-lekar
+pojistovnictvi,underwriter-upisovatel,Underwriter/upisovatel,41988,79823,60905,https://www.platy.cz/platy/pojistovnictvi/underwriter-upisovatel
+pomocne-prace,anketar,Anketář,22514,44983,33748,https://www.platy.cz/platy/pomocne-prace/anketar
+pomocne-prace,au-pair,Au-pair,22400,43690,33045,https://www.platy.cz/platy/pomocne-prace/au-pair
+pomocne-prace,delnik,Dělník,23046,49118,36082,https://www.platy.cz/platy/pomocne-prace/delnik
+pomocne-prace,hosteska,Hosteska,28604,52778,40691,https://www.platy.cz/platy/pomocne-prace/hosteska
+pomocne-prace,pomocny-pracovnik,Pomocný pracovník,22400,39459,30929,https://www.platy.cz/platy/pomocne-prace/pomocny-pracovnik
+pomocne-prace,vratny-informator,"Vrátný, informátor",22400,30556,26478,https://www.platy.cz/platy/pomocne-prace/vratny-informator
+pravo-a-legislativa,advokat,Advokát,65926,185088,125507,https://www.platy.cz/platy/pravo-a-legislativa/advokat
+pravo-a-legislativa,advokatni-koncipient,Advokátní koncipient,33182,72889,53035,https://www.platy.cz/platy/pravo-a-legislativa/advokatni-koncipient
+pravo-a-legislativa,paralegal-student-prav,Paralegal  - student práv,23039,46856,34947,https://www.platy.cz/platy/pravo-a-legislativa/paralegal-student-prav
+pravo-a-legislativa,pravnik,Právník,39482,104477,71979,https://www.platy.cz/platy/pravo-a-legislativa/pravnik
+prekladatelstvi-a-tlumocnictvi,korektor,Korektor,26105,42319,34212,https://www.platy.cz/platy/prekladatelstvi-a-tlumocnictvi/korektor
+prekladatelstvi-a-tlumocnictvi,prekladatel,Překladatel,29493,65316,47404,https://www.platy.cz/platy/prekladatelstvi-a-tlumocnictvi/prekladatel
+prekladatelstvi-a-tlumocnictvi,tlumocnik,Tlumočník,23528,63801,43664,https://www.platy.cz/platy/prekladatelstvi-a-tlumocnictvi/tlumocnik
+skolstvi-vzdelavani-veda-vyzkum,archeolog,Archeolog,27773,49139,38456,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/archeolog
+skolstvi-vzdelavani-veda-vyzkum,asistent-ucitele,Asistent učitele,23867,38680,31273,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/asistent-ucitele
+skolstvi-vzdelavani-veda-vyzkum,biolog,Biolog,31902,61430,46666,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/biolog
+skolstvi-vzdelavani-veda-vyzkum,fitness-instruktor,Fitness instruktor,35613,82900,59256,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/fitness-instruktor
+skolstvi-vzdelavani-veda-vyzkum,instruktor-autoskoly,Instruktor autoškoly,28552,53550,41051,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/instruktor-autoskoly
+skolstvi-vzdelavani-veda-vyzkum,knihovnik,Knihovník,25493,45108,35300,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/knihovnik
+skolstvi-vzdelavani-veda-vyzkum,laborant,Laborant,29310,51026,40168,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/laborant
+skolstvi-vzdelavani-veda-vyzkum,mistr-odborneho-vycviku,Mistr odborného výcviku,31361,51494,41427,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/mistr-odborneho-vycviku
+skolstvi-vzdelavani-veda-vyzkum,psycholog,Psycholog,33521,57551,45536,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/psycholog
+skolstvi-vzdelavani-veda-vyzkum,specialni-pedagog,Speciální pedagog,33643,56939,45291,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/specialni-pedagog
+skolstvi-vzdelavani-veda-vyzkum,sportovni-trener,Sportovní trenér,22400,62217,42308,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/sportovni-trener
+skolstvi-vzdelavani-veda-vyzkum,ucitel-stredni-skoly,Učitel střední školy,35367,59567,47467,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/ucitel-stredni-skoly
+skolstvi-vzdelavani-veda-vyzkum,ucitel-zakladni-skoly,Učitel základní školy,35612,54623,45117,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/ucitel-zakladni-skoly
+skolstvi-vzdelavani-veda-vyzkum,ucitel-zakladni-umelecke-skoly,Učitel základní umělecké školy,31415,57110,44262,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/ucitel-zakladni-umelecke-skoly
+skolstvi-vzdelavani-veda-vyzkum,vedouci-skolni-jidelny,Vedoucí školní jídelny,26438,41223,33830,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/vedouci-skolni-jidelny
+skolstvi-vzdelavani-veda-vyzkum,vychovatel,Vychovatel,28959,50287,39623,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/vychovatel
+skolstvi-vzdelavani-veda-vyzkum,vysokoskolsky-pedagog,Vysokoškolský pedagog,34649,80270,57459,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/vysokoskolsky-pedagog
+skolstvi-vzdelavani-veda-vyzkum,zastupce-reditele-skoly,Zástupce ředitele školy,46252,85063,65657,https://www.platy.cz/platy/skolstvi-vzdelavani-veda-vyzkum/zastupce-reditele-skoly
+sluzby,instalater,Instalatér,28511,61273,44892,https://www.platy.cz/platy/sluzby/instalater
+sluzby,kadernik,Kadeřník,26332,66655,46493,https://www.platy.cz/platy/sluzby/kadernik
+sluzby,kosmetik,Kosmetik,22400,48759,35579,https://www.platy.cz/platy/sluzby/kosmetik
+sluzby,mechanik-kol,Mechanik kol,28831,59840,44335,https://www.platy.cz/platy/sluzby/mechanik-kol
+sluzby,obsluha-cerpaci-stanice,Obsluha čerpací stanice,22632,41755,32193,https://www.platy.cz/platy/sluzby/obsluha-cerpaci-stanice
+sluzby,pediker-maniker,"Pedikér, manikér",22400,49324,35862,https://www.platy.cz/platy/sluzby/pediker-maniker
+sluzby,popelar,Popelář,24611,53937,39274,https://www.platy.cz/platy/sluzby/popelar
+sluzby,pracovnik-mycky-vozidel,Pracovník myčky vozidel,28005,51335,39670,https://www.platy.cz/platy/sluzby/pracovnik-mycky-vozidel
+sluzby,pracovnik-pohrebni-sluzby,Pracovník pohřební služby,27401,50377,38889,https://www.platy.cz/platy/sluzby/pracovnik-pohrebni-sluzby
+sluzby,spravce-domacnosti-hospodyne,"Správce domácnosti, hospodyně",25294,55318,40306,https://www.platy.cz/platy/sluzby/spravce-domacnosti-hospodyne
+sluzby,stylista-vizazista,"Stylista, vizážista",26822,56423,41622,https://www.platy.cz/platy/sluzby/stylista-vizazista
+sluzby,topic,Topič,25901,54595,40248,https://www.platy.cz/platy/sluzby/topic
+sluzby,udrzbar,Údržbář,29470,50562,40016,https://www.platy.cz/platy/sluzby/udrzbar
+sluzby,vedouci-uklizec,Vedoucí uklízeč,30091,64719,47405,https://www.platy.cz/platy/sluzby/vedouci-uklizec
+sluzby,zahradnik,Zahradník,23593,48441,36017,https://www.platy.cz/platy/sluzby/zahradnik
+sluzby,zlatnik-klenotnik,"Zlatník, klenotník",24044,44811,34427,https://www.platy.cz/platy/sluzby/zlatnik-klenotnik
+statni-sprava-samosprava,hlavni-kontrolor-mesta-obce,Hlavní kontrolor města/obce,29463,85898,57680,https://www.platy.cz/platy/statni-sprava-samosprava/hlavni-kontrolor-mesta-obce
+statni-sprava-samosprava,inspektor,Inspektor,29694,61115,45404,https://www.platy.cz/platy/statni-sprava-samosprava/inspektor
+statni-sprava-samosprava,odborny-rada,Odborný rada,35257,60984,48120,https://www.platy.cz/platy/statni-sprava-samosprava/odborny-rada
+statni-sprava-samosprava,reditel-odboru,Ředitel odboru,60274,152942,106608,https://www.platy.cz/platy/statni-sprava-samosprava/reditel-odboru
+statni-sprava-samosprava,referent,Referent,28008,46448,37228,https://www.platy.cz/platy/statni-sprava-samosprava/referent
+statni-sprava-samosprava,referent-specialista-vyssi-referent,"Referent - specialista, vyšší referent",32227,54314,43270,https://www.platy.cz/platy/statni-sprava-samosprava/referent-specialista-vyssi-referent
+statni-sprava-samosprava,statni-rada,Státní rada,34844,58576,46710,https://www.platy.cz/platy/statni-sprava-samosprava/statni-rada
+statni-sprava-samosprava,vrchni-rada,Vrchní rada,37850,76368,57109,https://www.platy.cz/platy/statni-sprava-samosprava/vrchni-rada
+statni-sprava-samosprava,vrchni-referent,Vrchní referent,29195,47668,38431,https://www.platy.cz/platy/statni-sprava-samosprava/vrchni-referent
+statni-sprava-samosprava,vrchni-statni-rada,Vrchní státní rada,40891,95123,68007,https://www.platy.cz/platy/statni-sprava-samosprava/vrchni-statni-rada
+statni-sprava-samosprava,vyssi-referent-specialista,Vyšší referent - specialista,35094,68514,51804,https://www.platy.cz/platy/statni-sprava-samosprava/vyssi-referent-specialista
+stavebnictvi-a-reality,architekt,Architekt,35484,72115,53799,https://www.platy.cz/platy/stavebnictvi-a-reality/architekt
+stavebnictvi-a-reality,bytovy-architekt,Bytový architekt,29285,79055,54170,https://www.platy.cz/platy/stavebnictvi-a-reality/bytovy-architekt
+stavebnictvi-a-reality,jerabnik,Jeřábník,27374,61111,44242,https://www.platy.cz/platy/stavebnictvi-a-reality/jerabnik
+stavebnictvi-a-reality,kamenik,Kameník,25190,67883,46536,https://www.platy.cz/platy/stavebnictvi-a-reality/kamenik
+stavebnictvi-a-reality,klempir-pokryvac,"Klempíř, pokrývač",30064,75686,52875,https://www.platy.cz/platy/stavebnictvi-a-reality/klempir-pokryvac
+stavebnictvi-a-reality,konstrukter,Konstruktér,37884,69221,53552,https://www.platy.cz/platy/stavebnictvi-a-reality/konstrukter
+stavebnictvi-a-reality,malir-naterac,"Malíř, natěrač",26416,67375,46895,https://www.platy.cz/platy/stavebnictvi-a-reality/malir-naterac
+stavebnictvi-a-reality,mechanik-chladirenskych-zarizeni,Mechanik chladírenských zařízení,32337,76016,54176,https://www.platy.cz/platy/stavebnictvi-a-reality/mechanik-chladirenskych-zarizeni
+stavebnictvi-a-reality,montaznik-monter,Montážník/montér,30303,58227,44265,https://www.platy.cz/platy/stavebnictvi-a-reality/montaznik-monter
+stavebnictvi-a-reality,operator-stavebnich-stroju,Operátor stavebních strojů,29541,74451,51996,https://www.platy.cz/platy/stavebnictvi-a-reality/operator-stavebnich-stroju
+stavebnictvi-a-reality,podlahar-dlazdic,"Podlahář, dlaždič",26636,73592,50114,https://www.platy.cz/platy/stavebnictvi-a-reality/podlahar-dlazdic
+stavebnictvi-a-reality,projektant,Projektant,35456,69126,52291,https://www.platy.cz/platy/stavebnictvi-a-reality/projektant
+stavebnictvi-a-reality,projektovy-manazer,Projektový manažer,48430,114698,81564,https://www.platy.cz/platy/stavebnictvi-a-reality/projektovy-manazer
+stavebnictvi-a-reality,realitni-makler,Realitní makléř,41707,157932,99819,https://www.platy.cz/platy/stavebnictvi-a-reality/realitni-makler
+stavebnictvi-a-reality,rozpoctar-kalkulant-staveb,Rozpočtář/kalkulant staveb,35916,68918,52417,https://www.platy.cz/platy/stavebnictvi-a-reality/rozpoctar-kalkulant-staveb
+stavebnictvi-a-reality,spravce-budov,Správce budov,32819,73568,53193,https://www.platy.cz/platy/stavebnictvi-a-reality/spravce-budov
+stavebnictvi-a-reality,stavbyvedouci,Stavbyvedoucí,44629,91796,68212,https://www.platy.cz/platy/stavebnictvi-a-reality/stavbyvedouci
+stavebnictvi-a-reality,stavebni-delnik,Stavební dělník,26768,65181,45974,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-delnik
+stavebnictvi-a-reality,stavebni-dozor,Stavební dozor,43480,89901,66690,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-dozor
+stavebnictvi-a-reality,stavebni-inzenyr,Stavební inženýr,42100,86065,64082,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-inzenyr
+stavebnictvi-a-reality,stavebni-mistr,Stavební mistr,37636,66664,52150,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-mistr
+stavebnictvi-a-reality,stavebni-technik,Stavební technik,36645,69364,53004,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-technik
+stavebnictvi-a-reality,stavebni-zamecnik,Stavební zámečník,27567,50032,38799,https://www.platy.cz/platy/stavebnictvi-a-reality/stavebni-zamecnik
+stavebnictvi-a-reality,svarec,Svářeč,32785,63905,48345,https://www.platy.cz/platy/stavebnictvi-a-reality/svarec
+stavebnictvi-a-reality,tesar,Tesař,28273,68761,48517,https://www.platy.cz/platy/stavebnictvi-a-reality/tesar
+stavebnictvi-a-reality,zednik,Zedník,27193,61988,44590,https://www.platy.cz/platy/stavebnictvi-a-reality/zednik
+stavebnictvi-a-reality,zememeric-geodet,Zeměměřič/geodet,31060,60421,45740,https://www.platy.cz/platy/stavebnictvi-a-reality/zememeric-geodet
+strojirenstvi,brusic,Brusič,29791,55525,42658,https://www.platy.cz/platy/strojirenstvi/brusic
+strojirenstvi,frezar,Frézař,29723,55691,42707,https://www.platy.cz/platy/strojirenstvi/frezar
+strojirenstvi,konstrukter,Konstruktér,40541,67748,54144,https://www.platy.cz/platy/strojirenstvi/konstrukter
+strojirenstvi,konstrukter-pro-automatizaci,Konstruktér pro automatizaci,42314,63446,52880,https://www.platy.cz/platy/strojirenstvi/konstrukter-pro-automatizaci
+strojirenstvi,kovar,Kovář,28039,65024,46531,https://www.platy.cz/platy/strojirenstvi/kovar
+strojirenstvi,montaznik-monter,Montážník/montér,32096,50752,41424,https://www.platy.cz/platy/strojirenstvi/montaznik-monter
+strojirenstvi,procesni-inzenyr,Procesní inženýr,48448,79813,64130,https://www.platy.cz/platy/strojirenstvi/procesni-inzenyr
+strojirenstvi,programator-cnc,Programátor CNC,35864,60119,47991,https://www.platy.cz/platy/strojirenstvi/programator-cnc
+strojirenstvi,projektant,Projektant,42974,81002,61988,https://www.platy.cz/platy/strojirenstvi/projektant
+strojirenstvi,serizovac-cnc-stroju,Seřizovač CNC strojů,33507,58608,46057,https://www.platy.cz/platy/strojirenstvi/serizovac-cnc-stroju
+strojirenstvi,strojni-zamecnik,Strojní zámečník,31873,51989,41931,https://www.platy.cz/platy/strojirenstvi/strojni-zamecnik
+strojirenstvi,svarec,Svářeč,31760,59045,45402,https://www.platy.cz/platy/strojirenstvi/svarec
+technika-rozvoj,procesni-inzenyr,Procesní inženýr,44610,89858,67234,https://www.platy.cz/platy/technika-rozvoj/procesni-inzenyr
+technika-rozvoj,technicky-pracovnik,Technický pracovník,32746,81912,57329,https://www.platy.cz/platy/technika-rozvoj/technicky-pracovnik
+telekomunikace,ict-specialista,ICT specialista,37487,91557,64522,https://www.platy.cz/platy/telekomunikace/ict-specialista
+telekomunikace,specialista-analyz-a-rozvoje-prenosovych-siti,Specialista analýz a rozvoje přenosových sítí,42929,104099,73514,https://www.platy.cz/platy/telekomunikace/specialista-analyz-a-rozvoje-prenosovych-siti
+telekomunikace,specialista-modelovani-siti,Specialista modelování sítí,48647,118623,83635,https://www.platy.cz/platy/telekomunikace/specialista-modelovani-siti
+telekomunikace,specialista-oss-bss,Specialista OSS/BSS,45265,116800,81032,https://www.platy.cz/platy/telekomunikace/specialista-oss-bss
+telekomunikace,specialista-provozu-siti-a-sluzeb,Specialista provozu sítí a služeb,41727,94236,67981,https://www.platy.cz/platy/telekomunikace/specialista-provozu-siti-a-sluzeb
+telekomunikace,specialista-strategie-site,Specialista strategie sítě,59124,147124,103124,https://www.platy.cz/platy/telekomunikace/specialista-strategie-site
+telekomunikace,specialista-testovani-koncovych-zarizeni,Specialista testování koncových zařízení,38116,85262,61689,https://www.platy.cz/platy/telekomunikace/specialista-testovani-koncovych-zarizeni
+telekomunikace,specialista-vyvoje-telekomunikacnich-sluzeb,Specialista vývoje telekomunikačních služeb,43212,110119,76665,https://www.platy.cz/platy/telekomunikace/specialista-vyvoje-telekomunikacnich-sluzeb
+telekomunikace,technik,Technik,34753,60674,47713,https://www.platy.cz/platy/telekomunikace/technik
+textilni-kozedelny-a-odevni-prumysl,krejci,Krejčí,22400,38745,30572,https://www.platy.cz/platy/textilni-kozedelny-a-odevni-prumysl/krejci
+textilni-kozedelny-a-odevni-prumysl,odevni-navrhar-konstrukter-strihu,"Oděvní návrhář, konstruktér střihů",30924,61991,46457,https://www.platy.cz/platy/textilni-kozedelny-a-odevni-prumysl/odevni-navrhar-konstrukter-strihu
+umeni-a-kultura,aranzer-dekorater,"Aranžér, dekoratér",22400,46112,34256,https://www.platy.cz/platy/umeni-a-kultura/aranzer-dekorater
+umeni-a-kultura,designer,Designér,30296,73315,51805,https://www.platy.cz/platy/umeni-a-kultura/designer
+umeni-a-kultura,fotomodel,Fotomodel,30603,119360,74981,https://www.platy.cz/platy/umeni-a-kultura/fotomodel
+umeni-a-kultura,herec,Herec,29546,59515,44530,https://www.platy.cz/platy/umeni-a-kultura/herec
+umeni-a-kultura,kulturni-referent,Kulturní referent,27658,45669,36663,https://www.platy.cz/platy/umeni-a-kultura/kulturni-referent
+umeni-a-kultura,masker-parukar,"Maskér, parukář",23514,48065,35789,https://www.platy.cz/platy/umeni-a-kultura/masker-parukar
+umeni-a-kultura,osvetlovac,Osvětlovač,27480,52388,39934,https://www.platy.cz/platy/umeni-a-kultura/osvetlovac
+umeni-a-kultura,restaurator-konzervator,Restaurátor/konzervátor,23792,50359,37075,https://www.platy.cz/platy/umeni-a-kultura/restaurator-konzervator
+umeni-a-kultura,stavec-scenickych-dekoraci,Stavěč scénických dekorací,24178,55406,39792,https://www.platy.cz/platy/umeni-a-kultura/stavec-scenickych-dekoraci
+vodohospodarstvi-lesnictvi-zivotni-prostredi,ekolog,Ekolog,35544,66763,51153,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/ekolog
+vodohospodarstvi-lesnictvi-zivotni-prostredi,environmentalista,Environmentalista,40916,80068,60492,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/environmentalista
+vodohospodarstvi-lesnictvi-zivotni-prostredi,lesni-inzenyr,Lesní inženýr,31872,62033,46952,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/lesni-inzenyr
+vodohospodarstvi-lesnictvi-zivotni-prostredi,lesni-technik,Lesní technik,31288,60750,46019,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/lesni-technik
+vodohospodarstvi-lesnictvi-zivotni-prostredi,lesnik,Lesník,28228,64550,46389,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/lesnik
+vodohospodarstvi-lesnictvi-zivotni-prostredi,vedouci-lesni-spravy,Vedoucí lesní správy,41547,82660,62103,https://www.platy.cz/platy/vodohospodarstvi-lesnictvi-zivotni-prostredi/vedouci-lesni-spravy
+vrcholovy-management,developement-director,Developement Director,81667,345717,213692,https://www.platy.cz/platy/vrcholovy-management/developement-director
+vrcholovy-management,ekonomicky-financni-reditel,Ekonomický/finanční ředitel,77928,229800,153864,https://www.platy.cz/platy/vrcholovy-management/ekonomicky-financni-reditel
+vrcholovy-management,generalni-reditel,Generální ředitel,94217,367302,230759,https://www.platy.cz/platy/vrcholovy-management/generalni-reditel
+vrcholovy-management,marketingovy-reditel,Marketingový ředitel,66498,204023,135260,https://www.platy.cz/platy/vrcholovy-management/marketingovy-reditel
+vrcholovy-management,obchodni-reditel,Obchodní ředitel,72409,205694,139051,https://www.platy.cz/platy/vrcholovy-management/obchodni-reditel
+vrcholovy-management,personalni-reditel,Personální ředitel,76317,203509,139913,https://www.platy.cz/platy/vrcholovy-management/personalni-reditel
+vrcholovy-management,provozni-manazer,Provozní manažer,39391,127826,83608,https://www.platy.cz/platy/vrcholovy-management/provozni-manazer
+vrcholovy-management,reditel-bezpecnostni-sluzby,Ředitel bezpečnostní služby,37533,214741,126137,https://www.platy.cz/platy/vrcholovy-management/reditel-bezpecnostni-sluzby
+vrcholovy-management,reditel-call-centra,Ředitel call centra,67878,219409,143643,https://www.platy.cz/platy/vrcholovy-management/reditel-call-centra
+vrcholovy-management,reditel-it,Ředitel IT,96589,280992,188790,https://www.platy.cz/platy/vrcholovy-management/reditel-it
+vrcholovy-management,reditel-logistiky,Ředitel logistiky,67134,231369,149251,https://www.platy.cz/platy/vrcholovy-management/reditel-logistiky
+vrcholovy-management,reditel-skoly,Ředitel školy,49089,99106,74097,https://www.platy.cz/platy/vrcholovy-management/reditel-skoly
+vrcholovy-management,reditel-vydavatelstvi,Ředitel vydavatelství,46017,175182,110599,https://www.platy.cz/platy/vrcholovy-management/reditel-vydavatelstvi
+vrcholovy-management,reditel-zdravotnickeho-zarizeni,Ředitel zdravotnického zařízení,44367,150658,97512,https://www.platy.cz/platy/vrcholovy-management/reditel-zdravotnickeho-zarizeni
+vrcholovy-management,technicky-reditel,Technický ředitel,67188,195346,131267,https://www.platy.cz/platy/vrcholovy-management/technicky-reditel
+vrcholovy-management,vykonny-reditel,Výkonný ředitel,57601,218045,137823,https://www.platy.cz/platy/vrcholovy-management/vykonny-reditel
+vrcholovy-management,vyrobni-reditel,Výrobní ředitel,66326,163714,115020,https://www.platy.cz/platy/vrcholovy-management/vyrobni-reditel
+vyroba,balic,Balič,22400,39675,31037,https://www.platy.cz/platy/vyroba/balic
+vyroba,delnik,Dělník,24233,48786,36509,https://www.platy.cz/platy/vyroba/delnik
+vyroba,lakyrnik,Lakýrník,27153,56483,41818,https://www.platy.cz/platy/vyroba/lakyrnik
+vyroba,metrolog,Metrolog,35203,65546,50374,https://www.platy.cz/platy/vyroba/metrolog
+vyroba,montaznik-monter,Montážník/montér,25691,55276,40483,https://www.platy.cz/platy/vyroba/montaznik-monter
+vyroba,nastrojar,Nástrojař,33419,60224,46821,https://www.platy.cz/platy/vyroba/nastrojar
+vyroba,normovac-prace,Normovač práce,31950,61277,46613,https://www.platy.cz/platy/vyroba/normovac-prace
+vyroba,operator-stroju-a-zarizeni,Operátor strojů a zařízení,27510,53314,40412,https://www.platy.cz/platy/vyroba/operator-stroju-a-zarizeni
+vyroba,planovac-vyroby,Plánovač výroby,37255,63162,50208,https://www.platy.cz/platy/vyroba/planovac-vyroby
+vyroba,predak,Předák,31923,66403,49163,https://www.platy.cz/platy/vyroba/predak
+vyroba,procesni-inzenyr,Procesní inženýr,45425,78943,62184,https://www.platy.cz/platy/vyroba/procesni-inzenyr
+vyroba,servisni-inzenyr,Servisní inženýr,44223,89415,66819,https://www.platy.cz/platy/vyroba/servisni-inzenyr
+vyroba,servisni-technik,Servisní technik,34729,68273,51501,https://www.platy.cz/platy/vyroba/servisni-technik
+vyroba,sklar,Sklář,27417,52505,39961,https://www.platy.cz/platy/vyroba/sklar
+vyroba,technolog,Technolog,39695,67582,53638,https://www.platy.cz/platy/vyroba/technolog
+vyroba,vedouci-provozu,Vedoucí provozu,37842,91211,64526,https://www.platy.cz/platy/vyroba/vedouci-provozu
+zakaznicka-podpora,analytik-zakaznickeho-servisu,Analytik zákaznického servisu,34167,61203,47685,https://www.platy.cz/platy/zakaznicka-podpora/analytik-zakaznickeho-servisu
+zakaznicka-podpora,helpdesk-operator,Helpdesk operátor,30136,55767,42951,https://www.platy.cz/platy/zakaznicka-podpora/helpdesk-operator
+zakaznicka-podpora,specialista-podpory-zakazniku,Specialista podpory zákazníků,31838,56454,44146,https://www.platy.cz/platy/zakaznicka-podpora/specialista-podpory-zakazniku
+zakaznicka-podpora,specialista-technicke-podpory,Specialista technické podpory,37943,68915,53429,https://www.platy.cz/platy/zakaznicka-podpora/specialista-technicke-podpory
+zakaznicka-podpora,supervizor-call-centra,Supervizor call centra,32814,73021,52917,https://www.platy.cz/platy/zakaznicka-podpora/supervizor-call-centra
+zdravotnictvi-a-socialni-pece,anesteziolog,Anesteziolog,53547,147351,100449,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/anesteziolog
+zdravotnictvi-a-socialni-pece,dentalni-hygienistka,Dentální hygienistka,34822,83950,59386,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/dentalni-hygienistka
+zdravotnictvi-a-socialni-pece,ergoterapeut,Ergoterapeut,32671,54667,43669,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/ergoterapeut
+zdravotnictvi-a-socialni-pece,fyzioterapeut,Fyzioterapeut,34029,57684,45856,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/fyzioterapeut
+zdravotnictvi-a-socialni-pece,hlavni-zdravotni-brat,Hlavní zdravotní brat,36132,100548,68340,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/hlavni-zdravotni-brat
+zdravotnictvi-a-socialni-pece,hygienik,Hygienik,32341,72219,52280,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/hygienik
+zdravotnictvi-a-socialni-pece,kinetoterapeut,Kinetoterapeut,22400,49377,35888,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/kinetoterapeut
+zdravotnictvi-a-socialni-pece,klinicky-psycholog,Klinický psycholog,36745,73826,55285,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/klinicky-psycholog
+zdravotnictvi-a-socialni-pece,lekar,Lékař,57571,162004,109787,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/lekar
+zdravotnictvi-a-socialni-pece,maser,Masér,23987,50052,37019,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/maser
+zdravotnictvi-a-socialni-pece,medik,Medik,32112,87323,59717,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/medik
+zdravotnictvi-a-socialni-pece,nutricni-terapeut,Nutriční terapeut,27433,53475,40454,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/nutricni-terapeut
+zdravotnictvi-a-socialni-pece,ocni-optik,Oční optik,26445,49390,37917,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/ocni-optik
+zdravotnictvi-a-socialni-pece,ortopedicky-technik,Ortopedický technik,26352,59935,43143,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/ortopedicky-technik
+zdravotnictvi-a-socialni-pece,porodni-asistent,Porodní asistent,31631,58548,45089,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/porodni-asistent
+zdravotnictvi-a-socialni-pece,regulatory-affairs-specialist,Regulatory affairs specialist,50535,98075,74305,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/regulatory-affairs-specialist
+zdravotnictvi-a-socialni-pece,rentgenolog,Rentgenolog,28645,74245,51445,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/rentgenolog
+zdravotnictvi-a-socialni-pece,ridic-sanitky,Řidič sanitky,26008,62797,44402,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/ridic-sanitky
+zdravotnictvi-a-socialni-pece,sanitar,Sanitář,23661,38826,31243,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/sanitar
+zdravotnictvi-a-socialni-pece,socialni-pracovnik,Sociální pracovník,29587,48528,39057,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/socialni-pracovnik
+zdravotnictvi-a-socialni-pece,specialista-na-socialni-rehabilitaci,Specialista na sociální rehabilitaci,27872,55142,41507,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/specialista-na-socialni-rehabilitaci
+zdravotnictvi-a-socialni-pece,veterinarni-lekar,Veterinární lékař,31473,73686,52579,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/veterinarni-lekar
+zdravotnictvi-a-socialni-pece,vrchni-sestra,Vrchní sestra,45067,80227,62647,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/vrchni-sestra
+zdravotnictvi-a-socialni-pece,vyzkumny-lekar,Výzkumný lékař,42210,117689,79949,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/vyzkumny-lekar
+zdravotnictvi-a-socialni-pece,zdravotni-sestra-bratr,Zdravotní sestra/bratr,33575,62779,48177,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/zdravotni-sestra-bratr
+zdravotnictvi-a-socialni-pece,zdravotnicky-asistent,Zdravotnický asistent,30109,54668,42388,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/zdravotnicky-asistent
+zdravotnictvi-a-socialni-pece,zdravotnicky-zachranar,Zdravotnický záchranář,37669,80938,59303,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/zdravotnicky-zachranar
+zdravotnictvi-a-socialni-pece,zubni-lekar,Zubní lékař,48720,140996,94858,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/zubni-lekar
+zdravotnictvi-a-socialni-pece,zubni-technik,Zubní technik,23305,58129,40717,https://www.platy.cz/platy/zdravotnictvi-a-socialni-pece/zubni-technik
+zemedelstvi-a-potravinarstvi,cukrar,Cukrář,22400,46083,34241,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/cukrar
+zemedelstvi-a-potravinarstvi,dojic,Dojič,25955,45357,35656,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/dojic
+zemedelstvi-a-potravinarstvi,operator-zemedelskych-stroju,Operátor zemědělských strojů,24328,54929,39628,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/operator-zemedelskych-stroju
+zemedelstvi-a-potravinarstvi,potravinarsky-technik,Potravinářský technik,25271,46977,36124,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/potravinarsky-technik
+zemedelstvi-a-potravinarstvi,potravinarsky-technolog,Potravinářský technolog,35629,60648,48138,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/potravinarsky-technolog
+zemedelstvi-a-potravinarstvi,zootechnik,Zootechnik,29714,52403,41058,https://www.platy.cz/platy/zemedelstvi-a-potravinarstvi/zootechnik
+zurnalistika-polygrafie-media,asistent-televizni-filmove-produkce,Asistent televizní/filmové produkce,31224,63228,47226,https://www.platy.cz/platy/zurnalistika-polygrafie-media/asistent-televizni-filmove-produkce
+zurnalistika-polygrafie-media,content-provider,Content provider,38006,81592,59799,https://www.platy.cz/platy/zurnalistika-polygrafie-media/content-provider
+zurnalistika-polygrafie-media,dtp-operator,DTP operátor,30216,56353,43284,https://www.platy.cz/platy/zurnalistika-polygrafie-media/dtp-operator
+zurnalistika-polygrafie-media,editor,Editor,33261,68471,50866,https://www.platy.cz/platy/zurnalistika-polygrafie-media/editor
+zurnalistika-polygrafie-media,grafik,Grafik,28623,56066,42344,https://www.platy.cz/platy/zurnalistika-polygrafie-media/grafik
+zurnalistika-polygrafie-media,junior-grafik,Junior Grafik,27187,46391,36789,https://www.platy.cz/platy/zurnalistika-polygrafie-media/junior-grafik
+zurnalistika-polygrafie-media,kameraman,Kameraman,29148,75793,52470,https://www.platy.cz/platy/zurnalistika-polygrafie-media/kameraman
+zurnalistika-polygrafie-media,korektor,Korektor,25805,54269,40037,https://www.platy.cz/platy/zurnalistika-polygrafie-media/korektor
+zurnalistika-polygrafie-media,manazer-inzerce,Manažer inzerce,37260,86521,61890,https://www.platy.cz/platy/zurnalistika-polygrafie-media/manazer-inzerce
+zurnalistika-polygrafie-media,novinar,Novinář,31132,87361,59246,https://www.platy.cz/platy/zurnalistika-polygrafie-media/novinar
+zurnalistika-polygrafie-media,operator-3d-tiskarny,Operátor 3D tiskárny,24898,49205,37051,https://www.platy.cz/platy/zurnalistika-polygrafie-media/operator-3d-tiskarny
+zurnalistika-polygrafie-media,redaktor,Redaktor,32886,54938,43912,https://www.platy.cz/platy/zurnalistika-polygrafie-media/redaktor
+zurnalistika-polygrafie-media,reporter,Reporter,36492,68987,52739,https://www.platy.cz/platy/zurnalistika-polygrafie-media/reporter
+zurnalistika-polygrafie-media,senior-grafik,Senior grafik,33973,72082,53027,https://www.platy.cz/platy/zurnalistika-polygrafie-media/senior-grafik
+zurnalistika-polygrafie-media,strihac,Střihač,32776,71140,51958,https://www.platy.cz/platy/zurnalistika-polygrafie-media/strihac
+zurnalistika-polygrafie-media,tiskar,Tiskař,28911,57438,43174,https://www.platy.cz/platy/zurnalistika-polygrafie-media/tiskar

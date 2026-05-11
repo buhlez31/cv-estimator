@@ -64,7 +64,7 @@ as reviewer-visible artefacts. Output contract:
 
 ## Data approach
 
-The salary estimate is built from **two additive layers** so each
+The salary estimate is built from **three additive layers** so each
 number is traceable to a published source.
 
 ### Layer A — ISPV official statistics
@@ -108,6 +108,29 @@ curve.
 Exposed via the CLI flag `--region CZ010`. The web UI keeps a national
 default; region precision lives on the CLI / library API today.
 
+### Layer C — platy.cz role refinement
+
+Where ISPV gives the **occupational-class** curve (296 CZ-ISCO codes),
+[`cv_estimator/data/platycz_2025.csv`](cv_estimator/data/platycz_2025.csv)
+adds **role-title granularity** — 513 specific positions from
+[platy.cz](https://www.platy.cz) (e.g. *Backend developer*, *Solution
+architekt*, *AI inženýr*, *Advokát*) each with P10 / P90 in CZK.
+Generated from `data/platy_salaries.xlsx` (gitignored raw source) by
+[`scripts/prepare_platycz_data.py`](scripts/prepare_platycz_data.py).
+
+A token-overlap matcher in
+[`cv_estimator/salary/platycz.py`](cv_estimator/salary/platycz.py)
+finds the best platy.cz row for the analysis role — direct + cross-
+language alias hits (`developer` ↔ `vývojář` / `programátor`,
+`engineer` ↔ `inženýr`, `lawyer` ↔ `advokát`, exec abbreviations
+↔ Czech director equivalents). When a match clears the relevance
+threshold, the candidate's bucket-interpolated CZK blends **60 / 40**
+with the platy.cz proxy at the same percentile. ISPV stays the
+authoritative anchor; platy.cz refines for role specificity within the
+occupation class. No match → no-op, ISPV figure unchanged. The matched
+position label + URL surface on `SalaryEstimate.platycz_position` /
+`platycz_url` for auditability (CLI prints them; web UI ignores).
+
 ## Design choices
 
 | Choice | Rationale |
@@ -121,7 +144,7 @@ default; region precision lives on the CLI / library API today.
 ## Tests
 
 ```bash
-pytest -q   # 85 tests, no network — LLM calls patched in e2e tests
+pytest -q   # 91 tests, no network — LLM calls patched in e2e tests
 ```
 
 ## License

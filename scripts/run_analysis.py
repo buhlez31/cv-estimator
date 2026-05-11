@@ -140,6 +140,8 @@ def _print_track(label: str, track: TrackResult) -> None:
             f"{s.currency} (median {s.total_comp_median:,}, "
             f"bonus {s.bonus_pct:.1f}%, supp {s.supplement_pct:.1f}%)"
         )
+    if s.platycz_position:
+        print(f"  Refined via platy.cz: {s.platycz_position} ({s.platycz_url})")
     print(
         f"  Breakdown       : years {track.breakdown.years_experience:.0f} | "
         f"skills {track.breakdown.skills_depth:.0f} | "
