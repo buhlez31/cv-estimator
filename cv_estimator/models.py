@@ -9,6 +9,10 @@ class SkillEvidence(BaseModel):
     skill: str
     evidence_quote: str
     confidence: float = Field(ge=0.0, le=1.0)
+    # Role-scoped categorisation — set by the LLM in extract_inferred.
+    # must_have: direct core competency of the candidate's role.
+    # nice_to_have: relevant adjacent skill or soft signal (incl. hobbies).
+    relevance: Literal["must_have", "nice_to_have"]
     # Skepticism note — short hedge if the inference might overstate the
     # candidate's role (e.g. "mohl být v týmu, ne sole owner"). Set to None
     # when the evidence is unambiguous.

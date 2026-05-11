@@ -44,18 +44,21 @@ def _mock_call_json(prompt: str) -> dict:
                     "skill": "data engineering",
                     "evidence_quote": "Built and maintained ETL pipelines processing 500M events/day",
                     "confidence": 0.7,
+                    "relevance": "must_have",
                     "caveat": None,
                 },
                 {
                     "skill": "technical leadership",
                     "evidence_quote": "Led migration of legacy reporting system to Snowflake",
                     "confidence": 0.55,
+                    "relevance": "nice_to_have",
                     "caveat": "led ≠ sole architect",
                 },
                 {
                     "skill": "mentoring",
                     "evidence_quote": "Mentored 3 junior engineers",
                     "confidence": 0.75,
+                    "relevance": "nice_to_have",
                     "caveat": None,
                 },
             ]

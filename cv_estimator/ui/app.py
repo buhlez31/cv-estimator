@@ -200,16 +200,37 @@ st.divider()
 # -------------------------- Hidden assets list ---------------------------
 
 if result.inferred_capabilities:
-    st.subheader("🧠 Hidden assets (inferred capabilities)")
+    st.subheader(f"🧠 Hidden assets pro roli: {result.detected_role}")
     st.caption(
-        "Schopnosti odvozené z popisu projektů, nikoli z buzzword seznamů. "
-        "Model je instruován ke skepticismu — confidence ≤ 0.4 znamená titul-only inference."
+        "Schopnosti odvozené z celého CV (work, education, hobbies) a relevantní "
+        "pro detekovanou roli. Model je instruován ke skepticismu."
     )
-    for cap in result.inferred_capabilities:
+
+    must_have = [c for c in result.inferred_capabilities if c.relevance == "must_have"]
+    nice_to_have = [c for c in result.inferred_capabilities if c.relevance == "nice_to_have"]
+
+    def _render_cap(cap):
         line = f"**{cap.skill}** _(confidence {cap.confidence:.2f})_  \n> {cap.evidence_quote}"
         if cap.caveat:
             line += f"  \n*⚠️ Caveat: {cap.caveat}*"
         st.markdown(line)
+
+    ha_a, ha_b = st.columns(2, gap="large")
+    with ha_a:
+        st.markdown("### 🎯 Must-have pro tuto roli")
+        if must_have:
+            for cap in must_have:
+                _render_cap(cap)
+        else:
+            st.caption("_Žádné must-have hidden assets detekovány._")
+    with ha_b:
+        st.markdown("### 💡 Nice-to-have")
+        if nice_to_have:
+            for cap in nice_to_have:
+                _render_cap(cap)
+        else:
+            st.caption("_Žádné nice-to-have hidden assets detekovány._")
+
     st.divider()
 
 

@@ -100,13 +100,18 @@ def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
 
 def _inferred_bonus(inferred: InferredData) -> float:
     """Confidence-weighted bonus from inferred capabilities, capped at
-    INFERRED_BONUS_CAP. A 0.4-confidence capability contributes 40 % of
-    what a 1.0-confidence one would. No floor — even weak signals add a
-    sliver.
+    INFERRED_BONUS_CAP.
+
+    must_have capabilities contribute the full multiplier; nice_to_have
+    capabilities contribute half, so role-critical signal dominates
+    soft / adjacent signal in the score.
     """
-    raw = sum(
-        INFERRED_BONUS_PER_CAPABILITY * cap.confidence for cap in inferred.inferred_capabilities
-    )
+    raw = 0.0
+    for cap in inferred.inferred_capabilities:
+        weight = INFERRED_BONUS_PER_CAPABILITY * cap.confidence
+        if cap.relevance == "nice_to_have":
+            weight *= 0.5
+        raw += weight
     return min(INFERRED_BONUS_CAP, raw)
 
 

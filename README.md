@@ -139,12 +139,26 @@ When they diverge, the gap measures *how much the candidate's description
 style under-represents them* — which is the case the standard buzzword
 filters fail at.
 
-### Skepticism by default
+### Role-scoped + skepticism by default
 
 Looking at real-CV output, the inferred pass had a tendency to over-attribute
 (e.g. inferring "community manager" from being the analyst on a community
-project). The [`extract_inferred.md`](cv_estimator/prompts/extract_inferred.md)
-prompt now enforces an explicit skepticism protocol:
+project) AND to surface capabilities irrelevant to the candidate's actual
+role (e.g. "marketing copywriting" for a backend engineer). The
+[`extract_inferred.md`](cv_estimator/prompts/extract_inferred.md) prompt
+now:
+
+- **Receives the detected role** as a parameter and scopes every inference
+  to that role. Capabilities outside the role's domain are dropped.
+- **Scans the WHOLE CV**, not just work experience — education, certs,
+  languages, hobbies, interests. Soft signals from hobbies (team sports
+  → collaboration, marathon → discipline) are valid but get LOW
+  confidence (0.3–0.5).
+- **Classifies each capability** as either `must_have` (direct core
+  competency of the role) or `nice_to_have` (adjacent skill, soft signal).
+  Scoring contribution: `must_have` gets the full `8 × confidence` bonus;
+  `nice_to_have` gets half.
+- **Enforces an explicit skepticism protocol** on top:
 
 1. Anchor confidence at 0.5 by default — move to 0.8+ only with concrete
    numeric or role-scoped evidence.

@@ -40,31 +40,53 @@ def test_components_with_inferred_exceeds_baseline(explicit_senior_dev, inferred
 
 def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
     """A 0.4-confidence capability contributes 40 % of what 1.0 does
-    (multiplier 8 per capability, capped at 25 aggregate)."""
+    (multiplier 8 per capability, capped at 25 aggregate). must_have
+    relevance contributes full weight; nice_to_have contributes half."""
     from cv_estimator.extractors.inferred import InferredData
     from cv_estimator.models import SkillEvidence
 
-    weak = InferredData(
+    must_weak = InferredData(
         inferred_capabilities=[
-            SkillEvidence(skill="x", evidence_quote="ev1", confidence=0.4),
+            SkillEvidence(
+                skill="x",
+                evidence_quote="ev1",
+                confidence=0.4,
+                relevance="must_have",
+            ),
         ]
     )
-    strong = InferredData(
+    must_strong = InferredData(
         inferred_capabilities=[
-            SkillEvidence(skill="y", evidence_quote="ev2", confidence=1.0),
+            SkillEvidence(
+                skill="y",
+                evidence_quote="ev2",
+                confidence=1.0,
+                relevance="must_have",
+            ),
         ]
     )
-    # Reference baseline uses cap=100 (the with-inferred path) so the delta
-    # isolates the inferred bonus from the cap-asymmetry.
+    nice_strong = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(
+                skill="z",
+                evidence_quote="ev3",
+                confidence=1.0,
+                relevance="nice_to_have",
+            ),
+        ]
+    )
     explicit_at_100 = components._explicit_skills_score(
         explicit_junior_support.explicit_skills, cap=100.0
     )
-    b_weak = components.compute_with_inferred(explicit_junior_support, weak)
-    b_strong = components.compute_with_inferred(explicit_junior_support, strong)
-    # 0.4 conf × 8 = 3.2
-    assert abs(b_weak.skills_depth - (explicit_at_100 + 3.2)) < 0.01
-    # 1.0 conf × 8 = 8.0
-    assert abs(b_strong.skills_depth - (explicit_at_100 + 8.0)) < 0.01
+    b_must_weak = components.compute_with_inferred(explicit_junior_support, must_weak)
+    b_must_strong = components.compute_with_inferred(explicit_junior_support, must_strong)
+    b_nice_strong = components.compute_with_inferred(explicit_junior_support, nice_strong)
+    # must_have, 0.4 conf × 8 = 3.2
+    assert abs(b_must_weak.skills_depth - (explicit_at_100 + 3.2)) < 0.01
+    # must_have, 1.0 conf × 8 = 8.0
+    assert abs(b_must_strong.skills_depth - (explicit_at_100 + 8.0)) < 0.01
+    # nice_to_have, 1.0 conf × 8 × 0.5 = 4.0
+    assert abs(b_nice_strong.skills_depth - (explicit_at_100 + 4.0)) < 0.01
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):

@@ -27,7 +27,9 @@ def analyze_cv(file_bytes: bytes, filename: str) -> CVAnalysis:
     language = document.detect_language(raw_text)
 
     explicit_data = explicit.extract(raw_text, language)
-    inferred_data = inferred.extract(raw_text, language)
+    # Pass detected role to the inferred-capabilities pass so hidden assets
+    # are scoped to the role the candidate is best-fit for, not generic.
+    inferred_data = inferred.extract(raw_text, explicit_data.role, language)
     cz_isco = role_mapping.map_to_cz_isco(explicit_data.role)
 
     # Track A: skeptical baseline (only literal CV content).
