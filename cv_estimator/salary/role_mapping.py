@@ -1,20 +1,26 @@
 """Role title → CZ-ISCO 4-digit code.
 
-Deterministic keyword-based mapping. Trade-off: simpler than an LLM enum picker,
-no API cost, fully testable. Misses for ambiguous titles fall back to a sane
-default. This is a documented design choice — see README.
+Hybrid mapping:
+1. **Keyword rules** (deterministic, free) — handle ~30 common job titles
+   across tech, management, professional, healthcare, legal, design,
+   customer service. Word-boundary regex match.
+2. **LLM fallback** — if no keyword rule fires, ask the model to pick
+   the best CZ-ISCO code from the catalogue of 296 codes loaded from
+   `data/ispv_2025.csv`. Caches per role string so repeated CVs with
+   the same unusual title don't re-query.
+3. **UnmappedRoleError** — raised only if BOTH rules and LLM fail
+   (LLM returns "UNMATCHED" or an invalid code). Surfaces to UI as
+   "role not found, please specify directly".
 
-Coverage extended in Phase 6 to non-IT roles (healthcare, education, legal,
-marketing, sales, finance, design) so the salary lookup can use the full
-296-row ISPV CSV instead of just the 14 IT codes.
-
-Matching uses regex word boundaries (`\\bKEYWORD\\b`) so short abbreviations
-like "cto", "ceo", "cio" don't accidentally match inside longer words
-("director" contains the substring "cto", "doctor" contains "cto", etc.).
+The LLM call only fires for edge cases (~10-20% of CVs in practice);
+common roles cost $0 to map.
 """
 
 import re
 from functools import lru_cache
+from pathlib import Path
+
+from cv_estimator.config import DATA_DIR
 
 # (priority, keywords-any-of, cz_isco_code)
 # Higher priority wins on conflict. Rules grouped by domain for readability.
@@ -127,20 +133,71 @@ def _kw_pattern(keyword: str) -> re.Pattern[str]:
     return re.compile(rf"\b{re.escape(keyword)}\b")
 
 
-def map_to_cz_isco(role: str) -> str:
-    """Return best-match CZ-ISCO 4-digit code for a role title.
+@lru_cache(maxsize=1)
+def _valid_codes() -> frozenset[str]:
+    """Load the set of valid CZ-ISCO codes from the ISPV CSV.
 
-    Raises `UnmappedRoleError` when no keyword rule matches — no silent
-    default. Callers must catch and surface the error to the user.
+    Single-line read; avoids importing salary/lookup.py to keep this
+    module free of cyclic dependencies.
     """
-    if not role:
-        raise UnmappedRoleError(role)
+    csv_path: Path = DATA_DIR / "ispv_2025.csv"
+    codes: set[str] = set()
+    with csv_path.open(encoding="utf-8") as f:
+        next(f, None)  # header
+        for line in f:
+            code = line.split(",", 1)[0].strip()
+            if code:
+                codes.add(code)
+    return frozenset(codes)
+
+
+def _try_keyword_rules(role: str) -> str | None:
+    """Run the priority-ranked keyword rules. Return the matched code,
+    or None if nothing fires."""
     low = role.lower()
     best: tuple[int, str] | None = None
     for priority, keywords, code in _RULES:
         if any(_kw_pattern(kw).search(low) for kw in keywords):
             if best is None or priority > best[0]:
                 best = (priority, code)
-    if best is None:
+    return best[1] if best is not None else None
+
+
+@lru_cache(maxsize=256)
+def _llm_fallback(role: str) -> str:
+    """Call LLM to pick the best CZ-ISCO from the catalogue when no
+    keyword rule matched. Cached per role string to avoid re-querying.
+
+    Imported lazily to keep test fixtures that don't exercise the
+    fallback path from needing to set up the Anthropic client.
+    """
+    from cv_estimator import llm  # local import (lazy, avoids test setup cost)
+
+    valid = _valid_codes()
+    codes_list = "\n".join(f"- {code}" for code in sorted(valid))
+    prompt = llm.render_prompt("role_to_cz_isco", role=role, codes=codes_list)
+    payload = llm.call_json(prompt)
+    picked = (payload.get("code") or "").strip()
+    if picked == "UNMATCHED" or picked not in valid:
         raise UnmappedRoleError(role)
-    return best[1]
+    return picked
+
+
+def map_to_cz_isco(role: str) -> str:
+    """Return best-match CZ-ISCO 4-digit code for a role title.
+
+    Two-stage resolution:
+    1. Try the priority-ranked keyword rules (free, deterministic).
+    2. If no rule matches, fall back to an LLM call that picks from the
+       full 296-code CSV catalogue.
+
+    Raises `UnmappedRoleError` only when both stages fail (LLM returns
+    "UNMATCHED" or an invalid code). Callers must catch and surface the
+    error to the user.
+    """
+    if not role:
+        raise UnmappedRoleError(role)
+    matched = _try_keyword_rules(role)
+    if matched is not None:
+        return matched
+    return _llm_fallback(role)

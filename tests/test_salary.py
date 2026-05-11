@@ -1,8 +1,19 @@
 """Unit tests for salary/role_mapping.py and salary/lookup.py."""
 
+from unittest.mock import patch
+
 import pytest
 
 from cv_estimator.salary import lookup, role_mapping
+
+
+@pytest.fixture(autouse=True)
+def _clear_llm_fallback_cache():
+    """LLM fallback caches per role string via lru_cache. Clear between
+    tests so mocked responses from one case don't leak into the next."""
+    role_mapping._llm_fallback.cache_clear()
+    yield
+    role_mapping._llm_fallback.cache_clear()
 
 
 @pytest.mark.parametrize(
@@ -49,12 +60,44 @@ def test_role_mapping(role, expected_code):
     assert role_mapping.map_to_cz_isco(role) == expected_code
 
 
-def test_role_mapping_unknown_raises():
-    """No silent default — unmapped role raises UnmappedRoleError so the
-    UI can surface a 'role not found in ISPV database' message."""
-    with pytest.raises(role_mapping.UnmappedRoleError) as exc_info:
-        role_mapping.map_to_cz_isco("Quantum Computing Researcher")
-    assert exc_info.value.role == "Quantum Computing Researcher"
+def test_role_mapping_llm_fallback_success():
+    """Unknown role triggers LLM fallback; LLM returns a valid code."""
+    with patch("cv_estimator.llm.call_json", return_value={"code": "2111"}) as mock_call:
+        result = role_mapping.map_to_cz_isco("Quantum Computing Researcher")
+    assert result == "2111"
+    assert mock_call.call_count == 1
+
+
+def test_role_mapping_llm_fallback_unmatched_raises():
+    """LLM returns UNMATCHED → UnmappedRoleError, caller surfaces to UI."""
+    with patch("cv_estimator.llm.call_json", return_value={"code": "UNMATCHED"}):
+        with pytest.raises(role_mapping.UnmappedRoleError) as exc_info:
+            role_mapping.map_to_cz_isco("Completely Fictional Title")
+    assert exc_info.value.role == "Completely Fictional Title"
+
+
+def test_role_mapping_llm_fallback_invalid_code_raises():
+    """LLM hallucinates a code not in the CSV → treated as unmapped."""
+    with patch("cv_estimator.llm.call_json", return_value={"code": "9999"}):
+        with pytest.raises(role_mapping.UnmappedRoleError):
+            role_mapping.map_to_cz_isco("Another Fictional Title")
+
+
+def test_role_mapping_llm_fallback_caches_per_role():
+    """Same unmapped role hit twice → LLM called once (lru_cache)."""
+    with patch("cv_estimator.llm.call_json", return_value={"code": "2511"}) as mock_call:
+        a = role_mapping.map_to_cz_isco("Niche Title For Cache Test")
+        b = role_mapping.map_to_cz_isco("Niche Title For Cache Test")
+    assert a == b == "2511"
+    assert mock_call.call_count == 1
+
+
+def test_role_mapping_keyword_match_skips_llm():
+    """Known role (matches keyword rule) → LLM never called."""
+    with patch("cv_estimator.llm.call_json") as mock_call:
+        result = role_mapping.map_to_cz_isco("Senior Backend Engineer")
+    assert result == "2512"
+    assert mock_call.call_count == 0
 
 
 def test_role_mapping_empty_string_raises():
