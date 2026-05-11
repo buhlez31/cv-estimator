@@ -1,0 +1,15 @@
+region_code,region_label,multiplier_avg,multiplier_it
+CZ010,Hlavní město Praha,1.25,1.30
+CZ020,Středočeský kraj,1.05,1.10
+CZ031,Jihočeský kraj,0.92,0.95
+CZ032,Plzeňský kraj,0.95,0.97
+CZ041,Karlovarský kraj,0.85,0.88
+CZ042,Ústecký kraj,0.88,0.90
+CZ051,Liberecký kraj,0.93,0.95
+CZ052,Královéhradecký kraj,0.92,0.94
+CZ053,Pardubický kraj,0.91,0.93
+CZ063,Kraj Vysočina,0.90,0.92
+CZ064,Jihomoravský kraj,1.00,1.05
+CZ071,Olomoucký kraj,0.88,0.90
+CZ072,Zlínský kraj,0.90,0.92
+CZ080,Moravskoslezský kraj,0.88,0.90

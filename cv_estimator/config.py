@@ -290,3 +290,19 @@ LLM_TEMPERATURE = 0.0
 # --- Salary sanity bounds (CZK monthly gross) ---
 SALARY_FLOOR = 25_000
 SALARY_CEILING = 500_000
+
+# --- ISPV sample-size confidence buckets (in thousands of employees) ---
+HIGH_SAMPLE_THRESHOLD = 5.0  # >= 5000 sampled employees → "high"
+LOW_SAMPLE_THRESHOLD = 1.0  # < 1000 → "low" (P90 statistically noisy)
+
+# --- Salary band width by ISPV confidence ---
+SALARY_BAND_PCT_HIGH = 0.15  # ±15 % around interpolated median
+SALARY_BAND_PCT_LOW = 0.25  # ±25 % widening when sample is thin
+
+# --- Regional wage multipliers (Layer B) ---
+REGIONAL_MULTIPLIERS_PATH = PACKAGE_ROOT / "data" / "regional_multipliers_2025.csv"
+
+# --- Apify live job postings (Layer C) ---
+APIFY_ACTOR_ID = "abaddion/jobscz-scraper"
+APIFY_CACHE_TTL_HOURS = 24
+APIFY_MAX_RESULTS = 50

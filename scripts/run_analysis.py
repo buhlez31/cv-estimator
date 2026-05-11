@@ -32,6 +32,14 @@ def main() -> int:
         "Anchors the whole analysis on this role and runs LLM #5 match "
         "assessment. When omitted, the auto-detected best-fit role is used.",
     )
+    parser.add_argument(
+        "--region",
+        type=str,
+        default=None,
+        help='CZ NUTS region code (e.g. "CZ010" for Praha, "CZ080" for '
+        "Moravskoslezský). Applies the ČSÚ regional multiplier to the ISPV "
+        "national wage. Omit for the national curve.",
+    )
     args = parser.parse_args()
 
     if not args.cv_path.exists():
@@ -40,7 +48,12 @@ def main() -> int:
 
     file_bytes = args.cv_path.read_bytes()
     try:
-        result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
+        result = analyze_cv(
+            file_bytes,
+            args.cv_path.name,
+            target_role=args.target_role,
+            region=args.region,
+        )
     except UnmappedRoleError as e:
         print(
             f"Role {e.role!r} did not match any CZ-ISCO entry in the ISPV "
@@ -75,15 +88,31 @@ def _print_summary(result: CVAnalysis) -> None:
         print("  Tip: pro analýzu best-fit role spusť bez --target-role na stejné CV.")
 
     market = result.track_explicit.salary_estimate
+    region_note = (
+        f" · region {market.region} (×{market.region_multiplier:.2f})"
+        if market.region
+        else " · national"
+    )
     print(
         f"\nMarket band (P25-P90, ISPV "
         f"{result.processing_metadata.get('ispv_period', '?')}, "
-        f"{result.processing_metadata.get('ispv_sphere', '?')}): "
-        f"{market.market_p25:,} – {market.market_p90:,} {market.currency}"
+        f"{result.processing_metadata.get('ispv_sphere', '?')}{region_note}): "
+        f"{market.market_p25:,} – {market.market_p90:,} {market.currency} "
+        f"(mean {market.market_mean:,}, sample n≈{int(market.sample_size * 1000)}, "
+        f"confidence {market.confidence})"
     )
 
     _print_track("Buzzword baseline", result.track_explicit)
     _print_track("S hidden assets (potenciál)", result.track_with_inferred)
+
+    mp = result.market_postings
+    if mp is not None and mp.median is not None:
+        print(
+            f"\nLive jobs.cz postings (n={mp.sample_size} of {mp.total_postings}, "
+            f"via Apify): P25 {mp.p25:,} | median {mp.median:,} | P75 {mp.p75:,} CZK"
+        )
+        if mp.sample_url:
+            print(f"  Source: {mp.sample_url}")
 
     print("\nStrengths:")
     for s in result.strengths:
@@ -105,6 +134,12 @@ def _print_track(label: str, track: TrackResult) -> None:
         f"  Salary estimate : {s.low:,} – {s.high:,} {s.currency} "
         f"(median {s.median:,}, P{s.percentile_position})"
     )
+    if s.bonus_pct + s.supplement_pct >= 1.0:
+        print(
+            f"  Total comp est. : {s.total_comp_low:,} – {s.total_comp_high:,} "
+            f"{s.currency} (median {s.total_comp_median:,}, "
+            f"bonus {s.bonus_pct:.1f}%, supp {s.supplement_pct:.1f}%)"
+        )
     print(
         f"  Breakdown       : years {track.breakdown.years_experience:.0f} | "
         f"skills {track.breakdown.skills_depth:.0f} | "

@@ -19,7 +19,7 @@ import time
 from cv_estimator.explanation import match_assess, narrative, roadmap
 from cv_estimator.extractors import document, explicit, inferred
 from cv_estimator.models import CVAnalysis, TargetRoleMatch, TrackResult
-from cv_estimator.salary import lookup, role_mapping
+from cv_estimator.salary import lookup, market_postings, role_mapping
 from cv_estimator.scoring import components, seniority
 from cv_estimator.validation import sanity
 
@@ -29,6 +29,7 @@ def analyze_cv(
     filename: str,
     *,
     target_role: str | None = None,
+    region: str | None = None,
 ) -> CVAnalysis:
     """Run the full pipeline. Returns a validated CVAnalysis.
 
@@ -61,7 +62,9 @@ def analyze_cv(
     # Track A: buzzword baseline — objective view from literal CV content.
     breakdown_explicit = components.compute_explicit_only(explicit_data, analysis_role)
     score_explicit = seniority.compute(breakdown_explicit)
-    salary_explicit = lookup.estimate_salary(cz_isco, score_explicit)
+    salary_explicit = lookup.estimate_salary(
+        cz_isco, score_explicit, role=analysis_role, region=region
+    )
     attr_explicit = components.coverage_attribution_for(
         analysis_role, explicit_data.explicit_skills, [], include_inferred=False
     )
@@ -69,7 +72,7 @@ def analyze_cv(
     # Track B: optimistic ceiling (adds confidence-weighted inferred bonus).
     breakdown_full = components.compute_with_inferred(explicit_data, inferred_data, analysis_role)
     score_full = seniority.compute(breakdown_full)
-    salary_full = lookup.estimate_salary(cz_isco, score_full)
+    salary_full = lookup.estimate_salary(cz_isco, score_full, role=analysis_role, region=region)
     attr_full = components.coverage_attribution_for(
         analysis_role,
         explicit_data.explicit_skills,
@@ -96,6 +99,10 @@ def analyze_cv(
             rationale=match.rationale,
         )
 
+    # Layer C — optional live posting cross-check. Skips silently when
+    # APIFY_TOKEN is unset; failure here never breaks the pipeline.
+    postings = market_postings.fetch_market_postings(analysis_role, region)
+
     result = CVAnalysis(
         analysis_role=analysis_role,
         cz_isco_code=cz_isco,
@@ -121,6 +128,7 @@ def analyze_cv(
         strengths=sg.strengths,
         gaps=sg.gaps,
         recommendations=recs,
+        market_postings=postings,
         processing_metadata={
             "filename": filename,
             "elapsed_seconds": round(time.time() - started, 2),
@@ -128,6 +136,8 @@ def analyze_cv(
             "ispv_period": lookup.ISPV_PERIOD,
             "ispv_sphere": lookup.ISPV_SPHERE,
             "target_role_provided": target_role is not None,
+            "region": region,
+            "live_postings_available": postings is not None,
         },
     )
     sanity.validate(result)

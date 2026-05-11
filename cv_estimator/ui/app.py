@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 
 from cv_estimator.models import CVAnalysis, TrackResult
 from cv_estimator.pipeline import analyze_cv
+from cv_estimator.salary.region import list_regions
 from cv_estimator.salary.role_mapping import UnmappedRoleError
 
 load_dotenv()
@@ -52,16 +53,30 @@ target_role_input = st.text_input(
 )
 target_role = target_role_input.strip() or None
 
+# --- Region selectbox (Layer B) ------------------------------------------
+_REGION_OPTIONS: list[tuple[str | None, str]] = [(None, "Česká republika (národní průměr)")] + [
+    (code, label) for code, label in list_regions()
+]
+region_index = st.selectbox(
+    "Region (volitelné)",
+    options=list(range(len(_REGION_OPTIONS))),
+    format_func=lambda i: _REGION_OPTIONS[i][1],
+    index=0,
+    help=(
+        "Multiplikátor aplikovaný na ISPV národní mzdu. Praha ≈ 1.30× pro IT, "
+        "Ostrava / Karlovy Vary ≈ 0.88×. Bez výběru zůstává národní průměr."
+    ),
+)
+region = _REGION_OPTIONS[region_index][0]
+
 uploaded = st.file_uploader("Nahraj CV (PDF nebo DOCX)", type=["pdf", "docx"])
 
 if uploaded is None:
     st.info("👆 Vyber soubor pro analýzu.")
     st.stop()
 
-# Invalidate cached result when EITHER the upload OR the target_role
-# changes. file_id covers new uploads; comparing the target string covers
-# the case where the user edits the target field after a previous analysis.
-_state_key = (uploaded.file_id, target_role)
+# Invalidate cached result when ANY of upload / target_role / region change.
+_state_key = (uploaded.file_id, target_role, region)
 if st.session_state.get("state_key") != _state_key:
     st.session_state.pop("result", None)
     st.session_state["state_key"] = _state_key
@@ -79,7 +94,10 @@ if run_button:
     with st.spinner(spinner_label):
         try:
             st.session_state["result"] = analyze_cv(
-                uploaded.getvalue(), uploaded.name, target_role=target_role
+                uploaded.getvalue(),
+                uploaded.name,
+                target_role=target_role,
+                region=region,
             )
         except UnmappedRoleError as e:
             st.warning(
@@ -105,9 +123,18 @@ if result is None:
 # -------------------------- Header label ---------------------------------
 
 source_badge = "target" if result.role_source == "target" else "auto-detected"
+_region_label = next(
+    (
+        label
+        for code, label in _REGION_OPTIONS
+        if code == result.track_explicit.salary_estimate.region
+    ),
+    "Národní průměr",
+)
 st.subheader(
     f"📌 Analyzováno pro pozici: **{result.analysis_role}** "
-    f":blue-badge[{source_badge}] · CZ-ISCO {result.cz_isco_code} · jazyk {result.language.upper()}"
+    f":blue-badge[{source_badge}] · CZ-ISCO {result.cz_isco_code} · "
+    f"jazyk {result.language.upper()} · region {_region_label}"
 )
 if result.role_source == "target":
     st.caption(
@@ -281,6 +308,26 @@ def _render_track(track: TrackResult, *, title: str, caption: str, container) ->
             delta=f"P{s.percentile_position}",
         )
         st.caption(f"Rozsah: {s.low:,} – {s.high:,} {s.currency}".replace(",", " "))
+
+        # Total comp signal (base + bonus + supplements). Only shown when ISPV
+        # reports a non-trivial bonus share — otherwise it duplicates the median.
+        if s.bonus_pct + s.supplement_pct >= 1.0:
+            st.caption(
+                f"💼 Total comp (s bonusy {s.bonus_pct:.1f} % a příplatky "
+                f"{s.supplement_pct:.1f} %): "
+                f"{s.total_comp_low:,} – {s.total_comp_high:,} {s.currency} "
+                f"(medián {s.total_comp_median:,})".replace(",", " ")
+            )
+
+        # Low-sample warning — wide band reflects statistical noise.
+        if s.confidence == "low":
+            st.caption(
+                f"📊 Malý vzorek ISPV (n ≈ {int(s.sample_size * 1000)} zaměstnanců) — "
+                "odhad méně spolehlivý, pásmo rozšířeno na ±25 %."
+            )
+        elif s.confidence == "medium":
+            st.caption(f"📊 Střední vzorek ISPV (n ≈ {int(s.sample_size * 1000)} zaměstnanců).")
+
         st.plotly_chart(_radar(track, title), width="stretch")
 
 
@@ -302,6 +349,46 @@ _render_track(
 )
 
 st.divider()
+
+
+# -------------------------- Live market postings (Layer C) ---------------
+
+mp = result.market_postings
+if mp is not None and mp.median is not None:
+    st.subheader("📡 Recent jobs.cz postings")
+    st.caption(
+        f"Live signál z jobs.cz přes Apify ({mp.source}). "
+        f"Vzorek: {mp.sample_size} pozic se zveřejněnou mzdou z {mp.total_postings} "
+        f"nalezených. ISPV zůstává primárním zdrojem; tohle je cross-check."
+    )
+    mp_a, mp_b, mp_c = st.columns(3)
+    mp_a.metric("P25 (jobs.cz)", f"{mp.p25:,} CZK".replace(",", " ") if mp.p25 else "—")
+    mp_b.metric("Medián (jobs.cz)", f"{mp.median:,} CZK".replace(",", " "))
+    mp_c.metric("P75 (jobs.cz)", f"{mp.p75:,} CZK".replace(",", " ") if mp.p75 else "—")
+
+    # Out-of-band hint — Apify median significantly outside ISPV pásmo.
+    ispv = result.track_with_inferred.salary_estimate
+    if mp.median > ispv.market_p90 * 1.1 or mp.median < ispv.market_p25 * 0.9:
+        st.warning(
+            f"⚠️ Live medián {mp.median:,} CZK leží mimo ISPV pásmo "
+            f"{ispv.market_p25:,}–{ispv.market_p90:,} CZK. "
+            "Ověř ručně — buď je trh aktuálně jinde než loňský ISPV, "
+            "nebo je vzorek příliš malý / posuvný.".replace(",", " ")
+        )
+    if mp.sample_url:
+        st.markdown(f"[🔗 Otevřít jobs.cz s těmito filtry]({mp.sample_url})")
+    st.divider()
+elif mp is None and os.environ.get("APIFY_TOKEN"):
+    # Token set but actor returned nothing usable.
+    st.caption(
+        "💡 Apify actor neproběhl, vrátil prázdná data nebo žádná z pozic neměla "
+        "parsovatelnou mzdu. Pouze ISPV signál se zobrazuje."
+    )
+elif mp is None:
+    st.caption(
+        "💡 Připoj `APIFY_TOKEN` (Streamlit Cloud → Settings → Secrets, nebo `.env`) "
+        "pro live jobs.cz cross-check k ISPV odhadu."
+    )
 
 
 # -------------------------- Strengths & gaps -----------------------------

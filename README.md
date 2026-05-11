@@ -64,18 +64,25 @@ as reviewer-visible artefacts. Output contract:
 
 ## Data approach
 
+The salary estimate is built from **three additive layers** so each
+number is traceable to a published source.
+
+### Layer A — ISPV official statistics
+
 **Source: MPSV ISPV open data** — [data.mpsv.cz/web/data/ispv-zamestnani](https://data.mpsv.cz/web/data/ispv-zamestnani).
 Official Czech earnings statistics published by the Ministry of Labour
-and Social Affairs. Quantiles P25 / P50 / P75 / P90 per CZ-ISCO
-occupation code. Same dataset ČSÚ uses for pension valorization —
+and Social Affairs. Same dataset ČSÚ uses for pension valorization —
 defensible, free, no scraping.
 
 [`cv_estimator/data/ispv_2025.csv`](cv_estimator/data/ispv_2025.csv) is
 generated from the official MPSV JSON export (period `rok 2025`, sphere
-`MZDOVA` — private-sector wages, where almost all professional
-employment sits). 296 CZ-ISCO codes covered. Regenerate via
-[`scripts/prepare_ispv_data.py`](scripts/prepare_ispv_data.py); drop the
-raw JSON download into `data/raw/` and run the script.
+`MZDOVA` — private-sector wages). 296 CZ-ISCO codes; per code we ingest:
+P10 / P25 / P50 / P75 / P90, mean (`mzdaPrumer`), bonus share
+(`odmenaMzdy`), supplement share (`priplatekMzdy`) and sample size
+(`pocetZamestnancuMzda`). Bonus + supplement drive a separate
+**total-comp** estimate (`base × (1 + bonus_pct + supplement_pct)`).
+Sample size drives a **confidence label** that widens the output band
+for thinly-sampled codes (low n ⇒ ±25 %, otherwise ±15 %).
 
 **Role → CZ-ISCO mapping.** Priority-ranked keyword rules in
 [`cv_estimator/salary/role_mapping.py`](cv_estimator/salary/role_mapping.py)
@@ -86,8 +93,34 @@ than silently picking a default.
 
 **Score → salary mapping.** Bucketed interpolation onto the ISPV quantile
 curve: junior 0-40 → P25, mid 40-70 → P25-P50, senior 70-90 → P50-P75,
-principal 90+ → P75-P90. Output range ±15 % around the interpolated
-median, clamped to (P25, P90).
+principal 90+ → P75-P90.
+
+### Layer B — regional multiplier
+
+[`cv_estimator/data/regional_multipliers_2025.csv`](cv_estimator/data/regional_multipliers_2025.csv)
+holds 14 NUTS-3 multipliers (Praha 1.30× for IT, Ostrava / Karlovy Vary
+≈ 0.88×, etc.) calibrated from ČSÚ regional wage tables. Tech roles pick
+`multiplier_it`; everything else picks `multiplier_avg`. Applied before
+the bucket interpolation so the candidate's national percentile stays
+unchanged — region adjusts the absolute CZK, not the standing in the
+curve.
+
+UI exposes a *Region (volitelné)* dropdown; CLI accepts `--region CZ010`.
+
+### Layer C — live jobs.cz cross-check (optional)
+
+When `APIFY_TOKEN` is set, the pipeline runs the
+[`abaddion/jobscz-scraper`](https://apify.com/abaddion/jobscz-scraper)
+Apify actor for the resolved role + region and aggregates parseable
+salaries from the postings into P25 / median / P75. Cached for 24 h per
+(role, region) so repeated analyses cost ~zero. ISPV stays authoritative
+for the point estimate; this layer is a recency cross-check ("does
+2025-mid market match what jobs.cz is currently listing?"). When the
+live median sits > 10 % outside the ISPV pásmo, the UI raises an
+*"ověř ručně"* warning.
+
+Without the token, the pipeline runs Layer A + B only — the UI shows a
+hint instead of the live panel.
 
 ## Design choices
 

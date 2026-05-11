@@ -1,5 +1,6 @@
 """Pydantic schemas — single source of truth for pipeline output contract."""
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -27,18 +28,57 @@ class ScoreBreakdown(BaseModel):
 
 
 class SalaryEstimate(BaseModel):
-    # Candidate-specific point estimate
+    # Candidate-specific point estimate (base monthly gross — ISPV "MZDA")
     low: int
     median: int
     high: int
     currency: str = "CZK"
     percentile_position: int = Field(ge=0, le=100)
+
     # Full ISPV market band for the role — used by the UI range chart so
     # readers see where the candidate sits within the market.
+    market_p10: int = 0
     market_p25: int
     market_p50: int
     market_p75: int
     market_p90: int
+    market_mean: int = 0  # ISPV mzdaPrumer; usually > median due to upper-tail outliers
+
+    # ISPV total-comp signal: bonuses + supplements as a share of base. Total
+    # comp ≈ base × (1 + bonus_pct + supplement_pct).
+    bonus_pct: float = 0.0
+    supplement_pct: float = 0.0
+    total_comp_low: int = 0
+    total_comp_median: int = 0
+    total_comp_high: int = 0
+
+    # Statistical reliability of the ISPV row. sample_size is in thousands of
+    # employees (ISPV's "pocetZamestnancuMzda"); confidence widens the output
+    # band for thin rows.
+    sample_size: float = 0.0
+    confidence: Literal["low", "medium", "high"] = "high"
+
+    # Region applied (CZ010..CZ080) or None for national. Surface so UI / CLI
+    # can attribute the adjustment.
+    region: str | None = None
+    region_multiplier: float = 1.0
+
+
+class MarketPostings(BaseModel):
+    """Live posting signal pulled from jobs.cz via the Apify
+    `abaddion/jobscz-scraper` actor. Optional — None when APIFY_TOKEN
+    is unset or the actor errored. ISPV stays the authoritative source;
+    this is a recency cross-check."""
+
+    sample_size: int  # postings with a parseable salary
+    total_postings: int  # all postings returned by the actor
+    median: int | None = None
+    p25: int | None = None
+    p75: int | None = None
+    currency: Literal["CZK"] = "CZK"
+    source: Literal["jobs.cz via Apify"] = "jobs.cz via Apify"
+    fetched_at: datetime
+    sample_url: str | None = None
 
 
 class Recommendation(BaseModel):
@@ -112,5 +152,9 @@ class CVAnalysis(BaseModel):
     strengths: list[str]
     gaps: list[str]
     recommendations: list[Recommendation] = Field(min_length=3, max_length=3)
+
+    # Live market signal — None when APIFY_TOKEN is unset or the actor failed.
+    # ISPV stays the source of truth for the seniority-anchored point estimate.
+    market_postings: MarketPostings | None = None
 
     processing_metadata: dict

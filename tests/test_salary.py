@@ -171,3 +171,135 @@ def test_salary_exposes_market_band():
     assert est.market_p75 == 141_956
     assert est.market_p90 == 184_858
     assert est.market_p25 < est.market_p50 < est.market_p75 < est.market_p90
+
+
+# ----- Phase 12: enrichment ----------------------------------------------
+
+
+def test_salary_exposes_p10_and_mean():
+    """Enriched ISPV ingest must include the P10 floor and the mean
+    (asymmetric distribution check)."""
+    est = lookup.estimate_salary("2512", 50)
+    assert est.market_p10 > 0
+    assert est.market_p10 <= est.market_p25
+    assert est.market_mean >= est.market_p50  # IT distribution skews right
+
+
+def test_salary_total_comp_uses_bonus_and_supplement():
+    """total_comp_* = base × (1 + bonus_pct + supplement_pct) / 100."""
+    est = lookup.estimate_salary("2512", 70)
+    assert est.bonus_pct > 0  # ISPV reports IT bonuses
+    expected_mult = 1.0 + (est.bonus_pct + est.supplement_pct) / 100.0
+    assert abs(est.total_comp_median / est.median - expected_mult) < 0.01
+
+
+def test_salary_confidence_high_for_dense_code():
+    """Code 2512 has thousands of sampled employees → confidence=high."""
+    est = lookup.estimate_salary("2512", 50)
+    assert est.confidence == "high"
+    assert est.sample_size > 5.0
+
+
+def test_salary_region_praha_lifts_median():
+    """Praha (CZ010) multiplier > 1.0 → median rises for the same score."""
+    nat = lookup.estimate_salary("2512", 70, role="Backend Engineer")
+    pra = lookup.estimate_salary("2512", 70, role="Backend Engineer", region="CZ010")
+    assert pra.median > nat.median
+    assert pra.region == "CZ010"
+    assert pra.region_multiplier > 1.0
+    assert nat.region is None
+    assert nat.region_multiplier == 1.0
+
+
+def test_salary_region_uses_it_multiplier_for_tech_role():
+    """Tech role picks the higher IT-specific column."""
+    pra_tech = lookup.estimate_salary("2512", 70, role="Backend Engineer", region="CZ010")
+    pra_avg = lookup.estimate_salary("2512", 70, role="Marketing Manager", region="CZ010")
+    assert pra_tech.region_multiplier == 1.30
+    assert pra_avg.region_multiplier == 1.25
+
+
+def test_salary_unknown_region_falls_back_to_national():
+    """Garbage region code → multiplier 1.0, no failure."""
+    est = lookup.estimate_salary("2512", 70, region="ZZ999")
+    assert est.region is None
+    assert est.region_multiplier == 1.0
+
+
+def test_salary_percentile_position_unaffected_by_region():
+    """Region adjusts absolute CZK, not the candidate's standing in the
+    national curve. Score 70 stays at percentile_position 50 in any region."""
+    nat = lookup.estimate_salary("2512", 70)
+    pra = lookup.estimate_salary("2512", 70, region="CZ010")
+    assert nat.percentile_position == pra.percentile_position == 50
+
+
+# ----- Apify postings parser ---------------------------------------------
+
+
+def test_parse_salary_range_midpoint():
+    from cv_estimator.salary import market_postings
+
+    assert market_postings.parse_salary("60 000 – 80 000 Kč") == 70_000
+    assert market_postings.parse_salary("60 000 - 80 000 Kč/měs") == 70_000
+
+
+def test_parse_salary_single_value():
+    from cv_estimator.salary import market_postings
+
+    assert market_postings.parse_salary("od 70 000 Kč") == 70_000
+    assert market_postings.parse_salary("70 000 Kč") == 70_000
+
+
+def test_parse_salary_hourly_to_monthly():
+    from cv_estimator.salary import market_postings
+
+    # 500 CZK/hod × 160 h = 80 000 CZK/měsíc
+    assert market_postings.parse_salary("500 Kč/hod") == 80_000
+
+
+def test_parse_salary_rejects_garbage_and_out_of_range():
+    from cv_estimator.salary import market_postings
+
+    assert market_postings.parse_salary("") is None
+    assert market_postings.parse_salary(None) is None
+    assert market_postings.parse_salary("Dohodou") is None
+    # 5 000 CZK monthly is below sanity floor 10k
+    assert market_postings.parse_salary("5 000 Kč") is None
+    # 5 000 000 CZK monthly is above sanity ceiling 1M
+    assert market_postings.parse_salary("5 000 000 Kč") is None
+
+
+def test_fetch_market_postings_returns_none_without_token(monkeypatch):
+    from cv_estimator.salary import market_postings
+
+    monkeypatch.delenv("APIFY_TOKEN", raising=False)
+    assert market_postings.fetch_market_postings("Backend Engineer") is None
+
+
+def test_fetch_market_postings_parses_actor_response(monkeypatch, tmp_path):
+    """With APIFY_TOKEN set + actor returning items with salary strings,
+    fetch_market_postings should aggregate into a MarketPostings."""
+    from cv_estimator.salary import market_postings
+
+    # Redirect cache to a temp dir so we don't poison ~/.cache.
+    monkeypatch.setattr(market_postings, "CACHE_DIR", tmp_path)
+    monkeypatch.setenv("APIFY_TOKEN", "test-token")
+
+    fake_items = [
+        {"salary": "60 000 – 80 000 Kč"},
+        {"salary": "75 000 Kč"},
+        {"salary": "od 90 000 Kč"},
+        {"salary": "Dohodou"},  # unparseable — skipped from sample_size
+    ]
+    monkeypatch.setattr(market_postings, "_run_actor", lambda *a, **kw: fake_items)
+
+    result = market_postings.fetch_market_postings("Backend Engineer", region="CZ010")
+    assert result is not None
+    assert result.total_postings == 4
+    assert result.sample_size == 3  # "Dohodou" skipped
+    assert result.median is not None
+    assert result.median > 0
+    assert result.p25 is not None and result.p75 is not None
+    assert result.p25 <= result.median <= result.p75
+    assert "jobs.cz" in (result.sample_url or "")
