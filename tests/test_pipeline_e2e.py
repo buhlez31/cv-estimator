@@ -35,6 +35,7 @@ def _mock_call_json(prompt: str) -> dict:
             "explicit_skills": ["python", "sql", "snowflake", "kafka", "airflow", "dbt", "git"],
             "highest_education": "master",
             "institution": "Charles University",
+            "field_of_study": "Computer Science",
             "language": "en",
         }
     if "Extract inferred capabilities" in prompt:
@@ -107,6 +108,9 @@ def _mock_call_json(prompt: str) -> dict:
                 "gap is people-management experience for a manager track."
             ),
         }
+    if "Skills coverage scoring for non-tech role" in prompt:
+        # CTO target → business_mgmt family → LLM coverage scoring path.
+        return {"coverage_percent": 55, "missing_core": ["budget management"]}
     raise AssertionError(f"Unexpected prompt: {prompt[:100]}")
 
 

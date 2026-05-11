@@ -7,10 +7,12 @@ breakdowns in JSON, JSON-LD, and JSON-schema form.
 
 This script:
 1. Reads `data/raw/ispv-zamestnani.json` (gitignored).
-2. Filters to IT CZ-ISCO codes (prefixes 251x, 252x, 1330, 351x).
-3. Filters to the MZDOVA sphere (private-sector wages; most relevant for IT).
-4. Maps the verbose Czech field names to a slim lookup schema.
-5. Writes the table to `data/ispv_<year>.csv`.
+2. Filters to the MZDOVA sphere (private-sector wages — the canonical
+   reference; PLATOVA = public-sector salaries, smaller sample for IT).
+3. Emits ALL distinct CZ-ISCO codes in the MZDOVA sphere (not just IT).
+   IT-only mapping previously here is preserved as a lookup label
+   helper for the codes the pipeline cares about most.
+4. Writes the table to `data/ispv_<year>.csv`.
 """
 
 import json
@@ -19,13 +21,14 @@ import sys
 
 import pandas as pd
 
-from cv_estimator.config import DATA_DIR, IT_ISCO_PREFIXES
+from cv_estimator.config import DATA_DIR
 
 RAW_FILE = DATA_DIR / "raw" / "ispv-zamestnani.json"
 
-# CZ-ISCO 4-digit → (English label, Czech label). IT-only.
-# Source: ČSÚ CZ-ISCO classifier.
-ROLE_LABELS: dict[str, tuple[str, str]] = {
+# Optional CZ-ISCO 4-digit → (English label, Czech label) for IT codes.
+# For non-IT codes we emit "CZ-ISCO XXXX" as a placeholder label since
+# the raw JSON doesn't carry a name field.
+IT_ROLE_LABELS: dict[str, tuple[str, str]] = {
     "1330": ("ICT services manager", "Manažer v oblasti ICT"),
     "2511": ("Systems analyst", "Systémový analytik"),
     "2512": ("Software developer", "Vývojář software"),
@@ -71,14 +74,12 @@ def main() -> int:
 
     rows = []
     for it in items:
-        code = _strip_isco_prefix(it["czIsco"])
-        if not any(code.startswith(p) for p in IT_ISCO_PREFIXES):
-            continue
         # MZDOVA = private-sector wages; PLATOVA = public-sector salaries.
-        # IT in the private sector dominates the market — use MZDOVA as canonical.
+        # Use MZDOVA as the canonical reference (larger sample, market-rate).
         if it.get("sfera") != "MZDOVA":
             continue
-        label_en, label_cs = ROLE_LABELS.get(code, (f"CZ-ISCO {code}", f"CZ-ISCO {code}"))
+        code = _strip_isco_prefix(it["czIsco"])
+        label_en, label_cs = IT_ROLE_LABELS.get(code, (f"CZ-ISCO {code}", f"CZ-ISCO {code}"))
         rows.append(
             {
                 "cz_isco_code": code,
@@ -92,7 +93,7 @@ def main() -> int:
         )
 
     if not rows:
-        print("No matching IT rows found.", file=sys.stderr)
+        print("No MZDOVA rows found.", file=sys.stderr)
         return 2
 
     df = pd.DataFrame(rows).sort_values("cz_isco_code").reset_index(drop=True)
@@ -100,7 +101,6 @@ def main() -> int:
     out_path = DATA_DIR / f"ispv_{year}.csv"
     df.to_csv(out_path, index=False)
     print(f"Wrote {len(df)} rows → {out_path}")
-    print(df.to_string(index=False))
     return 0
 
 

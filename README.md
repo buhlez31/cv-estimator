@@ -115,6 +115,48 @@ the interpolated median, clamped to (P25, P90).
 | **No Sphinx, Airflow, Docker, CI** | Within 6–12 h budget. Brief explicitly says *"rather simpler but functional"*. |
 | **No scraping** | ISPV open data has a CSV download. Legal-clean. |
 
+### Education: role-aware field relevance
+
+`_education_score` factors in the candidate's `field_of_study` (extracted
+by LLM #1) against the analysis role's family. Heuristic role-family +
+field-family classifiers (`ROLE_FAMILY_KEYWORDS`, `FIELD_FAMILY_KEYWORDS`
+in [`config.py`](cv_estimator/config.py)) bucket each side into one of
+~8 families.
+
+**Lowered base map** so the typical case isn't already saturated before
+the relevance modifier applies:
+
+| Degree | Base |
+|---|---|
+| none | 0 |
+| high_school | 10 |
+| bachelor | 30 |
+| master | 50 |
+| phd | 70 |
+
+**+5** prestige bonus on top if the institution is in
+`PRESTIGE_INSTITUTION_KEYWORDS`.
+
+**Field-relevance modifier:**
+
+| Relationship | Effect on score |
+|---|---|
+| Same family (e.g. CS field + Software Engineer role) | **+5** match bonus |
+| Adjacent pair (e.g. Geoinformatika + Research Analyst, CS + CTO) | 0 |
+| Different families (e.g. History + Backend Engineer) | **-25** hard penalty |
+| Field empty (LLM couldn't find one) | base × **0.5** half-credit |
+| Either side unclassified | 0 (no signal, no penalty) |
+| `highest_education = "none"` | **0** regardless of anything else |
+
+Worked examples (assuming ČVUT, which has the +5 prestige bonus):
+
+- Master CS + Senior Backend Engineer (match) → 50 + 5 + 5 = **60**
+- Master Geoinformatika + Research Analyst (adjacent) → 50 + 5 = **55**
+- Master History + Senior Backend Engineer (mismatch) → 50 + 5 − 25 = **30**
+- PhD History + Senior Backend Engineer (mismatch, no prestige) → 70 − 25 = **45**
+- Master CS, no field listed + Backend Engineer (half credit) → (50 + 5) × 0.5 = **27.5**
+- No degree listed → **0** regardless of role / institution
+
 ## The hidden-assets thesis
 
 The product differentiator is `inferred_capabilities` ([extractors/inferred.py](cv_estimator/extractors/inferred.py)):
@@ -129,19 +171,33 @@ The pipeline emits **two independent scoring tracks** so the reader sees
 buzzword vs hidden-assets analyses side-by-side instead of a single blended
 number:
 
-- **`track_explicit`** — skeptical baseline. Only literal CV content
-  feeds the score. `skills_depth` is **capped at 75**, encoding the
-  rule that a bare skill list without project-narrative evidence is
-  inherently incomplete signal. Inferred capabilities are computed for
-  visibility but excluded from this track's score.
-- **`track_with_inferred`** — optimistic ceiling. Explicit skills can
-  reach 100, and a confidence-weighted bonus from the inferred pass
-  (`bonus = 8 × confidence` per capability, aggregate cap +25) is added
-  on top. The cap asymmetry between the two tracks is what makes the
-  methodology visible in the UI: even a buzzword-saturating CV (which
-  pegs explicit skills at 75 / baseline) leaves room for hidden-asset
-  evidence to lift the with-inferred track by ~10–17 points and shift
-  the salary marker visibly within the ISPV range.
+- **`track_explicit`** — buzzword baseline. Objective view from the
+  literal CV content. For tech roles, `skills_depth` is a **category
+  coverage** score: `covered_categories / 8 × 100` over the
+  `TECH_STACK_CATEGORIES` checklist (language, database, cloud,
+  container/orchestration, messaging, web framework, observability,
+  CI/devops). 100 literally means "every expected stack category is
+  represented in the CV's skill listing".
+- **`track_with_inferred`** — same coverage check, but inferred
+  capabilities with `confidence ≥ 0.6` also count as signals. The gap
+  between the two tracks measures *which categories the candidate
+  covers via project-narrative evidence rather than the explicit skill
+  listing*. If inferred doesn't unlock any new category, the gap is
+  zero — methodologically honest. No artificial asymmetric cap.
+
+For **non-tech roles** (business management, marketing, legal, etc.)
+the framework falls back to the legacy tier-weighted scoring with the
+explicit-only cap at 75 and a confidence-weighted inferred bonus — we
+don't have calibrated category lists for non-tech families yet, and
+the case study scope is IT.
+
+Worked examples (tech role):
+- Backend Engineer CV listing python, postgres, kafka, k8s, terraform
+  → covers `language`, `database`, `messaging`, `container/orchestration`
+  = 4/8 = **50 %**.
+- Same CV + inferred capability "aws" (confidence 0.8) → unlocks
+  `cloud_platform` → 5/8 = **62.5 %**, gap 12.5.
+- CV listing all 8 categories → **100 %** (the methodological max).
 
 Each track ships its own `seniority_score` and `salary_estimate`. The UI
 renders them in side-by-side cards and a market-range chart shows both
@@ -153,7 +209,11 @@ When they diverge, the gap measures *how much the candidate's description
 style under-represents them* — which is the case the standard buzzword
 filters fail at.
 
-### Role-scoped + skepticism by default
+### Role-scoped + skepticism (inferred-pass only)
+
+Skepticism applies only to the inferred-capabilities pass — the buzzword
+baseline is the objective view; the inferred extraction is the part that
+gets the conservative treatment.
 
 Looking at real-CV output, the inferred pass had a tendency to over-attribute
 (e.g. inferring "community manager" from being the analyst on a community

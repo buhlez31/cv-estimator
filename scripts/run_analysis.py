@@ -2,8 +2,9 @@
 """CLI entry point: `python scripts/run_analysis.py path/to/cv.pdf [--json]`.
 
 Prints either a human-readable summary (default) or the raw JSON output.
-After Branch A: emits both the skeptical baseline and the hidden-assets
-track side-by-side.
+Emits the buzzword baseline (objective, from explicit CV content) and the
+hidden-assets-included track side-by-side. Only the inferred-capabilities
+pass is evaluated skeptically — the baseline is the objective view.
 """
 
 import argparse
@@ -15,6 +16,7 @@ from dotenv import load_dotenv
 
 from cv_estimator.models import CVAnalysis, TrackResult
 from cv_estimator.pipeline import analyze_cv
+from cv_estimator.salary.role_mapping import UnmappedRoleError
 
 
 def main() -> int:
@@ -37,7 +39,16 @@ def main() -> int:
         return 2
 
     file_bytes = args.cv_path.read_bytes()
-    result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
+    try:
+        result = analyze_cv(file_bytes, args.cv_path.name, target_role=args.target_role)
+    except UnmappedRoleError as e:
+        print(
+            f"Role {e.role!r} did not match any CZ-ISCO entry in the ISPV "
+            "database. Use a more standard job title (e.g. 'Senior Backend "
+            "Engineer', 'Marketing Manager', 'Lawyer') or omit --target-role.",
+            file=sys.stderr,
+        )
+        return 3
 
     if args.json:
         print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
@@ -71,7 +82,7 @@ def _print_summary(result: CVAnalysis) -> None:
         f"{market.market_p25:,} – {market.market_p90:,} {market.currency}"
     )
 
-    _print_track("Buzzword baseline (skeptický)", result.track_explicit)
+    _print_track("Buzzword baseline", result.track_explicit)
     _print_track("S hidden assets (potenciál)", result.track_with_inferred)
 
     print("\nStrengths:")

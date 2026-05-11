@@ -16,6 +16,7 @@ def explicit_senior_dev() -> ExplicitData:
         explicit_skills=["python", "kubernetes", "postgres", "kafka", "terraform"],
         highest_education="master",
         institution="ČVUT",
+        field_of_study="Computer Science",
         language="en",
     )
 
@@ -28,6 +29,15 @@ def inferred_senior_dev() -> InferredData:
                 skill="technical leadership",
                 evidence_quote="led migration of legacy system to cloud",
                 confidence=0.85,
+                relevance="must_have",
+            ),
+            SkillEvidence(
+                # Matches TECH_STACK_CATEGORIES['cloud_platform'] — used by
+                # tests that exercise the "inferred unlocks a new category"
+                # branch of _skills_coverage_score.
+                skill="aws",
+                evidence_quote="migrated infrastructure to AWS",
+                confidence=0.8,
                 relevance="must_have",
             ),
             SkillEvidence(
@@ -49,6 +59,7 @@ def explicit_junior_support() -> ExplicitData:
         explicit_skills=["excel", "outlook", "jira"],
         highest_education="bachelor",
         institution="VŠE",
+        field_of_study="Information Systems",
         language="cs",
     )
 

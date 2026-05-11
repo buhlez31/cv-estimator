@@ -58,13 +58,13 @@ def analyze_cv(
 
     cz_isco = role_mapping.map_to_cz_isco(analysis_role)
 
-    # Track A: skeptical baseline (only literal CV content).
-    breakdown_explicit = components.compute_explicit_only(explicit_data)
+    # Track A: buzzword baseline — objective view from literal CV content.
+    breakdown_explicit = components.compute_explicit_only(explicit_data, analysis_role)
     score_explicit = seniority.compute(breakdown_explicit)
     salary_explicit = lookup.estimate_salary(cz_isco, score_explicit)
 
     # Track B: optimistic ceiling (adds confidence-weighted inferred bonus).
-    breakdown_full = components.compute_with_inferred(explicit_data, inferred_data)
+    breakdown_full = components.compute_with_inferred(explicit_data, inferred_data, analysis_role)
     score_full = seniority.compute(breakdown_full)
     salary_full = lookup.estimate_salary(cz_isco, score_full)
 

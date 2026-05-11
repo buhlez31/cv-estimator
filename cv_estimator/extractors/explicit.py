@@ -14,6 +14,11 @@ class ExplicitData(BaseModel):
     explicit_skills: list[str]
     highest_education: Literal["none", "high_school", "bachelor", "master", "phd"]
     institution: str
+    # Verbatim field-of-study string from the CV (e.g. "Computer Science",
+    # "History of Art", "Master práva"). Empty string when the LLM cannot
+    # locate one. Used by `_education_score` to apply a role-family
+    # relevance modifier.
+    field_of_study: str = ""
     language: Literal["cs", "en"]
 
 
