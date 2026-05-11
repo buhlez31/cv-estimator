@@ -55,7 +55,7 @@ target_role = target_role_input.strip() or None
 uploaded = st.file_uploader("Nahraj CV (PDF nebo DOCX)", type=["pdf", "docx"])
 
 if uploaded is None:
-    st.info("👈 Vyber soubor pro analýzu.")
+    st.info("👆 Vyber soubor pro analýzu.")
     st.stop()
 
 # Invalidate cached result when EITHER the upload OR the target_role
