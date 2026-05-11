@@ -105,21 +105,6 @@ median, clamped to (P25, P90).
 pytest -q   # 78 tests, no network — LLM calls patched in e2e tests
 ```
 
-## Deploy (Streamlit Community Cloud)
-
-1. [share.streamlit.io](https://share.streamlit.io) → New app →
-   repo, branch `main`, main file `cv_estimator/ui/app.py`.
-2. Advanced settings → Secrets:
-   ```toml
-   ANTHROPIC_API_KEY = "sk-ant-..."
-   ```
-3. Deploy. Auto-redeploys on every push to `main`.
-
-Uploaded CV stays in Streamlit server RAM only — never written to disk.
-Anthropic logs API calls per their commercial data policy (30-day
-retention, no training on API content). Owner's key bills owner's
-account for every visitor.
-
 ## License
 
 MIT — see [LICENSE](LICENSE).
