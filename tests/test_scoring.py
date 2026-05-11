@@ -93,10 +93,11 @@ def test_skills_coverage_inferred_changes_score(explicit_senior_dev, inferred_se
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
-    """senior_dev fixture under all-LLM coverage:
-    - Years: 8/15*100 ≈ 53
+    """senior_dev fixture under all-LLM coverage, analysis_role with
+    `senior` keyword:
+    - Years: cap 15 (senior keyword) → 8/15*100 ≈ 53
     - Skills coverage: autouse stub returns 50 %
-    - Role: senior signal + 8 years (no +5 since <10) = 80
+    - Role progression: senior keyword + 8 years (no +5 since <10) = 80
     - Education: master 50 + ČVUT prestige 5 + CS match +5 = 60
     """
     b = components.compute_with_inferred(
@@ -109,15 +110,41 @@ def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
 
 
 def test_components_junior_support(explicit_junior_support, inferred_empty):
-    """IT Support Specialist: autouse stub returns 50 % coverage.
-    Education: bachelor 30 + VŠE prestige 5 + unknown field family → 35."""
+    """Analysis_role "Junior IT Support" → junior keyword fires:
+    - Years: cap 3 (junior) → 1/3*100 ≈ 33
+    - Role progression: junior keyword → 25
+    - Education: bachelor 30 + VŠE prestige 5 + unknown field family → 35
+    """
     b = components.compute_with_inferred(
-        explicit_junior_support, inferred_empty, "IT Support Specialist"
+        explicit_junior_support, inferred_empty, "Junior IT Support"
     )
-    assert 5 <= b.years_experience <= 8
+    assert 30 <= b.years_experience <= 35
     assert b.skills_depth == 50.0
     assert b.role_progression == 25.0
     assert b.education == 35.0
+
+
+def test_years_and_role_react_to_analysis_role(explicit_senior_dev, inferred_empty):
+    """Same CV → different years_experience and role_progression depending
+    on the analyzed role. Demonstrates the target-driven reactivity."""
+    senior = components.compute_with_inferred(
+        explicit_senior_dev, inferred_empty, "Senior Backend Engineer"
+    )
+    junior = components.compute_with_inferred(
+        explicit_senior_dev, inferred_empty, "Junior Backend Engineer"
+    )
+    principal = components.compute_with_inferred(
+        explicit_senior_dev, inferred_empty, "Principal Engineer"
+    )
+    # 8 years saturates against junior cap (3), maxes mid-tier cap (10),
+    # and lands at 8/15 ≈ 53 against senior, 8/20 = 40 against principal.
+    assert junior.years_experience == 100.0
+    assert 50 <= senior.years_experience <= 55
+    assert 39 <= principal.years_experience <= 41
+    # Role progression flips with the keyword.
+    assert junior.role_progression == 25.0
+    assert senior.role_progression == 80.0
+    assert principal.role_progression == 95.0
 
 
 def test_coverage_attribution_universal():

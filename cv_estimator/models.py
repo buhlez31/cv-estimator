@@ -27,18 +27,46 @@ class ScoreBreakdown(BaseModel):
 
 
 class SalaryEstimate(BaseModel):
-    # Candidate-specific point estimate
+    # Candidate-specific point estimate (base monthly gross — ISPV "MZDA")
     low: int
     median: int
     high: int
     currency: str = "CZK"
     percentile_position: int = Field(ge=0, le=100)
+
     # Full ISPV market band for the role — used by the UI range chart so
     # readers see where the candidate sits within the market.
+    market_p10: int = 0
     market_p25: int
     market_p50: int
     market_p75: int
     market_p90: int
+    market_mean: int = 0  # ISPV mzdaPrumer; usually > median due to upper-tail outliers
+
+    # ISPV total-comp signal: bonuses + supplements as a share of base. Total
+    # comp ≈ base × (1 + bonus_pct + supplement_pct).
+    bonus_pct: float = 0.0
+    supplement_pct: float = 0.0
+    total_comp_low: int = 0
+    total_comp_median: int = 0
+    total_comp_high: int = 0
+
+    # Statistical reliability of the ISPV row. sample_size is in thousands of
+    # employees (ISPV's "pocetZamestnancuMzda"); confidence widens the output
+    # band for thin rows.
+    sample_size: float = 0.0
+    confidence: Literal["low", "medium", "high"] = "high"
+
+    # Region applied (CZ010..CZ080) or None for national. Surface so UI / CLI
+    # can attribute the adjustment.
+    region: str | None = None
+    region_multiplier: float = 1.0
+
+    # Layer C — platy.cz role refinement. Populated when the matcher found
+    # a role-title-level platy.cz row blended into the median; None when
+    # the ISPV-only number stands.
+    platycz_position: str | None = None
+    platycz_url: str | None = None
 
 
 class Recommendation(BaseModel):

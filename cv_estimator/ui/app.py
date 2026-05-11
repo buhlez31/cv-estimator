@@ -58,9 +58,7 @@ if uploaded is None:
     st.info("👆 Vyber soubor pro analýzu.")
     st.stop()
 
-# Invalidate cached result when EITHER the upload OR the target_role
-# changes. file_id covers new uploads; comparing the target string covers
-# the case where the user edits the target field after a previous analysis.
+# Invalidate cached result when EITHER the upload OR the target_role changes.
 _state_key = (uploaded.file_id, target_role)
 if st.session_state.get("state_key") != _state_key:
     st.session_state.pop("result", None)
@@ -79,7 +77,9 @@ if run_button:
     with st.spinner(spinner_label):
         try:
             st.session_state["result"] = analyze_cv(
-                uploaded.getvalue(), uploaded.name, target_role=target_role
+                uploaded.getvalue(),
+                uploaded.name,
+                target_role=target_role,
             )
         except UnmappedRoleError as e:
             st.warning(
@@ -372,6 +372,8 @@ if result.inferred_capabilities:
     # scored coverage and identified which inputs lifted or undermined it.
     attr = result.track_with_inferred.coverage_attribution
     if attr is not None and (attr.value_adding or attr.concerns):
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.divider()
         st.markdown("#### 📊 Vliv hidden assets na skóre")
         st.caption(
             f"LLM coverage hodnotitel ({result.analysis_role}) označil tyto inputy "

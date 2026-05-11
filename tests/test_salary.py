@@ -171,3 +171,119 @@ def test_salary_exposes_market_band():
     assert est.market_p75 == 141_956
     assert est.market_p90 == 184_858
     assert est.market_p25 < est.market_p50 < est.market_p75 < est.market_p90
+
+
+# ----- Phase 12: enrichment ----------------------------------------------
+
+
+def test_salary_exposes_p10_and_mean():
+    """Enriched ISPV ingest must include the P10 floor and the mean
+    (asymmetric distribution check)."""
+    est = lookup.estimate_salary("2512", 50)
+    assert est.market_p10 > 0
+    assert est.market_p10 <= est.market_p25
+    assert est.market_mean >= est.market_p50  # IT distribution skews right
+
+
+def test_salary_total_comp_uses_bonus_and_supplement():
+    """total_comp_* = base × (1 + bonus_pct + supplement_pct) / 100."""
+    est = lookup.estimate_salary("2512", 70)
+    assert est.bonus_pct > 0  # ISPV reports IT bonuses
+    expected_mult = 1.0 + (est.bonus_pct + est.supplement_pct) / 100.0
+    assert abs(est.total_comp_median / est.median - expected_mult) < 0.01
+
+
+def test_salary_confidence_high_for_dense_code():
+    """Code 2512 has thousands of sampled employees → confidence=high."""
+    est = lookup.estimate_salary("2512", 50)
+    assert est.confidence == "high"
+    assert est.sample_size > 5.0
+
+
+def test_salary_region_praha_lifts_median():
+    """Praha (CZ010) multiplier > 1.0 → median rises for the same score."""
+    nat = lookup.estimate_salary("2512", 70, role="Backend Engineer")
+    pra = lookup.estimate_salary("2512", 70, role="Backend Engineer", region="CZ010")
+    assert pra.median > nat.median
+    assert pra.region == "CZ010"
+    assert pra.region_multiplier > 1.0
+    assert nat.region is None
+    assert nat.region_multiplier == 1.0
+
+
+def test_salary_region_uses_it_multiplier_for_tech_role():
+    """Tech role picks the higher IT-specific column."""
+    pra_tech = lookup.estimate_salary("2512", 70, role="Backend Engineer", region="CZ010")
+    pra_avg = lookup.estimate_salary("2512", 70, role="Marketing Manager", region="CZ010")
+    assert pra_tech.region_multiplier == 1.30
+    assert pra_avg.region_multiplier == 1.25
+
+
+def test_salary_unknown_region_falls_back_to_national():
+    """Garbage region code → multiplier 1.0, no failure."""
+    est = lookup.estimate_salary("2512", 70, region="ZZ999")
+    assert est.region is None
+    assert est.region_multiplier == 1.0
+
+
+def test_salary_percentile_position_unaffected_by_region():
+    """Region adjusts absolute CZK, not the candidate's standing in the
+    national curve. Score 70 stays at percentile_position 50 in any region."""
+    nat = lookup.estimate_salary("2512", 70)
+    pra = lookup.estimate_salary("2512", 70, region="CZ010")
+    assert nat.percentile_position == pra.percentile_position == 50
+
+
+# ----- Layer C: platy.cz role refinement ---------------------------------
+
+
+def test_platycz_matcher_picks_backend_developer():
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    m = platycz.find_match("Senior Backend Engineer")
+    assert m is not None
+    assert m.position_slug == "backend-developer"
+
+
+def test_platycz_matcher_picks_lawyer_via_alias():
+    """English 'Lawyer' should resolve to Czech Advokát/Právník via alias."""
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    m = platycz.find_match("Lawyer")
+    assert m is not None
+    assert m.position_slug in {"advokat", "pravnik"}
+
+
+def test_platycz_matcher_returns_none_for_garbage():
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    assert platycz.find_match("Quantum Llama Whisperer") is None
+
+
+def test_platycz_matcher_returns_none_for_generic_only():
+    """Input that only contains generic tokens (senior / junior) has no
+    specific signal → no match."""
+    from cv_estimator.salary import platycz
+
+    platycz.find_match.cache_clear()
+    assert platycz.find_match("Senior") is None
+
+
+def test_estimate_salary_uses_platycz_when_match():
+    """Backend Developer + 2512 → median shifts vs ISPV-only baseline."""
+    baseline = lookup.estimate_salary("2512", 70)  # no role
+    refined = lookup.estimate_salary("2512", 70, role="Backend Developer")
+    assert refined.platycz_position == "Backend developer"
+    assert refined.platycz_url and "platy.cz" in refined.platycz_url
+    assert refined.median != baseline.median  # blended away from pure ISPV
+
+
+def test_estimate_salary_unchanged_when_no_match():
+    """Garbage role → no platy.cz match → behaviour identical to no-role."""
+    baseline = lookup.estimate_salary("2512", 70)
+    no_match = lookup.estimate_salary("2512", 70, role="Quantum Llama Whisperer")
+    assert no_match.platycz_position is None
+    assert no_match.median == baseline.median

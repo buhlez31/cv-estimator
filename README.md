@@ -64,18 +64,25 @@ as reviewer-visible artefacts. Output contract:
 
 ## Data approach
 
+The salary estimate is built from **three additive layers** so each
+number is traceable to a published source.
+
+### Layer A — ISPV official statistics
+
 **Source: MPSV ISPV open data** — [data.mpsv.cz/web/data/ispv-zamestnani](https://data.mpsv.cz/web/data/ispv-zamestnani).
 Official Czech earnings statistics published by the Ministry of Labour
-and Social Affairs. Quantiles P25 / P50 / P75 / P90 per CZ-ISCO
-occupation code. Same dataset ČSÚ uses for pension valorization —
+and Social Affairs. Same dataset ČSÚ uses for pension valorization —
 defensible, free, no scraping.
 
 [`cv_estimator/data/ispv_2025.csv`](cv_estimator/data/ispv_2025.csv) is
 generated from the official MPSV JSON export (period `rok 2025`, sphere
-`MZDOVA` — private-sector wages, where almost all professional
-employment sits). 296 CZ-ISCO codes covered. Regenerate via
-[`scripts/prepare_ispv_data.py`](scripts/prepare_ispv_data.py); drop the
-raw JSON download into `data/raw/` and run the script.
+`MZDOVA` — private-sector wages). 296 CZ-ISCO codes; per code we ingest:
+P10 / P25 / P50 / P75 / P90, mean (`mzdaPrumer`), bonus share
+(`odmenaMzdy`), supplement share (`priplatekMzdy`) and sample size
+(`pocetZamestnancuMzda`). Bonus + supplement drive a separate
+**total-comp** estimate (`base × (1 + bonus_pct + supplement_pct)`).
+Sample size drives a **confidence label** that widens the output band
+for thinly-sampled codes (low n ⇒ ±25 %, otherwise ±15 %).
 
 **Role → CZ-ISCO mapping.** Priority-ranked keyword rules in
 [`cv_estimator/salary/role_mapping.py`](cv_estimator/salary/role_mapping.py)
@@ -86,8 +93,43 @@ than silently picking a default.
 
 **Score → salary mapping.** Bucketed interpolation onto the ISPV quantile
 curve: junior 0-40 → P25, mid 40-70 → P25-P50, senior 70-90 → P50-P75,
-principal 90+ → P75-P90. Output range ±15 % around the interpolated
-median, clamped to (P25, P90).
+principal 90+ → P75-P90.
+
+### Layer B — regional multiplier
+
+[`cv_estimator/data/regional_multipliers_2025.csv`](cv_estimator/data/regional_multipliers_2025.csv)
+holds 14 NUTS-3 multipliers (Praha 1.30× for IT, Ostrava / Karlovy Vary
+≈ 0.88×, etc.) calibrated from ČSÚ regional wage tables. Tech roles pick
+`multiplier_it`; everything else picks `multiplier_avg`. Applied before
+the bucket interpolation so the candidate's national percentile stays
+unchanged — region adjusts the absolute CZK, not the standing in the
+curve.
+
+Exposed via the CLI flag `--region CZ010`. The web UI keeps a national
+default; region precision lives on the CLI / library API today.
+
+### Layer C — platy.cz role refinement
+
+Where ISPV gives the **occupational-class** curve (296 CZ-ISCO codes),
+[`cv_estimator/data/platycz_2025.csv`](cv_estimator/data/platycz_2025.csv)
+adds **role-title granularity** — 513 specific positions from
+[platy.cz](https://www.platy.cz) (e.g. *Backend developer*, *Solution
+architekt*, *AI inženýr*, *Advokát*) each with P10 / P90 in CZK.
+Generated from `data/platy_salaries.xlsx` (gitignored raw source) by
+[`scripts/prepare_platycz_data.py`](scripts/prepare_platycz_data.py).
+
+A token-overlap matcher in
+[`cv_estimator/salary/platycz.py`](cv_estimator/salary/platycz.py)
+finds the best platy.cz row for the analysis role — direct + cross-
+language alias hits (`developer` ↔ `vývojář` / `programátor`,
+`engineer` ↔ `inženýr`, `lawyer` ↔ `advokát`, exec abbreviations
+↔ Czech director equivalents). When a match clears the relevance
+threshold, the candidate's bucket-interpolated CZK blends **60 / 40**
+with the platy.cz proxy at the same percentile. ISPV stays the
+authoritative anchor; platy.cz refines for role specificity within the
+occupation class. No match → no-op, ISPV figure unchanged. The matched
+position label + URL surface on `SalaryEstimate.platycz_position` /
+`platycz_url` for auditability (CLI prints them; web UI ignores).
 
 ## Design choices
 
@@ -102,7 +144,7 @@ median, clamped to (P25, P90).
 ## Tests
 
 ```bash
-pytest -q   # 78 tests, no network — LLM calls patched in e2e tests
+pytest -q   # 91 tests, no network — LLM calls patched in e2e tests
 ```
 
 ## License

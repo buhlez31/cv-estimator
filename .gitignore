@@ -19,3 +19,5 @@ tests/fixtures/anchor_cvs/*.docx
 
 # Raw ISPV download (preprocessed file ispv_2024.csv is committed)
 data/raw/
+# Raw platy.cz xlsx (preprocessed CSV is committed inside package)
+data/platy_salaries.xlsx

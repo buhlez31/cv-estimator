@@ -29,6 +29,7 @@ def analyze_cv(
     filename: str,
     *,
     target_role: str | None = None,
+    region: str | None = None,
 ) -> CVAnalysis:
     """Run the full pipeline. Returns a validated CVAnalysis.
 
@@ -61,7 +62,9 @@ def analyze_cv(
     # Track A: buzzword baseline — objective view from literal CV content.
     breakdown_explicit = components.compute_explicit_only(explicit_data, analysis_role)
     score_explicit = seniority.compute(breakdown_explicit)
-    salary_explicit = lookup.estimate_salary(cz_isco, score_explicit)
+    salary_explicit = lookup.estimate_salary(
+        cz_isco, score_explicit, role=analysis_role, region=region
+    )
     attr_explicit = components.coverage_attribution_for(
         analysis_role, explicit_data.explicit_skills, [], include_inferred=False
     )
@@ -69,7 +72,7 @@ def analyze_cv(
     # Track B: optimistic ceiling (adds confidence-weighted inferred bonus).
     breakdown_full = components.compute_with_inferred(explicit_data, inferred_data, analysis_role)
     score_full = seniority.compute(breakdown_full)
-    salary_full = lookup.estimate_salary(cz_isco, score_full)
+    salary_full = lookup.estimate_salary(cz_isco, score_full, role=analysis_role, region=region)
     attr_full = components.coverage_attribution_for(
         analysis_role,
         explicit_data.explicit_skills,
@@ -128,6 +131,7 @@ def analyze_cv(
             "ispv_period": lookup.ISPV_PERIOD,
             "ispv_sphere": lookup.ISPV_SPHERE,
             "target_role_provided": target_role is not None,
+            "region": region,
         },
     )
     sanity.validate(result)

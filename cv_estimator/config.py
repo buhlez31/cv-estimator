@@ -21,7 +21,18 @@ WEIGHT_ROLE = 0.20
 WEIGHT_EDUCATION = 0.15
 
 # --- Years experience normalization ---
-YEARS_CAP = 15  # 15+ years saturates at 100
+# Default cap when the analyzed role gives no level cue.
+YEARS_CAP = 15
+
+# Role-level → years cap mapping. A junior position saturates much sooner
+# than a principal-level one, so the same candidate's 8-year CV scores
+# 100 against a junior target but only 53 against a senior target.
+YEARS_CAP_BY_LEVEL: dict[str, int] = {
+    "principal": 20,
+    "senior": 15,
+    "mid": 10,
+    "junior": 3,
+}
 
 # --- Skills coverage (LLM-driven for all roles) ---
 # Inferred capability confidence threshold for inclusion in the LLM's
@@ -290,3 +301,21 @@ LLM_TEMPERATURE = 0.0
 # --- Salary sanity bounds (CZK monthly gross) ---
 SALARY_FLOOR = 25_000
 SALARY_CEILING = 500_000
+
+# --- ISPV sample-size confidence buckets (in thousands of employees) ---
+HIGH_SAMPLE_THRESHOLD = 5.0  # >= 5000 sampled employees → "high"
+LOW_SAMPLE_THRESHOLD = 1.0  # < 1000 → "low" (P90 statistically noisy)
+
+# --- Salary band width by ISPV confidence ---
+SALARY_BAND_PCT_HIGH = 0.15  # ±15 % around interpolated median
+SALARY_BAND_PCT_LOW = 0.25  # ±25 % widening when sample is thin
+
+# --- Regional wage multipliers (Layer B) ---
+REGIONAL_MULTIPLIERS_PATH = PACKAGE_ROOT / "data" / "regional_multipliers_2025.csv"
+
+# --- platy.cz role refinement (Layer C) ---
+# Weight given to the platy.cz role-title proxy when it overlaps with the
+# CV's analysis_role. ISPV stays the dominant anchor (1 - weight) since
+# it's the official sample; platy.cz refines for role specificity within
+# the occupation class.
+PLATYCZ_BLEND_WEIGHT = 0.40

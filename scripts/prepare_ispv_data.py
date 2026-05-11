@@ -85,10 +85,17 @@ def main() -> int:
                 "cz_isco_code": code,
                 "role_label_en": label_en,
                 "role_label_cs": label_cs,
+                "p10": int(it.get("diferenciaceD1M", 0) or 0),
                 "p25": int(it["diferenciaceQ1M"]),
                 "p50": int(it["medianMzda"]),
                 "p75": int(it["diferenciaceQ3M"]),
                 "p90": int(it["diferenciaceD9M"]),
+                "mean": int(it.get("mzdaPrumer", 0) or 0),
+                # Percent of total monthly comp: ISPV reports as %, e.g. 28.8
+                "bonus_pct": float(it.get("odmenaMzdy", 0) or 0),
+                "supplement_pct": float(it.get("priplatekMzdy", 0) or 0),
+                # Sample size in thousands of employees, e.g. 5.2 = 5 200
+                "sample_n": float(it.get("pocetZamestnancuMzda", 0) or 0),
             }
         )
 

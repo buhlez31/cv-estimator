@@ -4,3 +4,6 @@ pytest-cov>=4.1.0
 black>=24.0.0
 ruff>=0.3.0
 pre-commit>=3.6.0
+# openpyxl only needed by scripts/prepare_platycz_data.py; runtime never
+# opens xlsx (CSV is committed inside the package).
+openpyxl>=3.1.0
