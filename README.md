@@ -121,7 +121,7 @@ default; region precision lives on the CLI / library API today.
 ## Tests
 
 ```bash
-pytest -q   # 78 tests, no network — LLM calls patched in e2e tests
+pytest -q   # 85 tests, no network — LLM calls patched in e2e tests
 ```
 
 ## License
