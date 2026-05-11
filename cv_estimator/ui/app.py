@@ -47,11 +47,13 @@ if uploaded is None:
     st.info("👈 Vyber soubor pro analýzu.")
     st.stop()
 
-# Clear any cached result when a new file is uploaded — file_id changes
-# per upload, so this triggers automatically.
-if st.session_state.get("upload_id") != uploaded.file_id:
+# Invalidate cached result when EITHER the upload OR the target_role
+# changes. file_id covers new uploads; comparing the target string covers
+# the case where the user edits the target field after a previous analysis.
+_state_key = (uploaded.file_id, target_role)
+if st.session_state.get("state_key") != _state_key:
     st.session_state.pop("result", None)
-    st.session_state["upload_id"] = uploaded.file_id
+    st.session_state["state_key"] = _state_key
 
 run_button = st.button(
     "🚀 Spustit analýzu",

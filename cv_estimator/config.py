@@ -19,11 +19,6 @@ WEIGHT_EDUCATION = 0.15
 # --- Years experience normalization ---
 YEARS_CAP = 15  # 15+ years saturates at 100
 
-# --- Skills tier weights (used by scoring/components.py) ---
-SKILL_TIER_HIGH = 1.0  # senior-signal tech (k8s, system design, ML infra, ...)
-SKILL_TIER_MID = 0.6  # mainstream production tools (Docker, AWS, Kafka, ...)
-SKILL_TIER_LOW = 0.3  # generic / commodity (Excel, basic Office, ...)
-
 # --- Skills coverage methodology (tech roles) ---
 # 100 = candidate's CV demonstrates coverage of every expected stack
 # category for the role family. 8 categories → each covered category
@@ -139,71 +134,6 @@ OVERCLAIM_PENALTY_POINTS = 11.1  # = 1 virtual category miss (1/9 × 100)
 # on the with-inferred track. Lower confidence inferences don't count
 # toward coverage.
 INFERRED_COVERAGE_CONFIDENCE_THRESHOLD = 0.6
-
-# --- Two-track skills_depth fallback (non-tech roles) ---
-# Used only when analysis_role's family isn't "tech" — kept so the
-# pipeline still produces a meaningful score for roles outside the IT
-# CZ-ISCO families.
-EXPLICIT_ONLY_SKILLS_CAP = 75.0
-INFERRED_BONUS_PER_CAPABILITY = 8.0
-INFERRED_BONUS_CAP = 25.0
-
-# Heuristic skill→tier lookup (lower-case match). Extend as needed.
-SKILL_TIERS_HIGH = {
-    "kubernetes",
-    "k8s",
-    "system design",
-    "distributed systems",
-    "machine learning infrastructure",
-    "mlops",
-    "site reliability",
-    "platform engineering",
-    "kafka streams",
-    "rust",
-    "go",
-    "terraform",
-    "spark",
-    "airflow",
-    "kubeflow",
-}
-SKILL_TIERS_MID = {
-    "python",
-    "sql",
-    "docker",
-    "aws",
-    "azure",
-    "gcp",
-    "postgres",
-    "postgresql",
-    "react",
-    "typescript",
-    "node",
-    "node.js",
-    "kafka",
-    "redis",
-    "elasticsearch",
-    "snowflake",
-    "bigquery",
-    "fastapi",
-    "django",
-    "flask",
-    "git",
-    "ci/cd",
-    "pandas",
-    "numpy",
-    "pytorch",
-    "tensorflow",
-}
-SKILL_TIERS_LOW = {
-    "excel",
-    "powerpoint",
-    "word",
-    "office",
-    "jira",
-    "confluence",
-    "slack",
-    "outlook",
-}
 
 # --- Role progression heuristics ---
 SENIOR_TITLE_KEYWORDS = {

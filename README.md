@@ -43,33 +43,64 @@ the target field set, once empty.
 ## Pipeline
 
 ```
-        ┌──────────────────────────────────────────────┐
-        │  pipeline.analyze_cv(file_bytes, filename)   │
-        └──────────────────────────────────────────────┘
+        ┌──────────────────────────────────────────────────────────┐
+        │  pipeline.analyze_cv(file_bytes, target_role=None)       │
+        └──────────────────────────────────────────────────────────┘
                               │
-        ┌─────────────────────┼──────────────────────┐
-        ▼                     ▼                      ▼
- document.extract_text  → raw_text → detect_language (cs / en)
+                              ▼
+ document.extract_text → raw_text → detect_language (cs / en)
+                              │
+        ├── LLM #1  extractors/explicit.py    → role, years, skills, education,
+        │                                       field_of_study (normalized EN)
         │
-        ├── LLM #1  extractors/explicit.py  →  role, years, skills, education
-        ├── LLM #2  extractors/inferred.py  →  inferred_capabilities (hidden assets)
+        ├── analysis_role  =  target_role  if user supplied
+        │                  else explicit.role
         │
-        ├── salary/role_mapping.py          →  CZ-ISCO 4-digit code
-        ├── scoring/components.py           →  ScoreBreakdown (4 components, 0-100 each)
-        ├── scoring/seniority.py            →  weighted aggregate score (0-100)
-        ├── salary/lookup.py                →  SalaryEstimate from ISPV quantiles
+        ├── LLM #2  extractors/inferred.py    → hidden capabilities scoped to
+        │                                       analysis_role (skepticism prompt,
+        │                                       caveat field, must/nice relevance)
         │
-        ├── LLM #3  explanation/narrative.py →  strengths + gaps (3-5 each, language-aware)
-        ├── LLM #4  explanation/roadmap.py   →  exactly 3 recommendations
+        ├── salary/role_mapping.py            → CZ-ISCO 4-digit code
+        │   keyword rules → LLM fallback (296 codes) → UnmappedRoleError
         │
-        ├── LLM #5  explanation/match_assess.py  → target-role fit score + rationale
-        │           (only when target_role supplied; otherwise skipped)
+        ├── scoring/components.py             → ScoreBreakdown (4 axes, 0-100)
+        │   ▶ years_experience: years / 15 × 100
+        │   ▶ skills_depth (track A — baseline):
+        │       tech    → TECH_STACK_CATEGORIES coverage (9 cats × 11.1%)
+        │       non-tech → LLM scoring (skills_coverage_nontech prompt)
+        │   ▶ skills_depth (track B — with hidden assets):
+        │       tech    → coverage + inferred caps unlock categories
+        │                 ± overclaim penalty (caveats / low confidence)
+        │       non-tech → LLM scoring with inferred caps included
+        │   ▶ role_progression: title keywords + years
+        │   ▶ education: degree base + prestige + role-aware field modifier
         │
-        └── validation/sanity.py             →  output-range invariants
+        ├── scoring/seniority.py              → weighted (30/35/20/15) → 0-100
+        ├── salary/lookup.py                  → SalaryEstimate per track
+        │                                       (bucketed: junior/mid/senior/principal)
+        │
+        ├── coverage_attribution_for(...)     → CoverageAttribution | None
+        │                                       (non-tech only — surfaces LLM's
+        │                                        value_adding + concerns lists)
+        │
+        ├── LLM #3  explanation/narrative.py  → strengths + gaps for analysis_role
+        ├── LLM #4  explanation/roadmap.py    → 3 recommendations for analysis_role
+        │
+        ├── LLM #5  explanation/match_assess  → target-role fit score + rationale
+        │           (only when target_role supplied)
+        │
+        └── validation/sanity.py              → output-range invariants
                               │
                               ▼
                        CVAnalysis (Pydantic)
 ```
+
+**LLM call count per analysis:**
+- Tech role, no target → **4 calls** (~$0.035)
+- Tech role + target → **5 calls** (~$0.045)
+- Non-tech role, no target → **4 + 2** (coverage scoring × 2 tracks) (~$0.045)
+- Non-tech role + target → **5 + 2** (~$0.055)
+- Plus 1 conditional LLM fallback for `role_mapping` on unknown titles (~$0.003)
 
 Four LLM calls, each driven by a prompt loaded from
 `cv_estimator/prompts/*.md` (kept as artifacts, not Python strings).

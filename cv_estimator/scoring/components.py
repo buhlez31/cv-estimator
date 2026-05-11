@@ -20,8 +20,6 @@ from cv_estimator.config import (
     EDUCATION_FIELD_MISMATCH_PENALTY,
     EDUCATION_PRESTIGE_BONUS,
     FIELD_FAMILY_KEYWORDS,
-    INFERRED_BONUS_CAP,
-    INFERRED_BONUS_PER_CAPABILITY,
     INFERRED_COVERAGE_CONFIDENCE_THRESHOLD,
     JUNIOR_TITLE_KEYWORDS,
     OVERCLAIM_AVG_CONFIDENCE_THRESHOLD,
@@ -31,9 +29,6 @@ from cv_estimator.config import (
     ROLE_FAMILY_KEYWORDS,
     ROLE_FIELD_ADJACENT_PAIRS,
     SENIOR_TITLE_KEYWORDS,
-    SKILL_TIERS_HIGH,
-    SKILL_TIERS_LOW,
-    SKILL_TIERS_MID,
     TECH_STACK_CATEGORIES,
     YEARS_CAP,
 )
@@ -122,19 +117,15 @@ def _skills_coverage_score(
     *,
     include_inferred: bool,
 ) -> float:
-    """Category-coverage score for technical roles, tier-weighted fallback
-    otherwise.
+    """Skills coverage score, dispatched by role family.
 
-    Tech path: build a set of signal strings (explicit skills + optionally
-    inferred capabilities meeting the confidence threshold), then count
-    how many TECH_STACK_CATEGORIES are "covered" — i.e. at least one
-    signal in the candidate's list matches at least one keyword in the
-    category's set. Score = covered / total × 100.
-
-    Non-tech path: fall back to the legacy tier-weighted sum, with the
-    explicit-only cap if include_inferred=False, or +inferred bonus
-    otherwise. We don't have calibrated category lists for non-tech
-    role families.
+    - **Tech roles** → deterministic check of how many TECH_STACK_CATEGORIES
+      the CV's signals match. Each covered category = 100/N percentage points.
+      With-inferred track also applies an overclaim penalty (caveat-heavy or
+      low-confidence inferences pull the score below baseline).
+    - **Non-tech roles** → LLM-based coverage scoring (see
+      `_llm_coverage_nontech_raw`). The model evaluates against the role's
+      typical core competencies.
     """
     role_family = _classify_role_family(analysis_role)
 
@@ -145,17 +136,14 @@ def _skills_coverage_score(
                 if cap.confidence >= INFERRED_COVERAGE_CONFIDENCE_THRESHOLD:
                     signals.add(cap.skill.strip().lower())
 
-        covered = 0
-        for keywords in TECH_STACK_CATEGORIES.values():
-            if any(any(kw in s for kw in keywords) for s in signals):
-                covered += 1
+        covered = sum(
+            1
+            for keywords in TECH_STACK_CATEGORIES.values()
+            if any(any(kw in s for kw in keywords) for s in signals)
+        )
         score = (covered / len(TECH_STACK_CATEGORIES)) * 100.0
 
-        # Overclaim penalty (with-inferred track only): if the inferred
-        # pass returned a lot of caveats or low-confidence inferences,
-        # the CV's claims may be overselling. Subtract a virtual-category
-        # equivalent so the score can land BELOW the explicit baseline —
-        # bidirectional methodology.
+        # Overclaim penalty (with-inferred track only).
         if include_inferred and inferred_capabilities:
             n = len(inferred_capabilities)
             n_caveats = sum(1 for c in inferred_capabilities if c.caveat)
@@ -168,11 +156,8 @@ def _skills_coverage_score(
                 score = max(0.0, score - OVERCLAIM_PENALTY_POINTS)
         return score
 
-    # Non-tech roles: LLM-based coverage scoring. The tech-stack
-    # checklist doesn't fit marketing / legal / sales / healthcare /
-    # management. Use the model's knowledge of each role's expected
-    # competencies.
-    return _llm_coverage_nontech(
+    # Non-tech roles: LLM-based scoring.
+    score, _, _ = _llm_coverage_nontech_raw(
         analysis_role,
         tuple(s.strip().lower() for s in explicit_skills if s.strip()),
         (
@@ -186,6 +171,7 @@ def _skills_coverage_score(
         ),
         include_inferred=include_inferred,
     )
+    return score
 
 
 @lru_cache(maxsize=128)
@@ -222,24 +208,6 @@ def _llm_coverage_nontech_raw(
     value_adding = tuple(str(x) for x in (payload.get("value_adding_capabilities") or []))
     concerns = tuple(str(x) for x in (payload.get("concerns") or []))
     return score, value_adding, concerns
-
-
-def _llm_coverage_nontech(
-    role: str,
-    explicit_skills_tuple: tuple[str, ...],
-    inferred_caps_tuple: tuple[tuple[str, float], ...],
-    *,
-    include_inferred: bool,
-) -> float:
-    """Thin wrapper that returns just the float score (drops attribution).
-    Used by `_skills_coverage_score` which only needs the number."""
-    score, _, _ = _llm_coverage_nontech_raw(
-        role,
-        explicit_skills_tuple,
-        inferred_caps_tuple,
-        include_inferred=include_inferred,
-    )
-    return score
 
 
 def coverage_attribution_for(
@@ -281,46 +249,6 @@ def coverage_attribution_for(
         value_adding=list(value_adding),
         concerns=list(concerns),
     )
-
-
-def _explicit_skills_score(skills: list[str], *, cap: float) -> float:
-    """Tier-weighted score for skills that literally appear in the CV,
-    clamped to the caller-supplied cap. The explicit-only track passes
-    EXPLICIT_ONLY_SKILLS_CAP (75); the with-inferred track passes 100."""
-    base = 0.0
-    seen: set[str] = set()
-    for raw in skills:
-        s = raw.strip().lower()
-        if s in seen:
-            continue
-        seen.add(s)
-        if s in SKILL_TIERS_HIGH:
-            base += 25
-        elif s in SKILL_TIERS_MID:
-            base += 15
-        elif s in SKILL_TIERS_LOW:
-            base += 5
-        else:
-            base += 8  # unknown skill — partial credit, don't ignore
-    return float(min(cap, base))
-
-
-def _inferred_bonus(inferred_capabilities: list) -> float:
-    """Confidence-weighted bonus from inferred capabilities, capped at
-    INFERRED_BONUS_CAP. Used as the non-tech-role fallback in
-    `_skills_coverage_score`.
-
-    must_have capabilities contribute the full multiplier; nice_to_have
-    capabilities contribute half, so role-critical signal dominates
-    soft / adjacent signal in the score.
-    """
-    raw = 0.0
-    for cap in inferred_capabilities:
-        weight = INFERRED_BONUS_PER_CAPABILITY * cap.confidence
-        if cap.relevance == "nice_to_have":
-            weight *= 0.5
-        raw += weight
-    return min(INFERRED_BONUS_CAP, raw)
 
 
 def _role_progression_score(role: str, signal: str, years: int) -> float:

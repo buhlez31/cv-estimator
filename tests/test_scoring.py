@@ -127,25 +127,6 @@ def test_skills_coverage_overclaim_penalty_caveat_ratio(explicit_senior_dev):
     assert abs(b.skills_depth - 33.3) < 0.2
 
 
-def test_inferred_bonus_helper_math():
-    """The legacy `_inferred_bonus` helper (kept for potential reuse) is
-    confidence-weighted: 8 × conf × {1.0 must_have, 0.5 nice_to_have},
-    aggregate cap 25. Tested directly since the live pipeline now uses
-    LLM-based scoring for non-tech roles."""
-    must_weak = [
-        SkillEvidence(skill="x", evidence_quote="ev1", confidence=0.4, relevance="must_have")
-    ]
-    must_strong = [
-        SkillEvidence(skill="y", evidence_quote="ev2", confidence=1.0, relevance="must_have")
-    ]
-    nice_strong = [
-        SkillEvidence(skill="z", evidence_quote="ev3", confidence=1.0, relevance="nice_to_have")
-    ]
-    assert abs(components._inferred_bonus(must_weak) - 3.2) < 0.01
-    assert abs(components._inferred_bonus(must_strong) - 8.0) < 0.01
-    assert abs(components._inferred_bonus(nice_strong) - 4.0) < 0.01
-
-
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
     """senior_dev fixture under category-coverage methodology (9 cats):
     - Years: 8/15*100 ≈ 53
