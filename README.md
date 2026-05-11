@@ -27,7 +27,18 @@ streamlit run cv_estimator/ui/app.py
 # CLI
 python scripts/run_analysis.py path/to/cv.pdf
 python scripts/run_analysis.py path/to/cv.pdf --json
+python scripts/run_analysis.py path/to/cv.pdf --target-role "Senior Python Backend Engineer"
 ```
+
+### Target-role mode
+
+If the candidate is applying to a specific role, supplying it via the
+text field in the UI (or `--target-role` on the CLI) anchors the **entire
+analysis** on that role: CZ-ISCO lookup, salary band, hidden-asset
+scoping, and a 5th LLM call that scores how well the CV matches. When
+the field is empty, the auto-detected best-fit role from the CV drives
+everything. To compare both views, run the analysis twice — once with
+the target field set, once empty.
 
 ## Pipeline
 
@@ -50,6 +61,9 @@ python scripts/run_analysis.py path/to/cv.pdf --json
         │
         ├── LLM #3  explanation/narrative.py →  strengths + gaps (3-5 each, language-aware)
         ├── LLM #4  explanation/roadmap.py   →  exactly 3 recommendations
+        │
+        ├── LLM #5  explanation/match_assess.py  → target-role fit score + rationale
+        │           (only when target_role supplied; otherwise skipped)
         │
         └── validation/sanity.py             →  output-range invariants
                               │
@@ -109,6 +123,69 @@ a second LLM pass that finds skills *implied* by project descriptions
 `stakeholder management`) instead of the buzzword list at the bottom of the
 CV.
 
+### Two parallel analysis tracks
+
+The pipeline emits **two independent scoring tracks** so the reader sees
+buzzword vs hidden-assets analyses side-by-side instead of a single blended
+number:
+
+- **`track_explicit`** — skeptical baseline. Only literal CV content
+  feeds the score. `skills_depth` is **capped at 75**, encoding the
+  rule that a bare skill list without project-narrative evidence is
+  inherently incomplete signal. Inferred capabilities are computed for
+  visibility but excluded from this track's score.
+- **`track_with_inferred`** — optimistic ceiling. Explicit skills can
+  reach 100, and a confidence-weighted bonus from the inferred pass
+  (`bonus = 8 × confidence` per capability, aggregate cap +25) is added
+  on top. The cap asymmetry between the two tracks is what makes the
+  methodology visible in the UI: even a buzzword-saturating CV (which
+  pegs explicit skills at 75 / baseline) leaves room for hidden-asset
+  evidence to lift the with-inferred track by ~10–17 points and shift
+  the salary marker visibly within the ISPV range.
+
+Each track ships its own `seniority_score` and `salary_estimate`. The UI
+renders them in side-by-side cards and a market-range chart shows both
+points within the ISPV P25-P90 band for the role.
+
+When the two tracks coincide (e.g. CV already lists every skill explicitly),
+that is itself a signal: there is nothing for the inferred pass to surface.
+When they diverge, the gap measures *how much the candidate's description
+style under-represents them* — which is the case the standard buzzword
+filters fail at.
+
+### Role-scoped + skepticism by default
+
+Looking at real-CV output, the inferred pass had a tendency to over-attribute
+(e.g. inferring "community manager" from being the analyst on a community
+project) AND to surface capabilities irrelevant to the candidate's actual
+role (e.g. "marketing copywriting" for a backend engineer). The
+[`extract_inferred.md`](cv_estimator/prompts/extract_inferred.md) prompt
+now:
+
+- **Receives the detected role** as a parameter and scopes every inference
+  to that role. Capabilities outside the role's domain are dropped.
+- **Scans the WHOLE CV**, not just work experience — education, certs,
+  languages, hobbies, interests. Soft signals from hobbies (team sports
+  → collaboration, marathon → discipline) are valid but get LOW
+  confidence (0.3–0.5).
+- **Classifies each capability** as either `must_have` (direct core
+  competency of the role) or `nice_to_have` (adjacent skill, soft signal).
+  Scoring contribution: `must_have` gets the full `8 × confidence` bonus;
+  `nice_to_have` gets half.
+- **Enforces an explicit skepticism protocol** on top:
+
+1. Anchor confidence at 0.5 by default — move to 0.8+ only with concrete
+   numeric or role-scoped evidence.
+2. Title-only inferences are capped at confidence 0.4.
+3. The model emits an optional `caveat` field beside each capability when
+   the inference rests on team-scope ambiguity, peak metrics, or
+   short-tenure roles ("mohl být v týmu, ne sole owner").
+4. Second-order inferential leaps are rejected — "miss a hidden asset"
+   beats "fabricate one".
+
+The UI renders each `caveat` in italics under the evidence quote so the
+reader sees the model's self-doubt and can discount accordingly.
+
 **A/B buzzword test** ([`scripts/generate_synthetic_cvs.py`](scripts/generate_synthetic_cvs.py))
 produces two CVs for the same fictional candidate:
 
@@ -116,10 +193,9 @@ produces two CVs for the same fictional candidate:
 - **Variant B** — outcome-driven: same person, same skills, but described
   as *what they did* and *what they delivered* (with metrics).
 
-Expected: A and B land within roughly the same band. If A scores
-significantly higher, the inferred pass is failing and the prompt needs
-work. This is the kind of test the standard buzzword-matching CV screeners
-fail by design — and the reason the second LLM pass is worth its latency.
+Expected: A and B land within roughly the same band on `track_with_inferred`.
+If A scores significantly higher even on the inferred track, the inferred
+pass is failing and the prompt needs work.
 
 ## Architecture invariants
 

@@ -28,11 +28,13 @@ def inferred_senior_dev() -> InferredData:
                 skill="technical leadership",
                 evidence_quote="led migration of legacy system to cloud",
                 confidence=0.85,
+                relevance="must_have",
             ),
             SkillEvidence(
                 skill="stakeholder management",
                 evidence_quote="reported weekly to 200 stakeholders",
                 confidence=0.75,
+                relevance="nice_to_have",
             ),
         ]
     )

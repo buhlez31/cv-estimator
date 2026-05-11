@@ -1,7 +1,8 @@
 """End-to-end pipeline test with mocked LLM calls.
 
 Skips the real Anthropic API; verifies that the orchestrator wires the
-domain modules together correctly and produces a valid CVAnalysis.
+domain modules together correctly and produces a valid CVAnalysis with
+both parallel tracks populated.
 """
 
 from unittest.mock import patch
@@ -42,17 +43,23 @@ def _mock_call_json(prompt: str) -> dict:
                 {
                     "skill": "data engineering",
                     "evidence_quote": "Built and maintained ETL pipelines processing 500M events/day",
-                    "confidence": 0.95,
+                    "confidence": 0.7,
+                    "relevance": "must_have",
+                    "caveat": None,
                 },
                 {
                     "skill": "technical leadership",
                     "evidence_quote": "Led migration of legacy reporting system to Snowflake",
-                    "confidence": 0.85,
+                    "confidence": 0.55,
+                    "relevance": "nice_to_have",
+                    "caveat": "led ≠ sole architect",
                 },
                 {
                     "skill": "mentoring",
                     "evidence_quote": "Mentored 3 junior engineers",
-                    "confidence": 0.8,
+                    "confidence": 0.75,
+                    "relevance": "nice_to_have",
+                    "caveat": None,
                 },
             ]
         }
@@ -92,23 +99,73 @@ def _mock_call_json(prompt: str) -> dict:
                 },
             ]
         }
+    if "Target role match assessment" in prompt:
+        return {
+            "match_score": 72,
+            "rationale": (
+                "Strong data engineering and migration scope are a clear strength; "
+                "gap is people-management experience for a manager track."
+            ),
+        }
     raise AssertionError(f"Unexpected prompt: {prompt[:100]}")
 
 
 def test_pipeline_end_to_end():
+    """No target_role → analysis anchored on detected role, no match panel."""
     with patch("cv_estimator.llm.call_json", side_effect=_mock_call_json):
         result = pipeline.analyze_cv(SAMPLE_TXT, "sample.txt")
 
     assert isinstance(result, CVAnalysis)
     assert result.detected_role == "Senior Data Engineer"
-    assert result.cz_isco_code == "2519"  # "Data Engineer" → 2519 per rules
+    assert result.analysis_role == "Senior Data Engineer"
+    assert result.role_source == "detected"
+    assert result.cz_isco_code == "2519"
     assert result.language == "en"
-    assert 0 <= result.seniority_score <= 100
+    # No target supplied → no LLM #5
+    assert result.target is None
+    assert result.processing_metadata["target_role_provided"] is False
+
+    # Both parallel tracks populated.
+    assert 0 <= result.track_explicit.seniority_score <= 100
+    assert 0 <= result.track_with_inferred.seniority_score <= 100
+    assert result.track_with_inferred.seniority_score >= result.track_explicit.seniority_score
+
+    for track in (result.track_explicit, result.track_with_inferred):
+        s = track.salary_estimate
+        assert s.low <= s.median <= s.high
+        assert s.market_p25 < s.market_p50 < s.market_p75 < s.market_p90
+
     assert len(result.recommendations) == 3
     assert 3 <= len(result.strengths) <= 5
     assert 3 <= len(result.gaps) <= 5
-    assert (
-        result.salary_estimate.low <= result.salary_estimate.median <= result.salary_estimate.high
-    )
-    # Senior with strong skills should land at a respectable score
-    assert result.seniority_score >= 60
+
+    # Hidden assets carry caveat strings or None.
+    caveats = [c.caveat for c in result.inferred_capabilities]
+    assert any(c is not None for c in caveats)
+
+
+def test_pipeline_with_target_role_drives_everything():
+    """target_role supplied → analysis anchored on target, match panel populated,
+    salary uses target's CZ-ISCO band, NOT detected."""
+    with patch("cv_estimator.llm.call_json", side_effect=_mock_call_json):
+        result = pipeline.analyze_cv(SAMPLE_TXT, "sample.txt", target_role="CTO")
+
+    # detected_role unchanged for traceability — but analysis is anchored on
+    # the target.
+    assert result.detected_role == "Senior Data Engineer"
+    assert result.analysis_role == "CTO"
+    assert result.role_source == "target"
+    # "CTO" maps to CZ-ISCO 1330; detected "Data Engineer" would map to 2519.
+    assert result.cz_isco_code == "1330"
+
+    # LLM #5 ran.
+    assert result.target is not None
+    assert result.target.target_role == "CTO"
+    assert result.target.target_cz_isco == "1330"
+    assert result.target.match_score == 72
+    assert result.processing_metadata["target_role_provided"] is True
+
+    # Salary anchored on CTO (1330) band — median for 1330 P50 ≈ 148k CZK,
+    # far above the 2519 P50 (~83k).
+    assert result.track_with_inferred.salary_estimate.median > 120_000
+    assert result.track_explicit.salary_estimate.market_p50 > 120_000

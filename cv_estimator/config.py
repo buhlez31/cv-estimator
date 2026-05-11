@@ -24,6 +24,16 @@ SKILL_TIER_HIGH = 1.0  # senior-signal tech (k8s, system design, ML infra, ...)
 SKILL_TIER_MID = 0.6  # mainstream production tools (Docker, AWS, Kafka, ...)
 SKILL_TIER_LOW = 0.3  # generic / commodity (Excel, basic Office, ...)
 
+# --- Two-track skills_depth ceilings (see scoring/components.py) ---
+# Buzzword-only baseline cannot reach 100 — a bare skill list without
+# project-narrative evidence is inherently incomplete signal.
+EXPLICIT_ONLY_SKILLS_CAP = 75.0
+# Inferred capabilities are confidence-weighted and capped on their
+# aggregate contribution. Tuned so a typical 3-capability senior CV
+# lifts ~17 points of skills_depth (= ~6 points of seniority_score).
+INFERRED_BONUS_PER_CAPABILITY = 8.0
+INFERRED_BONUS_CAP = 25.0
+
 # Heuristic skill→tier lookup (lower-case match). Extend as needed.
 SKILL_TIERS_HIGH = {
     "kubernetes",
