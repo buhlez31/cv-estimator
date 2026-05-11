@@ -13,13 +13,12 @@ def validate(result: CVAnalysis) -> None:
     _check_track(result.track_explicit, label="track_explicit")
     _check_track(result.track_with_inferred, label="track_with_inferred")
 
-    # Hidden-assets track should not score below the buzzword baseline —
-    # inferred bonus is additive, never subtractive.
-    if result.track_with_inferred.seniority_score < result.track_explicit.seniority_score:
-        raise SanityError(
-            "track_with_inferred.seniority_score < track_explicit.seniority_score — "
-            "inferred bonus should be non-negative."
-        )
+    # NOTE: track_with_inferred.seniority_score CAN now legitimately fall
+    # below track_explicit.seniority_score thanks to the overclaim penalty
+    # (see components._skills_coverage_score). If the inferred pass surfaces
+    # many caveats / low-confidence inferences, the CV may be overselling
+    # and the with-inferred view drops below the baseline. Methodologically
+    # bidirectional; do not enforce monotonicity here.
 
     if len(result.recommendations) != 3:
         raise SanityError(f"Expected exactly 3 recommendations, got {len(result.recommendations)}")

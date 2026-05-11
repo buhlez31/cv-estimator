@@ -102,7 +102,39 @@ TECH_STACK_CATEGORIES: dict[str, set[str]] = {
         "gitlab ci",
         "ci/cd",
     },
+    "ml_data_science": {
+        "pytorch",
+        "tensorflow",
+        "scikit-learn",
+        "sklearn",
+        "keras",
+        "jax",
+        "huggingface",
+        "transformers",
+        "pandas",
+        "numpy",
+        "scipy",
+        "polars",
+        "jupyter",
+        "machine learning",
+        "deep learning",
+        "neural network",
+        "mlflow",
+        "kubeflow",
+        "vertex ai",
+        "sagemaker",
+        "data science",
+    },
 }
+
+# Overclaim penalty thresholds — applied on the with-inferred track when
+# the inferred-capabilities pass surfaces enough caveats / low confidence
+# to suggest the CV may be overselling. Subtracted from skills_coverage so
+# the with-inferred score can land BELOW the explicit baseline,
+# methodologically bidirectional.
+OVERCLAIM_CAVEAT_RATIO_THRESHOLD = 0.5  # >50 % capabilities with caveat
+OVERCLAIM_AVG_CONFIDENCE_THRESHOLD = 0.4  # average confidence below this
+OVERCLAIM_PENALTY_POINTS = 11.1  # = 1 virtual category miss (1/9 × 100)
 # Confidence threshold for an inferred capability to "unlock" a category
 # on the with-inferred track. Lower confidence inferences don't count
 # toward coverage.

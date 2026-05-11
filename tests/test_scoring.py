@@ -22,33 +22,36 @@ def test_seniority_clamped_to_range():
 
 
 def test_skills_coverage_tech_baseline(explicit_senior_dev):
-    """senior_dev explicit_skills cover 4 of 8 tech categories:
+    """senior_dev explicit_skills cover 4 of 9 tech categories:
     language (python), container_orchestration (k8s + terraform),
-    database (postgres), messaging_streaming (kafka). → 50.0%."""
+    database (postgres), messaging_streaming (kafka). → 44.4%."""
     b_explicit = components.compute_explicit_only(explicit_senior_dev, "Senior Software Engineer")
-    assert b_explicit.skills_depth == 50.0
+    assert abs(b_explicit.skills_depth - 44.4) < 0.2
 
 
 def test_skills_coverage_inferred_unlocks_new_category(explicit_senior_dev, inferred_senior_dev):
     """inferred_senior_dev fixture includes 'aws' capability (confidence
-    0.8, above threshold) — unlocks cloud_platform category. Baseline
-    4/8 = 50%, with-inferred 5/8 = 62.5%."""
+    0.8, above threshold) — unlocks cloud_platform category. Now 9 total
+    categories (added ml_data_science). Baseline 4/9 ≈ 44.4 %,
+    with-inferred 5/9 ≈ 55.6 %. Caveat ratio 1/3 < 0.5 and avg
+    confidence (0.85+0.8+0.75)/3 = 0.8 ≥ 0.4 → no overclaim penalty."""
     role = "Senior Software Engineer"
     b_explicit = components.compute_explicit_only(explicit_senior_dev, role)
     b_full = components.compute_with_inferred(explicit_senior_dev, inferred_senior_dev, role)
-    assert b_explicit.skills_depth == 50.0
-    assert b_full.skills_depth == 62.5
+    assert abs(b_explicit.skills_depth - 44.4) < 0.2
+    assert abs(b_full.skills_depth - 55.6) < 0.2
 
 
 def test_skills_coverage_low_confidence_inferred_does_not_unlock(explicit_senior_dev):
     """Inferred capability below confidence threshold (0.6) does NOT count
-    toward coverage even if its skill string matches a category keyword."""
+    toward coverage. Plus low avg confidence (0.4) triggers overclaim
+    penalty → with-inferred drops below baseline."""
     weak_inferred = InferredData(
         inferred_capabilities=[
             SkillEvidence(
                 skill="aws",
                 evidence_quote="mentioned cloud experience",
-                confidence=0.4,  # below threshold
+                confidence=0.4,  # below threshold + triggers overclaim
                 relevance="nice_to_have",
             ),
         ]
@@ -56,8 +59,42 @@ def test_skills_coverage_low_confidence_inferred_does_not_unlock(explicit_senior
     b = components.compute_with_inferred(
         explicit_senior_dev, weak_inferred, "Senior Software Engineer"
     )
-    # Same 4/8 as baseline — low-confidence inferred didn't unlock cloud.
-    assert b.skills_depth == 50.0
+    # Coverage stays at 4/9 (low conf didn't unlock) BUT overclaim penalty
+    # fires (avg conf 0.4 ≤ threshold). Score = 44.4 − 11.1 ≈ 33.3.
+    assert abs(b.skills_depth - 33.3) < 0.2
+
+
+def test_skills_coverage_overclaim_penalty_caveat_ratio(explicit_senior_dev):
+    """Caveat ratio > 50% triggers overclaim penalty even with good conf."""
+    caveat_heavy = InferredData(
+        inferred_capabilities=[
+            SkillEvidence(
+                skill="x",
+                evidence_quote="ev1",
+                confidence=0.8,
+                relevance="must_have",
+                caveat="led ≠ sole owner",
+            ),
+            SkillEvidence(
+                skill="y",
+                evidence_quote="ev2",
+                confidence=0.8,
+                relevance="must_have",
+                caveat="peak metric, not current",
+            ),
+            SkillEvidence(
+                skill="z",
+                evidence_quote="ev3",
+                confidence=0.8,
+                relevance="nice_to_have",
+            ),
+        ]
+    )
+    b = components.compute_with_inferred(
+        explicit_senior_dev, caveat_heavy, "Senior Software Engineer"
+    )
+    # 2/3 caveats > 0.5 threshold → penalty fires. 4/9 = 44.4, − 11.1 ≈ 33.3.
+    assert abs(b.skills_depth - 33.3) < 0.2
 
 
 def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
@@ -97,10 +134,10 @@ def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
-    """senior_dev fixture under category-coverage methodology:
+    """senior_dev fixture under category-coverage methodology (9 cats):
     - Years: 8/15*100 ≈ 53
     - Skills coverage: 4 explicit categories + 1 inferred (aws → cloud_platform)
-      = 5/8 = 62.5%
+      = 5/9 ≈ 55.6 %. No overclaim penalty (1/3 caveats, avg conf 0.8).
     - Role: senior signal + 8 years (no +5 since <10) = 80
     - Education: master 50 + ČVUT prestige 5 + CS match +5 = 60
     """
@@ -108,7 +145,7 @@ def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
         explicit_senior_dev, inferred_senior_dev, "Senior Software Engineer"
     )
     assert 50 <= b.years_experience <= 55
-    assert b.skills_depth == 62.5
+    assert abs(b.skills_depth - 55.6) < 0.2
     assert b.role_progression == 80.0
     assert b.education == 60.0
 
@@ -137,7 +174,7 @@ def test_skills_coverage_unknown_skill_tech_role_no_credit(explicit_senior_dev, 
 
 
 def test_skills_coverage_full_stack_saturates(explicit_senior_dev, inferred_empty):
-    """CV listing skills covering all 8 categories saturates at 100%."""
+    """CV listing skills covering all 9 categories saturates at 100%."""
     explicit_senior_dev.explicit_skills = [
         "python",  # language
         "postgres",  # database
@@ -147,6 +184,7 @@ def test_skills_coverage_full_stack_saturates(explicit_senior_dev, inferred_empt
         "fastapi",  # framework_web
         "prometheus",  # observability
         "git",  # ci_devops
+        "pytorch",  # ml_data_science
     ]
     b = components.compute_with_inferred(
         explicit_senior_dev, inferred_empty, "Senior Software Engineer"

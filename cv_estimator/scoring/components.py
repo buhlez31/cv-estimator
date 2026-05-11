@@ -23,6 +23,9 @@ from cv_estimator.config import (
     INFERRED_BONUS_PER_CAPABILITY,
     INFERRED_COVERAGE_CONFIDENCE_THRESHOLD,
     JUNIOR_TITLE_KEYWORDS,
+    OVERCLAIM_AVG_CONFIDENCE_THRESHOLD,
+    OVERCLAIM_CAVEAT_RATIO_THRESHOLD,
+    OVERCLAIM_PENALTY_POINTS,
     PRESTIGE_INSTITUTION_KEYWORDS,
     ROLE_FAMILY_KEYWORDS,
     ROLE_FIELD_ADJACENT_PAIRS,
@@ -145,7 +148,24 @@ def _skills_coverage_score(
         for keywords in TECH_STACK_CATEGORIES.values():
             if any(any(kw in s for kw in keywords) for s in signals):
                 covered += 1
-        return (covered / len(TECH_STACK_CATEGORIES)) * 100.0
+        score = (covered / len(TECH_STACK_CATEGORIES)) * 100.0
+
+        # Overclaim penalty (with-inferred track only): if the inferred
+        # pass returned a lot of caveats or low-confidence inferences,
+        # the CV's claims may be overselling. Subtract a virtual-category
+        # equivalent so the score can land BELOW the explicit baseline —
+        # bidirectional methodology.
+        if include_inferred and inferred_capabilities:
+            n = len(inferred_capabilities)
+            n_caveats = sum(1 for c in inferred_capabilities if c.caveat)
+            avg_conf = sum(c.confidence for c in inferred_capabilities) / n
+            overclaim = (
+                n_caveats / n > OVERCLAIM_CAVEAT_RATIO_THRESHOLD
+                or avg_conf <= OVERCLAIM_AVG_CONFIDENCE_THRESHOLD
+            )
+            if overclaim:
+                score = max(0.0, score - OVERCLAIM_PENALTY_POINTS)
+        return score
 
     # Non-tech fallback: legacy tier-weighted sum.
     if include_inferred:
