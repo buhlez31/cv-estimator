@@ -108,6 +108,9 @@ def _mock_call_json(prompt: str) -> dict:
                 "gap is people-management experience for a manager track."
             ),
         }
+    if "Skills coverage scoring for non-tech role" in prompt:
+        # CTO target → business_mgmt family → LLM coverage scoring path.
+        return {"coverage_percent": 55, "missing_core": ["budget management"]}
     raise AssertionError(f"Unexpected prompt: {prompt[:100]}")
 
 

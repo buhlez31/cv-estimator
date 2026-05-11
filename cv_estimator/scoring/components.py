@@ -11,13 +11,14 @@ Two entry points produce two ScoreBreakdowns:
 The weighted aggregate is in `seniority.py`.
 """
 
+from functools import lru_cache
+
 from cv_estimator.config import (
     EDUCATION_BASE_MAP,
     EDUCATION_EMPTY_FIELD_MULTIPLIER,
     EDUCATION_FIELD_MATCH_BONUS,
     EDUCATION_FIELD_MISMATCH_PENALTY,
     EDUCATION_PRESTIGE_BONUS,
-    EXPLICIT_ONLY_SKILLS_CAP,
     FIELD_FAMILY_KEYWORDS,
     INFERRED_BONUS_CAP,
     INFERRED_BONUS_PER_CAPABILITY,
@@ -167,12 +168,58 @@ def _skills_coverage_score(
                 score = max(0.0, score - OVERCLAIM_PENALTY_POINTS)
         return score
 
-    # Non-tech fallback: legacy tier-weighted sum.
-    if include_inferred:
-        explicit_score = _explicit_skills_score(explicit_skills, cap=100.0)
-        bonus = _inferred_bonus(inferred_capabilities)
-        return min(100.0, explicit_score + bonus)
-    return _explicit_skills_score(explicit_skills, cap=EXPLICIT_ONLY_SKILLS_CAP)
+    # Non-tech roles: LLM-based coverage scoring. The tech-stack
+    # checklist doesn't fit marketing / legal / sales / healthcare /
+    # management. Use the model's knowledge of each role's expected
+    # competencies.
+    return _llm_coverage_nontech(
+        analysis_role,
+        tuple(s.strip().lower() for s in explicit_skills if s.strip()),
+        (
+            tuple(
+                (c.skill.strip().lower(), round(c.confidence, 2))
+                for c in inferred_capabilities
+                if c.confidence >= INFERRED_COVERAGE_CONFIDENCE_THRESHOLD
+            )
+            if include_inferred
+            else ()
+        ),
+        include_inferred=include_inferred,
+    )
+
+
+@lru_cache(maxsize=128)
+def _llm_coverage_nontech(
+    role: str,
+    explicit_skills_tuple: tuple[str, ...],
+    inferred_caps_tuple: tuple[tuple[str, float], ...],
+    *,
+    include_inferred: bool,
+) -> float:
+    """LLM-based skills coverage scoring for non-tech roles.
+
+    Asks the model to estimate what percent of the role's expected core
+    competencies the candidate's CV demonstrates. Cached per
+    (role, skills, inferred, include_inferred) so the same analysis
+    doesn't re-query.
+
+    Lazy import of `llm` to keep test fixtures that exercise only tech
+    paths from needing Anthropic client setup.
+    """
+    import json as _json
+
+    from cv_estimator import llm
+
+    inferred_payload = [{"skill": s, "confidence": c} for s, c in inferred_caps_tuple]
+    prompt = llm.render_prompt(
+        "skills_coverage_nontech",
+        role=role,
+        explicit_skills=_json.dumps(list(explicit_skills_tuple), ensure_ascii=False),
+        inferred_capabilities=_json.dumps(inferred_payload, ensure_ascii=False),
+    )
+    payload = llm.call_json(prompt)
+    score = float(payload.get("coverage_percent", 0) or 0)
+    return max(0.0, min(100.0, score))
 
 
 def _explicit_skills_score(skills: list[str], *, cap: float) -> float:

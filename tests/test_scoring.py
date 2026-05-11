@@ -1,8 +1,33 @@
 """Unit tests for scoring/components.py and scoring/seniority.py."""
 
+from unittest.mock import patch
+
+import pytest
+
 from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown, SkillEvidence
 from cv_estimator.scoring import components, seniority
+
+
+@pytest.fixture(autouse=True)
+def _stub_llm_calls():
+    """Most test_scoring cases exercise the deterministic tech-coverage
+    path. A few hit non-tech roles which now go through the LLM-based
+    coverage scorer — stub call_json with a stable 50 % default so the
+    test can focus on whichever component it's actually asserting.
+    Tests that want a specific LLM response override with their own patch.
+    """
+    components._llm_coverage_nontech.cache_clear()
+
+    def _stub(prompt: str) -> dict:
+        if "Skills coverage scoring for non-tech role" in prompt:
+            return {"coverage_percent": 50, "missing_core": []}
+        # Any other LLM hit during a test means a missing mock — fail loud.
+        raise AssertionError(f"Unexpected LLM call in test_scoring: {prompt[:100]}")
+
+    with patch("cv_estimator.llm.call_json", side_effect=_stub):
+        yield
+    components._llm_coverage_nontech.cache_clear()
 
 
 def test_seniority_is_weighted_average():
@@ -97,40 +122,23 @@ def test_skills_coverage_overclaim_penalty_caveat_ratio(explicit_senior_dev):
     assert abs(b.skills_depth - 33.3) < 0.2
 
 
-def test_inferred_bonus_is_confidence_weighted(explicit_junior_support):
-    """A 0.4-confidence capability contributes 40 % of what 1.0 does
-    (multiplier 8 per capability, capped at 25 aggregate). must_have
-    relevance contributes full weight; nice_to_have contributes half."""
-    role = "IT Support Specialist"
-    must_weak = InferredData(
-        inferred_capabilities=[
-            SkillEvidence(skill="x", evidence_quote="ev1", confidence=0.4, relevance="must_have"),
-        ]
-    )
-    must_strong = InferredData(
-        inferred_capabilities=[
-            SkillEvidence(skill="y", evidence_quote="ev2", confidence=1.0, relevance="must_have"),
-        ]
-    )
-    nice_strong = InferredData(
-        inferred_capabilities=[
-            SkillEvidence(
-                skill="z", evidence_quote="ev3", confidence=1.0, relevance="nice_to_have"
-            ),
-        ]
-    )
-    explicit_at_100 = components._explicit_skills_score(
-        explicit_junior_support.explicit_skills, cap=100.0
-    )
-    b_must_weak = components.compute_with_inferred(explicit_junior_support, must_weak, role)
-    b_must_strong = components.compute_with_inferred(explicit_junior_support, must_strong, role)
-    b_nice_strong = components.compute_with_inferred(explicit_junior_support, nice_strong, role)
-    # must_have, 0.4 conf × 8 = 3.2
-    assert abs(b_must_weak.skills_depth - (explicit_at_100 + 3.2)) < 0.01
-    # must_have, 1.0 conf × 8 = 8.0
-    assert abs(b_must_strong.skills_depth - (explicit_at_100 + 8.0)) < 0.01
-    # nice_to_have, 1.0 conf × 8 × 0.5 = 4.0
-    assert abs(b_nice_strong.skills_depth - (explicit_at_100 + 4.0)) < 0.01
+def test_inferred_bonus_helper_math():
+    """The legacy `_inferred_bonus` helper (kept for potential reuse) is
+    confidence-weighted: 8 × conf × {1.0 must_have, 0.5 nice_to_have},
+    aggregate cap 25. Tested directly since the live pipeline now uses
+    LLM-based scoring for non-tech roles."""
+    must_weak = [
+        SkillEvidence(skill="x", evidence_quote="ev1", confidence=0.4, relevance="must_have")
+    ]
+    must_strong = [
+        SkillEvidence(skill="y", evidence_quote="ev2", confidence=1.0, relevance="must_have")
+    ]
+    nice_strong = [
+        SkillEvidence(skill="z", evidence_quote="ev3", confidence=1.0, relevance="nice_to_have")
+    ]
+    assert abs(components._inferred_bonus(must_weak) - 3.2) < 0.01
+    assert abs(components._inferred_bonus(must_strong) - 8.0) < 0.01
+    assert abs(components._inferred_bonus(nice_strong) - 4.0) < 0.01
 
 
 def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
@@ -151,14 +159,14 @@ def test_components_senior_dev_full(explicit_senior_dev, inferred_senior_dev):
 
 
 def test_components_junior_support(explicit_junior_support, inferred_empty):
-    """IT Support Specialist role family → unknown → falls back to legacy
-    tier-weighted scoring. excel+outlook+jira = 15 (3 × LOW=5).
+    """IT Support Specialist role family → unknown → LLM-based coverage
+    scorer (autouse fixture returns 50 % default).
     Education: bachelor 30 + VŠE prestige 5 + unknown field family → 35."""
     b = components.compute_with_inferred(
         explicit_junior_support, inferred_empty, "IT Support Specialist"
     )
     assert 5 <= b.years_experience <= 8
-    assert b.skills_depth == 15.0
+    assert b.skills_depth == 50.0  # autouse stub returns 50 %
     assert b.role_progression == 25.0
     assert b.education == 35.0
 
@@ -192,15 +200,29 @@ def test_skills_coverage_full_stack_saturates(explicit_senior_dev, inferred_empt
     assert b.skills_depth == 100.0
 
 
-def test_skills_coverage_non_tech_falls_back_to_tier_weights(explicit_senior_dev, inferred_empty):
-    """Marketing Manager role → non-tech (well, business_mgmt) → falls
-    back to legacy tier-weighted scoring."""
-    # senior_dev skills are mostly tech, but scored via legacy weights for non-tech roles.
-    # Note: "Marketing Manager" maps to business_mgmt family.
-    b = components.compute_with_inferred(explicit_senior_dev, inferred_empty, "Marketing Manager")
-    # Legacy: kubernetes(25 HIGH) + terraform(25 HIGH) + python(15 MID) +
-    # postgres(15 MID) + kafka(15 MID) = 95 (with-inferred cap 100).
-    assert b.skills_depth == 95.0
+def test_skills_coverage_non_tech_uses_llm():
+    """Non-tech roles (marketing/legal/sales/healthcare/business_mgmt)
+    route through LLM-based coverage scoring. Verify the helper is
+    invoked and its output reaches the score."""
+    from cv_estimator.extractors.explicit import ExplicitData
+
+    marketing_cv = ExplicitData(
+        role="Marketing Manager",
+        role_seniority_signal="senior",
+        years_experience=6,
+        explicit_skills=["google analytics", "seo", "hubspot", "content strategy"],
+        highest_education="master",
+        institution="VŠE",
+        field_of_study="Marketing",
+        language="en",
+    )
+    with patch(
+        "cv_estimator.llm.call_json",
+        return_value={"coverage_percent": 72, "missing_core": ["paid acquisition"]},
+    ) as mock_call:
+        b = components.compute_explicit_only(marketing_cv, "Marketing Manager")
+    assert b.skills_depth == 72.0
+    assert mock_call.call_count == 1
 
 
 # ----- Education field-relevance modifier ------------------------------------
