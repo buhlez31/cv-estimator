@@ -49,8 +49,9 @@ class Recommendation(BaseModel):
 
 
 class TrackResult(BaseModel):
-    """One scoring pass — either the skeptical buzzword-only baseline, or
-    the hidden-assets-included ceiling."""
+    """One scoring view — either the buzzword-only baseline (objective,
+    derived from literal CV content) or the hidden-assets-included
+    ceiling (adds the inferred-capabilities pass on top)."""
 
     seniority_score: int = Field(ge=0, le=100)
     breakdown: ScoreBreakdown

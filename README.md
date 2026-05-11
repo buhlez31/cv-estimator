@@ -149,11 +149,12 @@ The pipeline emits **two independent scoring tracks** so the reader sees
 buzzword vs hidden-assets analyses side-by-side instead of a single blended
 number:
 
-- **`track_explicit`** — skeptical baseline. Only literal CV content
-  feeds the score. `skills_depth` is **capped at 75**, encoding the
+- **`track_explicit`** — buzzword baseline. Objective view from the
+  literal CV content. `skills_depth` is **capped at 75**, encoding the
   rule that a bare skill list without project-narrative evidence is
   inherently incomplete signal. Inferred capabilities are computed for
-  visibility but excluded from this track's score.
+  visibility but excluded from this track's score. No skepticism is
+  applied here — this is the straight reading of what the CV claims.
 - **`track_with_inferred`** — optimistic ceiling. Explicit skills can
   reach 100, and a confidence-weighted bonus from the inferred pass
   (`bonus = 8 × confidence` per capability, aggregate cap +25) is added
@@ -173,7 +174,11 @@ When they diverge, the gap measures *how much the candidate's description
 style under-represents them* — which is the case the standard buzzword
 filters fail at.
 
-### Role-scoped + skepticism by default
+### Role-scoped + skepticism (inferred-pass only)
+
+Skepticism applies only to the inferred-capabilities pass — the buzzword
+baseline is the objective view; the inferred extraction is the part that
+gets the conservative treatment.
 
 Looking at real-CV output, the inferred pass had a tendency to over-attribute
 (e.g. inferring "community manager" from being the analyst on a community

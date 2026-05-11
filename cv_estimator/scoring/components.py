@@ -2,9 +2,11 @@
 
 Two entry points produce two ScoreBreakdowns:
 
-- `compute_explicit_only` — skeptical baseline using only literal CV content
+- `compute_explicit_only` — buzzword baseline using only literal CV content.
+  Objective view — no skepticism applied here, just degree of skill listing.
 - `compute_with_inferred` — adds a confidence-weighted bonus from the
-  hidden-assets pass
+  hidden-assets pass. The inferred extraction itself is the only part of
+  the pipeline that applies skepticism.
 
 The weighted aggregate is in `seniority.py`.
 """
@@ -33,7 +35,7 @@ from cv_estimator.models import ScoreBreakdown
 
 
 def compute_explicit_only(explicit: ExplicitData, analysis_role: str) -> ScoreBreakdown:
-    """Skeptical baseline — uses only what is literally in the CV.
+    """Buzzword baseline — uses only what is literally in the CV.
 
     Skills capped at EXPLICIT_ONLY_SKILLS_CAP (75) to encode the rule
     that a bare skill list, without project-narrative evidence, is

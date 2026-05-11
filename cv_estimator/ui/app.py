@@ -234,7 +234,7 @@ def _render_track(track: TrackResult, *, title: str, caption: str, container) ->
 col_a, col_b = st.columns(2, gap="large")
 _render_track(
     result.track_explicit,
-    title="🪧 Buzzword baseline (skeptický)",
+    title="🪧 Buzzword baseline",
     caption="Skóre a plat z toho, co CV literálně tvrdí. Inferred capabilities ignorovány.",
     container=col_a,
 )

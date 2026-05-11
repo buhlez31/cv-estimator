@@ -13,7 +13,7 @@ def validate(result: CVAnalysis) -> None:
     _check_track(result.track_explicit, label="track_explicit")
     _check_track(result.track_with_inferred, label="track_with_inferred")
 
-    # Hidden-assets track should not score below the skeptical baseline —
+    # Hidden-assets track should not score below the buzzword baseline —
     # inferred bonus is additive, never subtractive.
     if result.track_with_inferred.seniority_score < result.track_explicit.seniority_score:
         raise SanityError(

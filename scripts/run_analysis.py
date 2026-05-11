@@ -2,8 +2,9 @@
 """CLI entry point: `python scripts/run_analysis.py path/to/cv.pdf [--json]`.
 
 Prints either a human-readable summary (default) or the raw JSON output.
-After Branch A: emits both the skeptical baseline and the hidden-assets
-track side-by-side.
+Emits the buzzword baseline (objective, from explicit CV content) and the
+hidden-assets-included track side-by-side. Only the inferred-capabilities
+pass is evaluated skeptically — the baseline is the objective view.
 """
 
 import argparse
@@ -71,7 +72,7 @@ def _print_summary(result: CVAnalysis) -> None:
         f"{market.market_p25:,} – {market.market_p90:,} {market.currency}"
     )
 
-    _print_track("Buzzword baseline (skeptický)", result.track_explicit)
+    _print_track("Buzzword baseline", result.track_explicit)
     _print_track("S hidden assets (potenciál)", result.track_with_inferred)
 
     print("\nStrengths:")
