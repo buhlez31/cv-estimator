@@ -101,6 +101,15 @@ _RULES: list[tuple[int, tuple[str, ...], str]] = [
     # --- Associate-level / support roles ---
     (60, ("paralegal", "legal assistant"), "3411"),
     (50, ("customer success", "customer service", "customer care"), "4222"),
+    # --- Generic Czech / English catch-alls (lowest tier before LLM fallback) ---
+    # Fire only when no specific keyword above matched; serves as a free
+    # safety-net for the common Czech generic terms LLM #1 may emit.
+    (45, ("analyst", "analytik"), "2511"),  # systems / business analyst NEC
+    (45, ("manažer", "manazer"), "1219"),  # business services manager NEC
+    (45, ("specialista",), "2422"),  # policy/admin specialist
+    (45, ("konzultant", "consultant"), "2422"),  # business consultant
+    (45, ("ředitel", "reditel"), "1120"),  # general director
+    (45, ("vývojář", "vyvojar"), "2512"),  # generic developer (Czech)
     # --- IT support (lowest tech priority) ---
     (40, ("it support", "helpdesk", "support engineer"), "3512"),
     (40, ("technician",), "3512"),

@@ -54,6 +54,15 @@ def _clear_llm_fallback_cache():
         ("UX Designer", "2166"),
         ("Customer Success Manager", "4222"),
         ("Paralegal", "3411"),
+        # Generic Czech catch-alls (prio 45 — fire when no specific rule matches)
+        ("Analytik", "2511"),
+        ("Manažer", "1219"),
+        ("Vývojář", "2512"),
+        ("Specialista", "2422"),
+        ("Konzultant", "2422"),
+        ("Ředitel", "1120"),
+        # Plain English "analyst" (no domain) → same catch-all
+        ("Analyst", "2511"),
     ],
 )
 def test_role_mapping(role, expected_code):

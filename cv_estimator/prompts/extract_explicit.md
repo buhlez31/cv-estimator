@@ -22,6 +22,17 @@ Return a single JSON object matching this schema. Output the JSON object only �
 - `years_experience` = sum of full-time professional experience; round down. If a date range is given (e.g. "2018 – present"), compute from current year 2025 unless CV implies otherwise.
 - `explicit_skills` = only skills literally named in the CV (technologies, tools, languages, frameworks, methodologies). Lower-case. Deduplicate.
 - `role_seniority_signal` = derived from the current title keyword (junior, senior, principal, lead, head, manager, etc.) — not from years.
+- `role` MUST be:
+  1. **Normalized to standard English**: translate Czech titles (e.g. "Analytik" → "Analyst", "Vývojář" → "Developer", "Manažer" → "Manager", "Specialista" → "Specialist", "Ředitel" → "Director").
+  2. **Specific, not generic**: never return bare "Analyst" / "Manager" / "Developer" / "Specialist" if domain can be inferred from the CV's work content. Pick the most specific subtype:
+     - "Analytik" + data/SQL/dashboards in CV → **"Data Analyst"**
+     - "Analytik" + financial reports/accounting → **"Financial Analyst"**
+     - "Analytik" + business/strategy/operations → **"Business Analyst"**
+     - "Manažer" + IT/engineering → **"Engineering Manager"** or **"ICT Manager"**
+     - "Manažer" + marketing/sales → **"Marketing Manager"** / **"Sales Manager"**
+     - "Vývojář" + frontend/web → **"Frontend Developer"** or **"Web Developer"**
+     - "Vývojář" + backend → **"Backend Developer"** or **"Software Engineer"**
+  3. **Include seniority prefix** when the CV title carries one ("Senior", "Lead", etc.).
 - `field_of_study` = exact field / major / specialization for the **highest** education entry. Examples: "Computer Science", "Mathematics", "History of Art", "Geoinformatics", "Master of Law", "Marketing". Keep the original-language phrasing if the CV is in Czech (e.g. "Geoinformatika", "Právo"). Empty string if the CV mentions only an institution but no field.
 - If a field is unknown, use empty string or 0, never null.
 
