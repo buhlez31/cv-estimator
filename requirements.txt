@@ -6,3 +6,7 @@ python-docx>=1.1.0
 plotly>=5.18.0
 pandas>=2.1.0
 python-dotenv>=1.0.0
+# Install the local cv_estimator package itself. Streamlit Cloud only
+# runs `pip install -r requirements.txt`; without this line, imports like
+# `from cv_estimator.models import ...` fail at startup.
+.
