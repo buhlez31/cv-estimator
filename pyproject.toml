@@ -11,6 +11,9 @@ authors = [{ name = "Martin" }]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 include = ["cv_estimator*"]
 

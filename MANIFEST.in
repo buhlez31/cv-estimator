@@ -1,0 +1,2 @@
+recursive-include cv_estimator/prompts *.md
+recursive-include cv_estimator/data *.csv
