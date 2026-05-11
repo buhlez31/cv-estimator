@@ -35,6 +35,7 @@ def _mock_call_json(prompt: str) -> dict:
             "explicit_skills": ["python", "sql", "snowflake", "kafka", "airflow", "dbt", "git"],
             "highest_education": "master",
             "institution": "Charles University",
+            "field_of_study": "Computer Science",
             "language": "en",
         }
     if "Extract inferred capabilities" in prompt:

@@ -10,12 +10,17 @@ The weighted aggregate is in `seniority.py`.
 """
 
 from cv_estimator.config import (
+    EDUCATION_FIELD_MATCH_BONUS,
+    EDUCATION_FIELD_MISMATCH_PENALTY,
     EXPLICIT_ONLY_SKILLS_CAP,
+    FIELD_FAMILY_KEYWORDS,
     HIGHER_ED_KEYWORDS,
     INFERRED_BONUS_CAP,
     INFERRED_BONUS_PER_CAPABILITY,
     JUNIOR_TITLE_KEYWORDS,
     PRESTIGE_INSTITUTION_KEYWORDS,
+    ROLE_FAMILY_KEYWORDS,
+    ROLE_FIELD_ADJACENT_PAIRS,
     SENIOR_TITLE_KEYWORDS,
     SKILL_TIERS_HIGH,
     SKILL_TIERS_LOW,
@@ -27,7 +32,7 @@ from cv_estimator.extractors.inferred import InferredData
 from cv_estimator.models import ScoreBreakdown
 
 
-def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
+def compute_explicit_only(explicit: ExplicitData, analysis_role: str) -> ScoreBreakdown:
     """Skeptical baseline — uses only what is literally in the CV.
 
     Skills capped at EXPLICIT_ONLY_SKILLS_CAP (75) to encode the rule
@@ -35,6 +40,8 @@ def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
     inherently incomplete signal. The remaining 25 points of headroom
     are only reachable on the with-inferred track when hidden assets
     surface genuine project depth.
+
+    `analysis_role` drives the education field-relevance modifier.
     """
     return ScoreBreakdown(
         years_experience=_years_score(explicit.years_experience),
@@ -42,11 +49,20 @@ def compute_explicit_only(explicit: ExplicitData) -> ScoreBreakdown:
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
-        education=_education_score(explicit.highest_education, explicit.institution),
+        education=_education_score(
+            explicit.highest_education,
+            explicit.institution,
+            explicit.field_of_study,
+            analysis_role,
+        ),
     )
 
 
-def compute_with_inferred(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
+def compute_with_inferred(
+    explicit: ExplicitData,
+    inferred: InferredData,
+    analysis_role: str,
+) -> ScoreBreakdown:
     """Optimistic ceiling — explicit skills (cap 100) plus confidence-weighted
     inferred bonus on top, also capped so a single noisy LLM pass cannot
     inflate skills_depth past saturation."""
@@ -58,14 +74,23 @@ def compute_with_inferred(explicit: ExplicitData, inferred: InferredData) -> Sco
         role_progression=_role_progression_score(
             explicit.role, explicit.role_seniority_signal, explicit.years_experience
         ),
-        education=_education_score(explicit.highest_education, explicit.institution),
+        education=_education_score(
+            explicit.highest_education,
+            explicit.institution,
+            explicit.field_of_study,
+            analysis_role,
+        ),
     )
 
 
 # Backwards-compatible alias for any external caller — internal pipeline
 # uses the two explicit entry points above.
-def compute(explicit: ExplicitData, inferred: InferredData) -> ScoreBreakdown:
-    return compute_with_inferred(explicit, inferred)
+def compute(
+    explicit: ExplicitData,
+    inferred: InferredData,
+    analysis_role: str | None = None,
+) -> ScoreBreakdown:
+    return compute_with_inferred(explicit, inferred, analysis_role or explicit.role)
 
 
 # ----- Internals ---------------------------------------------------------
@@ -136,12 +161,59 @@ def _role_progression_score(role: str, signal: str, years: int) -> float:
     return 20.0
 
 
-def _education_score(highest: str, institution: str) -> float:
+def _education_score(
+    highest: str,
+    institution: str,
+    field_of_study: str,
+    analysis_role: str,
+) -> float:
     base_map = {"none": 0.0, "high_school": 15.0, "bachelor": 60.0, "master": 85.0, "phd": 95.0}
     base = base_map.get(highest, 30.0)
     inst_low = (institution or "").lower()
     if any(kw in inst_low for kw in PRESTIGE_INSTITUTION_KEYWORDS):
-        base = min(100.0, base + 5.0)
+        base += 5.0
     if highest == "none" and any(kw in inst_low for kw in HIGHER_ED_KEYWORDS):
         base = max(base, 60.0)
-    return base
+
+    base += _field_relevance_modifier(analysis_role, field_of_study)
+    return max(0.0, min(100.0, base))
+
+
+def _classify_role_family(role: str) -> str:
+    """Return the family bucket for a role title via substring keyword match."""
+    low = (role or "").lower()
+    for family, keywords in ROLE_FAMILY_KEYWORDS.items():
+        if any(kw in low for kw in keywords):
+            return family
+    return "unknown"
+
+
+def _classify_field_family(field: str) -> str:
+    """Return the family bucket for a field-of-study via substring match."""
+    low = (field or "").lower()
+    if not low.strip():
+        return "unknown"
+    for family, keywords in FIELD_FAMILY_KEYWORDS.items():
+        if any(kw in low for kw in keywords):
+            return family
+    return "unknown"
+
+
+def _field_relevance_modifier(role: str, field: str) -> int:
+    """Apply a bounded role-family ↔ field-family modifier on education.
+
+    Returns:
+        +EDUCATION_FIELD_MATCH_BONUS  when families match directly
+        0                              when adjacent or either side unknown
+        -EDUCATION_FIELD_MISMATCH_PENALTY  when families clearly differ
+    """
+    role_family = _classify_role_family(role)
+    field_family = _classify_field_family(field)
+
+    if role_family == "unknown" or field_family == "unknown":
+        return 0
+    if role_family == field_family:
+        return EDUCATION_FIELD_MATCH_BONUS
+    if (role_family, field_family) in ROLE_FIELD_ADJACENT_PAIRS:
+        return 0
+    return -EDUCATION_FIELD_MISMATCH_PENALTY

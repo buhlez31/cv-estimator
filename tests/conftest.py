@@ -16,6 +16,7 @@ def explicit_senior_dev() -> ExplicitData:
         explicit_skills=["python", "kubernetes", "postgres", "kafka", "terraform"],
         highest_education="master",
         institution="ČVUT",
+        field_of_study="Computer Science",
         language="en",
     )
 
@@ -49,6 +50,7 @@ def explicit_junior_support() -> ExplicitData:
         explicit_skills=["excel", "outlook", "jira"],
         highest_education="bachelor",
         institution="VŠE",
+        field_of_study="Information Systems",
         language="cs",
     )
 

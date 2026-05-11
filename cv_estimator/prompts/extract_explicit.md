@@ -12,6 +12,7 @@ Return a single JSON object matching this schema. Output the JSON object only â€
   "explicit_skills": ["<skill 1>", "<skill 2>", "..."],
   "highest_education": "<one of: none, high_school, bachelor, master, phd>",
   "institution": "<name of highest-ed institution or empty string>",
+  "field_of_study": "<the major / specialization / programme name as written in the CV, or empty string>",
   "language": "<one of: cs, en>"
 }
 ```
@@ -21,6 +22,7 @@ Return a single JSON object matching this schema. Output the JSON object only â€
 - `years_experience` = sum of full-time professional experience; round down. If a date range is given (e.g. "2018 â€“ present"), compute from current year 2025 unless CV implies otherwise.
 - `explicit_skills` = only skills literally named in the CV (technologies, tools, languages, frameworks, methodologies). Lower-case. Deduplicate.
 - `role_seniority_signal` = derived from the current title keyword (junior, senior, principal, lead, head, manager, etc.) â€” not from years.
+- `field_of_study` = exact field / major / specialization for the **highest** education entry. Examples: "Computer Science", "Mathematics", "History of Art", "Geoinformatics", "Master of Law", "Marketing". Keep the original-language phrasing if the CV is in Czech (e.g. "Geoinformatika", "PrÃ¡vo"). Empty string if the CV mentions only an institution but no field.
 - If a field is unknown, use empty string or 0, never null.
 
 ## CV TEXT

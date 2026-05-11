@@ -115,6 +115,26 @@ the interpolated median, clamped to (P25, P90).
 | **No Sphinx, Airflow, Docker, CI** | Within 6–12 h budget. Brief explicitly says *"rather simpler but functional"*. |
 | **No scraping** | ISPV open data has a CSV download. Legal-clean. |
 
+### Education: role-aware field relevance
+
+`_education_score` factors in the candidate's `field_of_study` (extracted
+by LLM #1) against the analysis role's family. Heuristic role-family +
+field-family classifiers (`ROLE_FAMILY_KEYWORDS`, `FIELD_FAMILY_KEYWORDS`
+in [`config.py`](cv_estimator/config.py)) bucket each side into one of
+~8 families; the modifier is then:
+
+| Relationship | Modifier |
+|---|---|
+| Same family (e.g. CS field + Software Engineer role) | **+5** |
+| Adjacent pair (e.g. Geoinformatika + Research Analyst, CS + CTO) | 0 |
+| Different families (e.g. History + Backend Engineer) | **-10** |
+| Field empty / either side unclassified | 0 (no signal, no penalty) |
+
+This means a Master's degree in History applying to a tech role scores
+`85 − 10 = 75` on education (vs `85` for a CS degree), giving the
+seniority weighted aggregate a defensible nudge based on field-role
+relevance rather than treating all degrees of the same level equally.
+
 ## The hidden-assets thesis
 
 The product differentiator is `inferred_capabilities` ([extractors/inferred.py](cv_estimator/extractors/inferred.py)):

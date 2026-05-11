@@ -135,6 +135,187 @@ PRESTIGE_INSTITUTION_KEYWORDS = {
     "charles university",
 }
 
+# --- Role-family classification (for education field-relevance modifier) ---
+# Substring match on the analysis_role string. First matching family wins.
+ROLE_FAMILY_KEYWORDS: dict[str, set[str]] = {
+    "tech": {
+        "engineer",
+        "developer",
+        "programmer",
+        "scientist",
+        "analyst",
+        "architect",
+        "sysadmin",
+        "devops",
+        "sre",
+        "technician",
+        "programátor",
+        "vývojář",
+        "technik",
+        "ml ",
+        "ai ",
+        "ai/",
+    },
+    "business_mgmt": {
+        "manager",
+        "director",
+        "head of",
+        "vp",
+        "chief",
+        "ceo",
+        "cfo",
+        "coo",
+        "cto",
+        "cio",
+        "principal",
+    },
+    "marketing_comms": {
+        "marketing",
+        "brand",
+        "content",
+        "growth",
+        "communications",
+        "pr ",
+        "copywriter",
+    },
+    "sales_biz_dev": {
+        "sales",
+        "account ",
+        "business development",
+    },
+    "design_creative": {
+        "designer",
+        "ux",
+        "ui",
+        "creative",
+        "artist",
+        "photographer",
+    },
+    "legal_compliance": {
+        "lawyer",
+        "legal",
+        "compliance",
+        "paralegal",
+    },
+    "ops_admin": {
+        "operations",
+        "administrator",
+        "coordinator",
+        "hr ",
+        "recruiter",
+    },
+    "healthcare": {
+        "doctor",
+        "nurse",
+        "pharmacist",
+    },
+}
+
+# --- Field-of-study family classification ---
+# Substring match on the field_of_study string. First matching family wins.
+# IMPORTANT: tech_adjacent is checked BEFORE tech so "Geoinformatika" doesn't
+# get swallowed by the "informatika" substring sitting under tech.
+FIELD_FAMILY_KEYWORDS: dict[str, set[str]] = {
+    "tech_adjacent": {
+        "industrial engineering",
+        "průmyslové inženýrství",
+        "statistics",
+        "statistika",
+        "geoinformatics",
+        "geoinformatika",
+        "biotechnology",
+        "biotechnologie",
+        "robotics",
+        "robotika",
+        "applied mathematics",
+        "aplikovaná matematika",
+        "quantitative finance",
+        "operations research",
+    },
+    "tech": {
+        "computer science",
+        "informatika",
+        "software engineering",
+        "softwarov",
+        "electrical engineering",
+        "elektrotechnika",
+        "mathematics",
+        "matematika",
+        "physics",
+        "fyzika",
+        "data science",
+        "machine learning",
+        "artificial intelligence",
+        "umělá inteligence",
+        "cybersecurity",
+        "kybernetická bezpečnost",
+    },
+    "business": {
+        "mba",
+        "business administration",
+        "ekonomie",
+        "economics",
+        "finance",
+        "accounting",
+        "supply chain",
+        "management",
+    },
+    "marketing": {
+        "marketing",
+        "communications",
+        "journalism",
+        "media studies",
+        "advertising",
+        "public relations",
+    },
+    "design_creative": {
+        "graphic design",
+        "fine arts",
+        "architecture",
+        "fashion design",
+        "industrial design",
+        "visual arts",
+    },
+    "legal": {
+        "law",
+        "legal studies",
+        "právo",
+        "právní",
+    },
+    "healthcare": {
+        "medicine",
+        "nursing",
+        "pharmacy",
+        "biology",
+        "biomedical",
+        "medicína",
+    },
+    "humanities": {
+        "history",
+        "philosophy",
+        "literature",
+        "languages",
+        "art history",
+        "sociology",
+        "anthropology",
+        "historie",
+        "filozofie",
+    },
+}
+
+# Pairs (role_family, field_family) treated as neutral (modifier = 0)
+# instead of penalised. Asymmetric — both directions listed if both apply.
+ROLE_FIELD_ADJACENT_PAIRS: set[tuple[str, str]] = {
+    ("tech", "tech_adjacent"),
+    ("tech_adjacent", "tech"),
+    ("business_mgmt", "tech"),
+    ("business_mgmt", "business"),
+    ("ops_admin", "business"),
+}
+
+EDUCATION_FIELD_MATCH_BONUS = 5
+EDUCATION_FIELD_MISMATCH_PENALTY = 10
+
 # --- CZ-ISCO IT-relevant code prefixes ---
 IT_ISCO_PREFIXES = ("251", "252", "1330", "351")
 
