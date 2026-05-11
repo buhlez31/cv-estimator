@@ -1,15 +1,11 @@
 """PDF / DOCX → raw text + language detection."""
 
 import io
-import logging
 import re
 from pathlib import Path
 
-import pdfplumber
 import pypdf
 from docx import Document
-
-logger = logging.getLogger(__name__)
 
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
@@ -25,29 +21,26 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
 
 
 def _extract_pdf(file_bytes: bytes) -> str:
-    """Try pypdf first (pure-Python, stable). Fall back to pdfplumber if it
-    yields no text — pypdf can fail silently on PDFs whose content streams
-    use ToUnicode CMaps it doesn't decode, where pdfplumber/pdfminer succeed.
+    """Pure-Python PDF extraction via pypdf.
 
-    pdfplumber is kept as a fallback rather than primary because its
-    `pdfminer.six` backend has a history of native crashes on macOS for
-    PDFs with embedded font tables.
+    Previously pdfplumber was kept as a fallback for PDFs whose ToUnicode
+    CMaps pypdf can't decode, but its `pdfminer.six` backend triggers a
+    macOS native crash dialog ("Aplikace Python se neočekávaně ukončila")
+    on Sequoia even when only imported. Dropped to eliminate that source.
+
+    For image-only or otherwise unparseable PDFs, the caller will see a
+    ValueError from this function — re-export as DOCX or text is the
+    documented workaround.
     """
-    try:
-        reader = pypdf.PdfReader(io.BytesIO(file_bytes))
-        pages = [(page.extract_text() or "") for page in reader.pages]
-        text = _normalize("\n".join(pages))
-        if text.strip():
-            return text
-        logger.info("pypdf returned empty text; falling back to pdfplumber")
-    except Exception as e:  # noqa: BLE001 — any pypdf failure → try fallback
-        logger.warning("pypdf failed: %s; falling back to pdfplumber", e)
-
-    pages: list[str] = []
-    with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-        for page in pdf.pages:
-            pages.append(page.extract_text() or "")
-    return _normalize("\n".join(pages))
+    reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+    pages = [(page.extract_text() or "") for page in reader.pages]
+    text = _normalize("\n".join(pages))
+    if not text.strip():
+        raise ValueError(
+            "PDF contains no extractable text (likely scanned / image-only). "
+            "Re-export the CV as DOCX or text."
+        )
+    return text
 
 
 def _extract_docx(file_bytes: bytes) -> str:
