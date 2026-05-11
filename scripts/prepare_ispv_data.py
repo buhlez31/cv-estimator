@@ -21,9 +21,9 @@ import sys
 
 import pandas as pd
 
-from cv_estimator.config import DATA_DIR
+from cv_estimator.config import DATA_DIR, RAW_DATA_DIR
 
-RAW_FILE = DATA_DIR / "raw" / "ispv-zamestnani.json"
+RAW_FILE = RAW_DATA_DIR / "ispv-zamestnani.json"
 
 # Optional CZ-ISCO 4-digit → (English label, Czech label) for IT codes.
 # For non-IT codes we emit "CZ-ISCO XXXX" as a placeholder label since

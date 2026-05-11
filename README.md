@@ -111,7 +111,7 @@ The output contract is [`cv_estimator/models.py`](cv_estimator/models.py).
 Official Czech earnings statistics, quantiles (P25 / P50 / P75 / P90) per
 CZ-ISCO occupation code. Used by ČSÚ for pension valorization.
 
-[`data/ispv_2025.csv`](data/ispv_2025.csv) is generated from the official
+[`cv_estimator/data/ispv_2025.csv`](cv_estimator/data/ispv_2025.csv) is generated from the official
 MPSV JSON (period `rok 2025`, sphere `MZDOVA` — private-sector wages).
 Regenerate via [`scripts/prepare_ispv_data.py`](scripts/prepare_ispv_data.py).
 
@@ -218,7 +218,7 @@ cv_estimator/
 ├── validation/      # output sanity checks
 ├── prompts/         # LLM prompts as .md artefacts
 └── ui/app.py        # Streamlit
-data/ispv_2025.csv   # preprocessed ISPV snapshot
+cv_estimator/data/ispv_2025.csv   # preprocessed ISPV snapshot (ships in package)
 tests/               # pytest suite + fixtures
 scripts/             # CLI entry points
 ```

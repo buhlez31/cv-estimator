@@ -7,8 +7,12 @@ from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).parent
 REPO_ROOT = PACKAGE_ROOT.parent
-DATA_DIR = REPO_ROOT / "data"
+# Both directories live inside the installed package so they ship via
+# package-data in any deploy target (e.g. Streamlit Cloud's `pip install .`).
+DATA_DIR = PACKAGE_ROOT / "data"
 PROMPTS_DIR = PACKAGE_ROOT / "prompts"
+# Raw MPSV ingest artefacts stay outside the package (gitignored).
+RAW_DATA_DIR = REPO_ROOT / "data" / "raw"
 
 # --- Scoring weights (sum must equal 1.0) ---
 WEIGHT_YEARS = 0.30
